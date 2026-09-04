@@ -1,0 +1,14 @@
+{
+  "name": "tokyo-nightlife-guide",
+  "version": "1.0.0",
+  "description": "Tokyo Nightlife Guide - Foreigner-friendly club search & referral portal (Phase 1)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "init-db": "node db.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.10.0",
+    "express": "^4.21.2"
+  }
+}

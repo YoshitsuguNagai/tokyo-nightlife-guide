@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理画面 | Tokyo Nightlife Guide</title>
+<style>
+:root{--gold:#c9a227;--bg:#0f0f0f;--bg2:#181818;--bg3:#222;--line:#2c2c2c;--txt:#eee;--sub:#999}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font-family:'Hiragino Sans','Noto Sans JP',Arial,sans-serif;font-size:14px}
+a{color:var(--gold)}
+.layout{display:flex;min-height:100vh}
+.side{width:210px;background:var(--bg2);border-right:1px solid var(--line);padding:16px 10px;position:sticky;top:0;height:100vh;overflow:auto}
+.side h1{font-size:14px;color:var(--gold);padding:8px;margin-bottom:10px}
+.side a{display:block;padding:9px 12px;border-radius:8px;color:var(--sub);cursor:pointer;font-size:13px}
+.side a.on,.side a:hover{background:var(--bg3);color:var(--txt)}
+.main{flex:1;padding:20px;overflow:auto}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.stat{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:16px}
+.stat b{font-size:26px;color:var(--gold)}
+table{width:100%;border-collapse:collapse;background:var(--bg2);border-radius:10px;overflow:hidden;margin-top:12px}
+th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:12px;vertical-align:top}
+th{color:var(--sub);background:var(--bg3);white-space:nowrap}
+td{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn{background:var(--gold);color:#000;border:0;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;font-size:13px}
+.btn.ghost{background:var(--bg3);color:var(--txt);border:1px solid var(--line)}
+.btn.sm{padding:4px 10px;font-size:11px}
+.btn.danger{background:#7a2626;color:#fff}
+input,textarea,select{width:100%;background:var(--bg3);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:8px;font-size:13px}
+.frm{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.frm .full{grid-column:1/-1}
+.frm label{display:block;font-size:11px;color:var(--sub);margin-bottom:3px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-start;justify-content:center;padding:30px 16px;z-index:50;overflow:auto}
+.modal .box{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:22px;width:100%;max-width:760px}
+.searchbar{display:flex;gap:8px;margin-top:12px}
+.searchbar input{max-width:300px}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px}
+.badge.pub{background:#1e3a1e;color:#8f8}.badge.pen{background:#3a3318;color:#fc6}.badge.hide{background:#333;color:#999}
+.login-wrap{max-width:360px;margin:120px auto;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:28px}
+.login-wrap h1{color:var(--gold);font-size:18px;margin-bottom:16px}
+.login-wrap .field{margin-bottom:10px}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--gold);color:#000;padding:10px 22px;border-radius:24px;font-weight:700;z-index:99}
+@media(max-width:800px){.side{width:64px}.side a span{display:none}.frm{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+let TOKEN = localStorage.tng_admin_token || '';
+let VIEW = 'dashboard';
+const API = (p, o) => fetch(p, { ...o, headers: { 'Content-Type':'application/json', Authorization:'Bearer '+TOKEN } }).then(async r => {
+  if (r.status === 401) { TOKEN=''; localStorage.removeItem('tng_admin_token'); render(); throw new Error('auth'); }
+  return r.json();
+});
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){ const d = document.createElement('div'); d.className='toast'; d.textContent=m; document.body.appendChild(d); setTimeout(()=>d.remove(),2000); }
+
+/* ---- field definitions per table (WordPress-like forms) ---- */
+const F = {
+ stores:[['name_ja','店舗名(JA)'],['name_en','店舗名(EN)'],['name_zh','店舗名(中文)'],['area_id','エリアID','number'],['genre','ジャンル(luxury/lounge/members/casual)'],
+  ['desc_ja','紹介(JA)','textarea'],['desc_en','紹介(EN)','textarea'],['desc_zh','紹介(中文)','textarea'],
+  ['cover_image','店舗写真URL'],['logo','ロゴURL'],['hue','テーマ色相(0-360)','number'],['address','住所'],['google_map_url','Google Map URL'],
+  ['open_hours','営業時間'],['closed_days','定休日'],['phone','電話番号'],['line_url','LINE URL'],['line_id','LINE ID'],['line_status','LINE連携状態'],
+  ['instagram','Instagram'],['website','Webサイト'],['budget_min','予算(下限)','number'],['budget_max','予算(上限)','number'],
+  ['charge','チャージ'],['service_fee','サービス料'],['payment_methods','支払い方法'],['cast_count','キャスト数','number'],
+  ['foreigner_welcome','外国人歓迎(1/0)','number'],['english_ok','英語OK(1/0)','number'],['chinese_ok','中国語OK(1/0)','number'],
+  ['credit_card_ok','カード可(1/0)','number'],['reservation_ok','予約可(1/0)','number'],['is_recommended','おすすめ店舗(1/0)','number'],
+  ['sort_order','掲載順位','number'],['status','ステータス(published/hidden)']],
+ casts:[['store_id','店舗ID','number'],['name','名前'],['display_name','表示名'],['photo','写真URL'],['hue','色相','number'],
+  ['profile_ja','プロフィール(JA)','textarea'],['profile_en','プロフィール(EN)','textarea'],['profile_zh','プロフィール(中文)','textarea'],
+  ['height','身長','number'],['hobbies','趣味'],['favorites','好きなもの'],['languages','言語(ja,en,zh)'],
+  ['english_ok','英語OK(1/0)','number'],['chinese_ok','中国語OK(1/0)','number'],
+  ['recommend_ja','おすすめコメント(JA)'],['recommend_en','おすすめ(EN)'],['recommend_zh','おすすめ(中文)'],
+  ['sns_instagram','Instagram'],['is_popular','人気(1/0)','number'],['sort_order','掲載順','number'],['status','ステータス']],
+ areas:[['slug','スラッグ'],['name_ja','名前(JA)'],['name_en','名前(EN)'],['name_zh','名前(中文)'],['sort_order','順','number'],['status','ステータス']],
+ events:[['store_id','店舗ID','number'],['title_ja','イベント名(JA)'],['title_en','(EN)'],['title_zh','(中文)'],
+  ['desc_ja','説明(JA)','textarea'],['desc_en','説明(EN)','textarea'],['desc_zh','説明(中文)','textarea'],
+  ['event_date','日付(YYYY-MM-DD)'],['start_time','開始'],['end_time','終了'],['image','画像URL'],['hue','色相','number'],['status','公開状態']],
+ coupons:[['store_id','店舗ID','number'],['title_ja','クーポン名(JA)'],['title_en','(EN)'],['title_zh','(中文)'],
+  ['desc_ja','説明(JA)','textarea'],['desc_en','説明(EN)','textarea'],['desc_zh','説明(中文)','textarea'],
+  ['conditions_ja','利用条件(JA)'],['conditions_en','条件(EN)'],['conditions_zh','条件(中文)'],
+  ['code','クーポンコード'],['valid_until','有効期限'],['image','画像URL'],['hue','色相','number'],['status','公開状態']],
+ blogs:[['slug','スラッグ'],['category','カテゴリー'],['title_ja','タイトル(JA)'],['title_en','(EN)'],['title_zh','(中文)'],
+  ['body_ja','本文(JA)','textarea'],['body_en','本文(EN)','textarea'],['body_zh','本文(中文)','textarea'],
+  ['seo_title','SEO title'],['seo_description','SEO description'],['image','画像URL'],['hue','色相','number'],['status','公開状態']],
+ reviews:[['store_id','店舗ID','number'],['author_name','投稿者'],['rating','星(1-5)','number'],['title','タイトル'],['body','本文','textarea'],
+  ['visit_date','利用日'],['language','言語(ja/en/zh)'],['status','承認(approved/pending/hidden)']],
+ users:[['name','名前'],['email','メール'],['country','国'],['language','言語'],['role','権限(user/store/admin)'],['store_id','店舗ID','number'],['is_blocked','停止(1/0)','number']],
+ messages:[], notifications:[['store_id','店舗ID','number'],['user_id','ユーザーID','number'],['template_ja','テンプレート(JA)','textarea'],['template_en','(EN)','textarea'],['template_zh','(中文)','textarea'],['channel','チャネル(dm/email/line)'],['status','状態(draft/sent)']],
+ settings:[['key','キー'],['value','値','textarea']]
+};
+const MENU = [['dashboard','📊 Dashboard'],['stores','🏠 店舗'],['casts','👤 キャスト'],['areas','📍 エリア'],['users','👥 ユーザー'],['reviews','⭐ 口コミ'],['messages','💬 DM'],['blogs','📖 ブログ'],['events','🎉 イベント'],['coupons','🎫 クーポン'],['notifications','🔔 お礼/通知'],['settings','⚙ サイト設定']];
+
+async function render(){
+  const root = document.getElementById('root');
+  if (!TOKEN) {
+    root.innerHTML = `<div class="login-wrap"><h1>◆ 管理画面ログイン</h1>
+      <div class="field"><label>Email</label><input id="le" value="admin@tng.jp"></div>
+      <div class="field"><label>Password</label><input id="lp" type="password" value="admin123"></div>
+      <button class="btn" style="width:100%" onclick="login()">ログイン</button>
+      <p style="font-size:11px;color:var(--sub);margin-top:10px">初期: admin@tng.jp / admin123（運用時に必ず変更）</p></div>`;
+    return;
+  }
+  root.innerHTML = `<div class="layout"><nav class="side"><h1>◆ TNG Admin</h1>
+    ${MENU.map(m=>`<a class="${VIEW===m[0]?'on':''}" onclick="go('${m[0]}')">${m[1].split(' ')[0]} <span>${m[1].split(' ').slice(1).join(' ')}</span></a>`).join('')}
+    <a onclick="localStorage.removeItem('tng_admin_token');TOKEN='';render()">🚪 <span>ログアウト</span></a>
+    <a href="/" target="_blank">🌐 <span>サイトを見る</span></a></nav>
+    <main class="main" id="main">...</main></div>`;
+  const main = document.getElementById('main');
+  if (VIEW === 'dashboard') {
+    const s = await API('/api/admin/stats');
+    main.innerHTML = `<div class="top"><h2>Dashboard</h2></div><div class="cards">
+      ${[['店舗',s.stores],['キャスト',s.casts],['ユーザー',s.users],['口コミ',s.reviews],['未承認口コミ',s.pending_reviews],['DM',s.messages],['イベント',s.events],['クーポン',s.coupons],['ブログ',s.blogs]]
+        .map(x=>`<div class="stat"><div style="color:var(--sub);font-size:11px">${x[0]}</div><b>${x[1]}</b></div>`).join('')}</div>
+      <p style="margin-top:18px;color:var(--sub);font-size:12px">左メニューから各データを追加・編集・削除できます。未承認口コミは「口コミ」から承認してください。</p>`;
+    return;
+  }
+  if (VIEW === 'messages') return renderMessages(main);
+  return renderTable(main, VIEW);
+}
+function go(v){ VIEW = v; render(); }
+async function login(){
+  const r = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ email: document.getElementById('le').value, password: document.getElementById('lp').value }) }).then(r=>r.json());
+  if (r.error || r.user.role !== 'admin') return toast('管理者アカウントでログインしてください');
+  TOKEN = r.token; localStorage.tng_admin_token = TOKEN; render();
+}
+
+async function renderTable(main, table){
+  const rows = await API('/api/admin/' + table);
+  const fields = F[table] || [];
+  const cols = table === 'settings' ? ['key','value'] : ['id', ...fields.slice(0,5).map(f=>f[0]), 'status'];
+  main.innerHTML = `<div class="top"><h2>${(MENU.find(m=>m[0]===table)||['',''])[1]}</h2>
+    <div>${table!=='settings'?`<button class="btn" onclick="editRow('${table}',null)">＋ 新規追加</button>`:`<button class="btn" onclick="editRow('settings',null)">＋ 追加</button>`}</div></div>
+    <div class="searchbar"><input id="q" placeholder="検索..." onkeydown="if(event.key==='Enter')renderSearch('${table}')"><button class="btn ghost sm" onclick="renderSearch('${table}')">検索</button></div>
+    <div style="overflow:auto"><table><tr>${cols.map(c=>`<th>${c}</th>`).join('')}<th>操作</th></tr>
+    ${rows.map(r=>`<tr>${cols.map(c=>`<td>${c==='status'?badge(r[c]):esc(short(r[c]))}</td>`).join('')}
+      <td style="white-space:nowrap"><button class="btn ghost sm" onclick='editRow("${table}",${JSON.stringify(r).replace(/'/g,"&#39;")})'>編集</button>
+      ${table!=='settings'?`<button class="btn danger sm" onclick="delRow('${table}',${r.id})">削除</button>`:''}</td></tr>`).join('')}</table></div>`;
+}
+async function renderSearch(table){
+  const q = document.getElementById('q').value;
+  const rows = await API('/api/admin/' + table + '?q=' + encodeURIComponent(q));
+  const main = document.getElementById('main');
+  // re-render with filter hack: simply filter displayed rows
+  const fields = F[table] || [];
+  const cols = table === 'settings' ? ['key','value'] : ['id', ...fields.slice(0,5).map(f=>f[0]), 'status'];
+  main.querySelector('div[style*="overflow"]').innerHTML = `<table><tr>${cols.map(c=>`<th>${c}</th>`).join('')}<th>操作</th></tr>
+    ${rows.map(r=>`<tr>${cols.map(c=>`<td>${c==='status'?badge(r[c]):esc(short(r[c]))}</td>`).join('')}
+    <td style="white-space:nowrap"><button class="btn ghost sm" onclick='editRow("${table}",${JSON.stringify(r).replace(/'/g,"&#39;")})'>編集</button>
+    ${table!=='settings'?`<button class="btn danger sm" onclick="delRow('${table}',${r.id})">削除</button>`:''}</td></tr>`).join('')}</table>`;
+}
+const short = v => v == null ? '' : String(v).slice(0, 40);
+const badge = s => s ? `<span class="badge ${s==='published'||s==='approved'?'pub':s==='pending'?'pen':'hide'}">${esc(s)}</span>` : '';
+
+function editRow(table, row){
+  const fields = F[table] || [];
+  const isSettings = table === 'settings';
+  const html = `<div class="box"><h3>${row ? '編集' : '新規追加'} — ${table}</h3><div class="frm">
+    ${fields.map(f => {
+      const val = row ? (row[f[0]] ?? '') : '';
+      const dis = isSettings && row && f[0] === 'key' ? 'disabled' : '';
+      const inp = f[2] === 'textarea' ? `<textarea data-k="${f[0]}" rows="4" ${dis}>${esc(val)}</textarea>`
+        : `<input data-k="${f[0]}" type="${f[2]==='number'?'number':'text'}" value="${esc(val)}" ${dis}>`;
+      return `<div class="${f[2]==='textarea'?'full':''}"><label>${f[1]}</label>${inp}</div>`;
+    }).join('')}</div>
+    <div style="margin-top:16px;display:flex;gap:8px">
+      <button class="btn" onclick="saveRow('${table}', ${row ? (isSettings ? `'${esc(row.key)}'` : row.id) : 'null'}, this)">保存</button>
+      <button class="btn ghost" onclick="this.closest('.modal').remove()">キャンセル</button></div></div>`;
+  const m = document.createElement('div'); m.className = 'modal'; m.innerHTML = html;
+  m.onclick = e => { if (e.target === m) m.remove(); };
+  document.body.appendChild(m);
+}
+async function saveRow(table, id, btn){
+  const data = {};
+  btn.closest('.box').querySelectorAll('[data-k]').forEach(el => {
+    data[el.dataset.k] = el.type === 'number' ? (parseInt(el.value, 10) || 0) : el.value;
+  });
+  const r = await API(id == null ? '/api/admin/' + table : `/api/admin/${table}/${id}`,
+    { method: id == null ? 'POST' : 'PUT', body: JSON.stringify(data) });
+  if (r.error) return toast(r.error);
+  btn.closest('.modal').remove(); toast('保存しました'); render();
+}
+async function delRow(table, id){
+  if (!confirm('削除しますか?')) return;
+  await API(`/api/admin/${table}/${id}`, { method:'DELETE' }); toast('削除しました'); render();
+}
+
+/* DM管理: ユーザーからのメッセージ一覧 + 返信(自動3言語) */
+async function renderMessages(main){
+  const rows = await API('/api/admin/messages');
+  main.innerHTML = `<div class="top"><h2>💬 DM管理</h2></div>
+  <table><tr><th>ID</th><th>方向</th><th>店舗</th><th>ユーザー</th><th>原文</th><th>JA</th><th>EN</th><th>中文</th><th>日時</th><th>操作</th></tr>
+  ${rows.map(m=>`<tr><td>${m.id}</td><td>${m.direction==='user_to_store'?'👤→🏠':'🏠→👤'}</td><td>${m.store_id}</td><td>${m.user_id}</td>
+    <td>${esc(short(m.body))}</td><td>${esc(short(m.body_ja))}</td><td>${esc(short(m.body_en))}</td><td>${esc(short(m.body_zh))}</td>
+    <td>${esc((m.created_at||'').slice(0,16))}</td>
+    <td><button class="btn ghost sm" onclick="replyMsg(${m.id})">返信</button></td></tr>`).join('')}</table>`;
+}
+function replyMsg(id){
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = `<div class="box"><h3>返信 (日本語で入力→自動翻訳)</h3>
+    <div class="frm"><div class="full"><textarea id="rp" rows="4" placeholder="ご来店ありがとうございます..."></textarea></div></div>
+    <div style="margin-top:14px;display:flex;gap:8px">
+    <button class="btn" onclick="doReply(${id},this)">送信</button>
+    <button class="btn ghost" onclick="this.closest('.modal').remove()">閉じる</button></div></div>`;
+  m.onclick = e => { if (e.target === m) m.remove(); };
+  document.body.appendChild(m);
+}
+async function doReply(id, btn){
+  await API(`/api/admin/messages/${id}/reply`, { method:'POST', body: JSON.stringify({ body: document.getElementById('rp').value, lang: 'ja' }) });
+  btn.closest('.modal').remove(); toast('返信しました'); render();
+}
+render();
+</script>
+</body>
+</html>
