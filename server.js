@@ -1,34 +1,42 @@
 /**
- * Tokyo Nightlife Guide - API server (Phase 1)
- * Express + SQLite. Serves public site, admin dashboard, JSON API.
+ * Tokyo Nightlife Guide - API server (Phase 1 改善版)
+ * Express + SQLite. 公開サイト / 管理画面 / JSON API / 画像アップロード
+ *
+ * 環境変数 (Render > Environment Variables):
+ *   PORT                       ... Renderが自動設定
+ *   CLOUDINARY_CLOUD_NAME      ... 画像の永続保存に使用 (未設定時はローカル保存=再デプロイで消えます)
+ *   CLOUDINARY_UPLOAD_PRESET   ... CloudinaryのUnsignedプリセット名
  */
 const express = require('express');
 const crypto = require('crypto');
 const path = require('path');
+const fs = require('fs');
 const { db, hashPassword, verifyPassword } = require('./db');
 
 const app = express();
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({ limit: '12mb' })); // base64画像アップロード許容
 app.use(express.static(path.join(__dirname, 'public')));
+const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
-/* ---------- naive in-memory translation dictionary (stub for AI translation) ---------- */
+/* ---------- 簡易翻訳 (本番は翻訳APIに差替え。README参照) ---------- */
 const DICT = [
-  ['こんにちは','Hello','你好'],['ありがとう','Thank you','谢谢'],['予約','Reservation','预约'],
-  ['今夜','Tonight','今晚'],['イベント','Event','活动'],['クーポン','Coupon','优惠券'],
-  ['お待ちしています','We look forward to seeing you','期待您的光临']
+  ['こんにちは', 'Hello', '你好'], ['ありがとう', 'Thank you', '谢谢'], ['ありがとうございます', 'Thank you very much', '非常感谢'],
+  ['予約', 'Reservation', '预约'], ['今夜', 'Tonight', '今晚'], ['イベント', 'Event', '活动'], ['クーポン', 'Coupon', '优惠券'],
+  ['お待ちしています', 'We look forward to seeing you', '期待您的光临'], ['ご来店', 'your visit', '光临'],
+  ['初回', 'First visit', '首次'], ['無料', 'Free', '免费'], ['本日', 'Today', '今天'], ['限定', 'Limited', '限定'],
+  ['キャンペーン', 'Campaign', '优惠活动'], ['特典', 'Special offer', '特典'], ['おすすめ', 'Recommended', '推荐'],
+  ['ようこそ', 'Welcome', '欢迎'], ['開催', 'Held', '举办'], ['店舗', 'Club', '店铺'], ['キャスト', 'Cast', '公关']
 ];
 function naiveTranslate(text, from, to) {
-  if (from === to || !text) return text;
-  let out = text;
+  if (from === to || !text) return text || '';
+  let out = String(text);
   const pick = (row, l) => l === 'ja' ? row[0] : l === 'en' ? row[1] : row[2];
-  for (const row of DICT) {
-    const src = pick(row, from), dst = pick(row, to);
-    if (src && src !== dst) out = out.split(src).join(dst);
-  }
+  for (const row of DICT) { const s = pick(row, from), d = pick(row, to); if (s && s !== d) out = out.split(s).join(d); }
   return out === text ? `[${to.toUpperCase()}] ` + text : out;
 }
 
-/* ---------- auth helpers ---------- */
+/* ---------- auth ---------- */
 function makeToken(uid) {
   const t = crypto.randomBytes(24).toString('hex');
   db.prepare('INSERT INTO tokens (token,user_id) VALUES (?,?)').run(t, uid);
@@ -46,13 +54,37 @@ function adminOnly(req, res, next) {
 }
 
 /* ---------- utils ---------- */
-const clean = s => String(s ?? '').slice(0, 5000);
+const clean = s => String(s ?? '').slice(0, 8000);
 const int = v => parseInt(v, 10) || 0;
 function storeWithStats(s) {
   const r = db.prepare(`SELECT ROUND(AVG(rating),1) avg, COUNT(*) cnt FROM reviews WHERE store_id=? AND status='approved'`).get(s.id);
   const area = s.area_id ? db.prepare('SELECT * FROM areas WHERE id=?').get(s.area_id) : null;
   return { ...s, rating_avg: r.avg || 0, review_count: r.cnt, area };
 }
+
+/* ---------- 画像アップロード (Cloudinary優先 / 未設定時ローカル) ---------- */
+app.post('/api/upload', auth, adminOnly, async (req, res) => {
+  try {
+    const { filename, data } = req.body || {};
+    const m = /^data:(image\/(png|jpeg|jpg|webp|gif));base64,(.+)$/.exec(data || '');
+    if (!m) return res.status(400).json({ error: '画像データ(png/jpg/webp/gif)を選択してください' });
+    const buf = Buffer.from(m[3], 'base64');
+    if (buf.length > 5 * 1024 * 1024) return res.status(400).json({ error: '画像は5MB以下にしてください' });
+    const cloud = process.env.CLOUDINARY_CLOUD_NAME, preset = process.env.CLOUDINARY_UPLOAD_PRESET;
+    if (cloud && preset) {
+      const fd = new FormData();
+      fd.append('file', new Blob([buf], { type: m[1] }), (filename || 'image').replace(/[^\w.\-]/g, '_'));
+      fd.append('upload_preset', preset);
+      const r = await fetch(`https://api.cloudinary.com/v1_1/${cloud}/image/upload`, { method: 'POST', body: fd }).then(r => r.json());
+      if (r.secure_url) return res.json({ url: r.secure_url, storage: 'cloudinary' });
+      return res.status(502).json({ error: 'Cloudinaryアップロード失敗: ' + (r.error && r.error.message || 'unknown') });
+    }
+    const ext = m[2] === 'jpeg' ? 'jpg' : m[2];
+    const name = Date.now() + '-' + crypto.randomBytes(4).toString('hex') + '.' + ext;
+    fs.writeFileSync(path.join(UPLOAD_DIR, name), buf);
+    res.json({ url: '/uploads/' + name, storage: 'local', warning: 'ローカル保存のため再デプロイで消えます。Cloudinaryを設定してください(README参照)。' });
+  } catch (e) { res.status(500).json({ error: 'upload failed' }); }
+});
 
 /* ---------- PUBLIC API ---------- */
 app.get('/api/settings', (req, res) => {
@@ -65,17 +97,21 @@ app.get('/api/stores', (req, res) => {
   const q = req.query;
   let sql = `SELECT * FROM stores WHERE status='published'`;
   const p = [];
-  if (q.area)   { sql += ' AND area_id=?'; p.push(int(q.area)); }
-  if (q.genre)  { sql += ' AND genre=?'; p.push(clean(q.genre)); }
+  if (q.area)  { sql += ' AND area_id=?'; p.push(int(q.area)); }
+  if (q.genre) { sql += ' AND genre=?'; p.push(clean(q.genre)); }
   if (q.lang === 'en') sql += ' AND english_ok=1';
   if (q.lang === 'zh') sql += ' AND chinese_ok=1';
   if (q.foreigner === '1') sql += ' AND foreigner_welcome=1';
   if (q.card === '1') sql += ' AND credit_card_ok=1';
-  if (q.budget) { sql += ' AND budget_min<=?'; p.push(int(q.budget)); }
+  if (q.budget) { // "0-50000" | "50000-100000" | "100000-" : 価格帯が重なる店舗を抽出
+    const [lo, hi] = String(q.budget).split('-');
+    if (lo) { sql += ' AND budget_max>=?'; p.push(int(lo)); }
+    if (hi) { sql += ' AND budget_min<=?'; p.push(int(hi)); }
+  }
   if (q.q) { sql += ' AND (name_ja LIKE ? OR name_en LIKE ? OR name_zh LIKE ?)'; const w = '%' + clean(q.q) + '%'; p.push(w, w, w); }
   if (q.recommended === '1') sql += ' AND is_recommended=1';
   sql += q.sort === 'popular'
-    ? ' ORDER BY (SELECT COUNT(*) FROM reviews r WHERE r.store_id=stores.id AND r.status=\'approved\') DESC, sort_order'
+    ? ` ORDER BY (SELECT COUNT(*) FROM reviews r WHERE r.store_id=stores.id AND r.status='approved') DESC, sort_order`
     : ' ORDER BY is_recommended DESC, sort_order';
   res.json(db.prepare(sql).all(...p).map(storeWithStats));
 });
@@ -93,25 +129,29 @@ app.get('/api/stores/:id', (req, res) => {
 
 app.get('/api/casts', (req, res) => {
   let sql = `SELECT c.*, s.name_ja store_name_ja, s.name_en store_name_en, s.name_zh store_name_zh FROM casts c JOIN stores s ON s.id=c.store_id WHERE c.status='published' AND s.status='published'`;
-  const p = [];
   if (req.query.lang === 'en') sql += ' AND c.english_ok=1';
   if (req.query.lang === 'zh') sql += ' AND c.chinese_ok=1';
   if (req.query.popular === '1') sql += ' AND c.is_popular=1';
-  sql += ' ORDER BY c.is_popular DESC, c.sort_order';
-  res.json(db.prepare(sql).all(...p));
+  res.json(db.prepare(sql + ' ORDER BY c.is_popular DESC, c.sort_order').all());
 });
 app.get('/api/casts/:id', (req, res) => {
-  const c = db.prepare(`SELECT c.*, s.name_ja store_name_ja, s.name_en store_name_en, s.name_zh store_name_zh, s.id sid FROM casts c JOIN stores s ON s.id=c.store_id WHERE c.id=? AND c.status='published'`).get(int(req.params.id));
+  const c = db.prepare(`SELECT c.*, s.name_ja store_name_ja, s.name_en store_name_en, s.name_zh store_name_zh FROM casts c JOIN stores s ON s.id=c.store_id WHERE c.id=? AND c.status='published'`).get(int(req.params.id));
   if (!c) return res.status(404).json({ error: 'not found' });
   res.json(c);
 });
 
 app.get('/api/events', (req, res) => {
   let sql = `SELECT e.*, s.name_en store_name_en, s.name_ja store_name_ja, s.name_zh store_name_zh FROM events e JOIN stores s ON s.id=e.store_id WHERE e.status='published' AND s.status='published'`;
-  if (req.query.when === 'today') sql += ` AND e.event_date=date('now')`;
-  else if (req.query.when === 'week') sql += ` AND e.event_date BETWEEN date('now') AND date('now','+7 day')`;
+  if (req.query.when === 'today') sql += ` AND e.event_date=date('now','localtime')`;
+  else if (req.query.when === 'week') sql += ` AND e.event_date BETWEEN date('now','localtime') AND date('now','localtime','+7 day')`;
   res.json(db.prepare(sql + ' ORDER BY e.event_date').all());
 });
+app.get('/api/events/:id', (req, res) => {
+  const e = db.prepare(`SELECT e.*, s.name_en store_name_en, s.name_ja store_name_ja, s.name_zh store_name_zh, s.address store_address, s.open_hours store_hours, s.budget_min, s.budget_max, s.hue store_hue FROM events e JOIN stores s ON s.id=e.store_id WHERE e.id=? AND e.status='published'`).get(int(req.params.id));
+  if (!e) return res.status(404).json({ error: 'not found' });
+  res.json(e);
+});
+
 app.get('/api/coupons', (req, res) => res.json(
   db.prepare(`SELECT c.*, s.name_en store_name_en, s.name_ja store_name_ja, s.name_zh store_name_zh FROM coupons c JOIN stores s ON s.id=c.store_id WHERE c.status='published' AND s.status='published' ORDER BY c.id DESC`).all()));
 app.get('/api/blogs', (req, res) => res.json(db.prepare(`SELECT id,slug,category,title_ja,title_en,title_zh,seo_description,hue,created_at FROM blogs WHERE status='published' ORDER BY created_at DESC`).all()));
@@ -127,7 +167,7 @@ app.get('/api/reviews/summary', (req, res) => {
   res.json({ avg: r.avg || 0, cnt: r.cnt });
 });
 
-/* review submission (public, goes to pending) */
+/* 口コミ投稿 (公開は管理者承認後) */
 app.post('/api/reviews', (req, res) => {
   const b = req.body;
   if (!b.store_id || !b.body) return res.status(400).json({ error: 'missing fields' });
@@ -136,10 +176,10 @@ app.post('/api/reviews', (req, res) => {
   res.json({ ok: true, message: 'pending_approval' });
 });
 
-/* translation endpoint */
+/* 翻訳 */
 app.post('/api/translate', (req, res) => {
   const { text, from, to } = req.body;
-  res.json({ translated: naiveTranslate(clean(text), clean(from || 'en'), clean(to || 'ja')) });
+  res.json({ translated: naiveTranslate(clean(text), clean(from || 'ja'), clean(to || 'en')) });
 });
 
 /* ---------- AUTH ---------- */
@@ -168,7 +208,7 @@ app.get('/api/me', auth, (req, res) => {
   });
 });
 
-/* ---------- USER: favorites / coupons / messages ---------- */
+/* ---------- USER actions ---------- */
 app.post('/api/favorites', auth, (req, res) => {
   const { target_type, target_id } = req.body;
   const ex = db.prepare('SELECT id FROM favorites WHERE user_id=? AND target_type=? AND target_id=?').get(req.user.id, target_type, int(target_id));
@@ -177,9 +217,7 @@ app.post('/api/favorites', auth, (req, res) => {
   res.json({ favorited: true });
 });
 app.post('/api/coupons/:id/get', auth, (req, res) => {
-  try {
-    db.prepare('INSERT INTO user_coupons (user_id,coupon_id) VALUES (?,?)').run(req.user.id, int(req.params.id));
-  } catch (e) {}
+  try { db.prepare('INSERT INTO user_coupons (user_id,coupon_id) VALUES (?,?)').run(req.user.id, int(req.params.id)); } catch (e) {}
   res.json({ ok: true });
 });
 app.post('/api/messages', auth, (req, res) => {
@@ -192,10 +230,10 @@ app.post('/api/messages', auth, (req, res) => {
   res.json({ ok: true });
 });
 
-/* ---------- ADMIN CRUD (generic) ---------- */
+/* ---------- ADMIN ---------- */
 const TABLES = {
   areas:   ['slug','name_ja','name_en','name_zh','sort_order','status'],
-  stores:  ['area_id','name_ja','name_en','name_zh','desc_ja','desc_en','desc_zh','logo','cover_image','hue','genre','address','google_map_url','open_hours','closed_days','phone','line_url','line_id','line_status','instagram','website','budget_min','budget_max','charge','service_fee','payment_methods','foreigner_welcome','english_ok','chinese_ok','credit_card_ok','reservation_ok','cast_count','is_recommended','sort_order','status'],
+  stores:  ['area_id','name_ja','name_en','name_zh','desc_ja','desc_en','desc_zh','logo','cover_image','hue','genre','address','google_map_url','open_hours','closed_days','phone','line_url','instagram','website','budget_min','budget_max','charge','service_fee','payment_methods','foreigner_welcome','english_ok','chinese_ok','credit_card_ok','reservation_ok','cast_count','is_recommended','sort_order','status'],
   casts:   ['store_id','name','display_name','photo','hue','profile_ja','profile_en','profile_zh','height','hobbies','favorites','languages','english_ok','chinese_ok','recommend_ja','recommend_en','recommend_zh','sns_instagram','is_popular','sort_order','status'],
   reviews: ['store_id','author_name','rating','rating_service','rating_atmosphere','rating_price','rating_cast','rating_foreigner','title','body','visit_date','language','status'],
   events:  ['store_id','title_ja','title_en','title_zh','desc_ja','desc_en','desc_zh','event_date','start_time','end_time','image','hue','status'],
@@ -214,33 +252,29 @@ app.get('/api/admin/stats', auth, adminOnly, (req, res) => {
     messages: c('messages'), events: c('events'), coupons: c('coupons'), blogs: c('blogs') });
 });
 app.get('/api/admin/:table', auth, adminOnly, (req, res) => {
-  const t = TABLES[req.params.table];
-  if (!t) return res.status(404).json({ error: 'unknown table' });
-  const q = req.query.q ? `%${clean(req.query.q)}%` : null;
+  if (!TABLES[req.params.table]) return res.status(404).json({ error: 'unknown table' });
   let rows = db.prepare(`SELECT * FROM ${req.params.table} ORDER BY ${req.params.table === 'settings' ? 'key' : 'id DESC'} LIMIT 500`).all();
-  if (q) rows = rows.filter(r => JSON.stringify(r).toLowerCase().includes(q.toLowerCase().replace(/%/g, '')));
+  const q = req.query.q;
+  if (q) { const needle = String(q).toLowerCase(); rows = rows.filter(r => JSON.stringify(r).toLowerCase().includes(needle)); }
   res.json(rows);
 });
 app.post('/api/admin/:table', auth, adminOnly, (req, res) => {
   const cols = TABLES[req.params.table];
   if (!cols) return res.status(404).json({ error: 'unknown table' });
-  const b = req.body;
-  const keys = cols.filter(k => b[k] !== undefined);
+  const keys = cols.filter(k => req.body[k] !== undefined);
   if (!keys.length) return res.status(400).json({ error: 'no fields' });
-  if (req.params.table === 'users' && b.password) { /* set via dedicated endpoint if needed */ }
   const r = db.prepare(`INSERT INTO ${req.params.table} (${keys.join(',')}) VALUES (${keys.map(() => '?').join(',')})`)
-    .run(...keys.map(k => typeof b[k] === 'number' ? b[k] : clean(b[k])));
+    .run(...keys.map(k => typeof req.body[k] === 'number' ? req.body[k] : clean(req.body[k])));
   res.json({ id: r.lastInsertRowid });
 });
 app.put('/api/admin/:table/:id', auth, adminOnly, (req, res) => {
   const cols = TABLES[req.params.table];
   if (!cols) return res.status(404).json({ error: 'unknown table' });
-  const b = req.body;
-  const keys = cols.filter(k => b[k] !== undefined);
+  const keys = cols.filter(k => req.body[k] !== undefined);
   if (!keys.length) return res.status(400).json({ error: 'no fields' });
   const keyCol = req.params.table === 'settings' ? 'key' : 'id';
   db.prepare(`UPDATE ${req.params.table} SET ${keys.map(k => k + '=?').join(',')} WHERE ${keyCol}=?`)
-    .run(...keys.map(k => typeof b[k] === 'number' ? b[k] : clean(b[k])), req.params.id);
+    .run(...keys.map(k => typeof req.body[k] === 'number' ? req.body[k] : clean(req.body[k])), req.params.id);
   res.json({ ok: true });
 });
 app.delete('/api/admin/:table/:id', auth, adminOnly, (req, res) => {
@@ -249,13 +283,10 @@ app.delete('/api/admin/:table/:id', auth, adminOnly, (req, res) => {
   db.prepare(`DELETE FROM ${req.params.table} WHERE ${keyCol}=?`).run(req.params.id);
   res.json({ ok: true });
 });
-
-/* admin reply to message (store -> user) */
 app.post('/api/admin/messages/:id/reply', auth, adminOnly, (req, res) => {
   const m = db.prepare('SELECT * FROM messages WHERE id=?').get(int(req.params.id));
   if (!m) return res.status(404).json({ error: 'not found' });
-  const body = clean(req.body.body);
-  const lang = clean(req.body.lang || 'ja');
+  const body = clean(req.body.body), lang = clean(req.body.lang || 'ja');
   db.prepare(`INSERT INTO messages (user_id,store_id,cast_id,direction,body,lang_original,body_ja,body_en,body_zh) VALUES (?,?,?,'store_to_user',?,?,?,?,?)`)
     .run(m.user_id, m.store_id, m.cast_id, body, lang,
       naiveTranslate(body, lang, 'ja'), naiveTranslate(body, lang, 'en'), naiveTranslate(body, lang, 'zh'));

@@ -173,7 +173,7 @@ if (areaCount === 0) {
     '六本木の中心に位置するラグジュアリーキャバクラ。英語・中国語対応スタッフ常駐で、海外からのお客様にも安心してお楽しみいただけます。',
     'A luxury club in the heart of Roppongi. English & Chinese speaking staff make it easy and comfortable for international guests.',
     '位于六本木中心的高级俱乐部。常驻会英语和中文的工作人员，让海外客人也能安心享受。',
-    45,'luxury','東京都港区六本木3-11-6','https://maps.google.com/?q=Roppongi+Tokyo','20:00 - 01:00','日曜・祝日','03-1234-0001','https://line.me/R/ti/p/@velvet','https://instagram.com/velvet_roppongi','https://example.com',30000,80000,'¥10,000','20%','Cash, VISA, Master, AMEX',1,1,1,1,1,25,1,1);
+    45,'cabaret','東京都港区六本木3-11-6','https://maps.google.com/?q=Roppongi+Tokyo','20:00 - 01:00','日曜・祝日','03-1234-0001','https://line.me/R/ti/p/@velvet','https://instagram.com/velvet_roppongi','https://example.com',30000,80000,'¥10,000','20%','Cash, VISA, Master, AMEX',1,1,1,1,1,25,1,1);
   insStore.run(2,'ラウンジ 琥珀 歌舞伎町','Lounge KOHAKU Kabukicho','琥珀酒廊 歌舞伎町',
     '歌舞伎町の隠れ家的ラウンジ。落ち着いた大人の空間で上質なひとときを。',
     'A hidden lounge in Kabukicho. A refined adult space for a quality evening.',
@@ -183,12 +183,12 @@ if (areaCount === 0) {
     '銀座の格式高い会員制クラブ。ビジネス接待や特別な夜に。',
     'A prestigious members club in Ginza, perfect for business entertainment and special nights.',
     '银座的高级会员制俱乐部。适合商务接待和特别的夜晚。',
-    50,'members','東京都中央区銀座8-5-6','https://maps.google.com/?q=Ginza+Tokyo','20:00 - 01:00','土日祝','03-1234-0003','https://line.me/R/ti/p/@lumiere','','',50000,150000,'¥20,000','25%','VISA, Master, AMEX, JCB',1,1,1,1,1,30,1,3);
+    50,'cabaret','東京都中央区銀座8-5-6','https://maps.google.com/?q=Ginza+Tokyo','20:00 - 01:00','土日祝','03-1234-0003','https://line.me/R/ti/p/@lumiere','','',50000,150000,'¥20,000','25%','VISA, Master, AMEX, JCB',1,1,1,1,1,30,1,3);
   insStore.run(4,'クラブ ネオン 渋谷','Club NEON Shibuya','NEON俱乐部 涩谷',
     '渋谷のカジュアルでフレンドリーなクラブ。初めての方にもおすすめ。',
     'A casual, friendly club in Shibuya. Great for first-timers.',
     '涩谷轻松友好的俱乐部。推荐初次体验的客人。',
-    300,'casual','東京都渋谷区道玄坂2-10-7','https://maps.google.com/?q=Shibuya+Tokyo','19:00 - 25:00','年中無休','03-1234-0004','','https://instagram.com/neon_shibuya','',15000,40000,'¥6,000','10%','Cash, VISA',1,1,0,1,0,20,0,4);
+    300,'club','東京都渋谷区道玄坂2-10-7','https://maps.google.com/?q=Shibuya+Tokyo','19:00 - 25:00','年中無休','03-1234-0004','','https://instagram.com/neon_shibuya','',15000,40000,'¥6,000','10%','Cash, VISA',1,1,0,1,0,20,0,4);
   insStore.run(5,'上野 スカイラウンジ','Ueno Sky Lounge','上野天空酒廊',
     '上野の夜景を望むスカイラウンジ。リーズナブルに楽しめる。',
     'A sky lounge overlooking Ueno. Affordable luxury with a view.',
@@ -198,7 +198,7 @@ if (areaCount === 0) {
     '池袋の人気クラブ。元気なキャストと楽しい夜を。',
     'A popular club in Ikebukuro with a lively cast.',
     '池袋的人气俱乐部。与活泼的公关共度欢乐夜晚。',
-    260,'casual','東京都豊島区西池袋1-20-5','https://maps.google.com/?q=Ikebukuro+Tokyo','19:00 - 01:00','年中無休','03-1234-0006','','','',12000,35000,'¥6,000','15%','Cash, VISA, Master',1,1,1,1,1,22,0,6);
+    260,'club','東京都豊島区西池袋1-20-5','https://maps.google.com/?q=Ikebukuro+Tokyo','19:00 - 01:00','年中無休','03-1234-0006','','','',12000,35000,'¥6,000','15%','Cash, VISA, Master',1,1,1,1,1,22,0,6);
 
   const insCast = db.prepare(`INSERT INTO casts (store_id,name,display_name,photo,hue,profile_ja,profile_en,profile_zh,height,hobbies,favorites,languages,english_ok,chinese_ok,recommend_ja,recommend_en,recommend_zh,sns_instagram,is_popular,sort_order) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
   insCast.run(1,'美咲','MISAKI','',330,'六本木店No.1。英語ペラペラで海外のお客様に大人気。','No.1 at Roppongi. Fluent in English and loved by international guests.','六本木店No.1。英语流利，深受海外客人喜爱。',162,'旅行・ワイン','シャンパン','ja,en',1,0,'英語OK! 笑顔が素敵な人気キャスト','English OK! Beloved for her smile','会说英语！以笑容著称的人气公关','https://instagram.com/misaki',1,1);
@@ -262,6 +262,10 @@ if (areaCount === 0) {
 
   console.log('Seed complete.');
 }
+
+/* ---------- migration: 旧ジャンル値→新体系 (冪等・既存データ互換) ---------- */
+db.exec("UPDATE stores SET genre='cabaret' WHERE genre IN ('cabaret','cabaret')");
+db.exec("UPDATE stores SET genre='club' WHERE genre='club'");
 
 module.exports = { db, hashPassword, verifyPassword };
 
