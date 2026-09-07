@@ -126,3 +126,26 @@ public/uploads/    ローカル画像保存先（Cloudinary 未設定時のみ�
 - 翻訳API（DeepL等）への差し替え → `POST /api/translate`
 - LINE Messaging API 連携 → `stores.line_url` から拡張
 - 予約・決済・店舗課金 → テーブル追加で拡張可能
+
+
+---
+
+## 10. v3 追記（2026-09-07）
+
+### 新機能
+- **センターモードカルーセル**: 店舗詳細・キャスト詳細の写真を中央大+両サイド小のスライダー表示。PCは矢印/クリック、スマホはスワイプ対応。管理画面の「追加写真」に複数登録すると自動で有効化
+- **キャスト絞り込み検索**: 「キャストを探す」ページに店舗エリア・身長・バスト・系統・顔立ち（常時表示）+ 出身地・お酒・接待スキル・スタイル・髪型（「さらに条件を追加」で展開）
+- **キャスト口コミ**: 店舗口コミとは別にキャスト個人へ紐づけて投稿・表示。管理画面の口コミ一覧は「店舗/キャスト」バッジで区別。承認制は従来通り
+- **Other Cast**: キャスト詳細下部に同店舗の他キャストを表示
+
+### 不具合修正
+- Chromeで言語切替が効かない問題 → `translate="no"` でChrome自動翻訳を無効化し、言語状態を localStorage で一元管理
+- フッターのLINE表記 → 全言語で「LINE」固定（翻訳対象外に指定。Instagram/Google Mapsも同様）
+- 「口コミ」タブが押せない問題 → タブの flex レイアウトを修正
+- 「Googleマップで開く」→ `https://www.google.com/maps/search/?api=1&query=...` 形式で外部遷移（埋め込みURLとの混用を解消）
+- 管理画面「翻訳」ボタン → 口コミ本文を日英中へ翻訳するプレビュー機能として実装修正
+
+### 新しいDBカラム（既存DBは起動時に自動ALTER・データは保持されます）
+- stores.images / casts.photos : 複数写真（JSON配列）
+- casts: bust, birthplace, style_type, alcohol, skill, face, body_style, hair（絞り込み検索用）
+- reviews.cast_id : キャスト口コミ識別

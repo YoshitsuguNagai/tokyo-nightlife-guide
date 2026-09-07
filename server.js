@@ -57,7 +57,7 @@ function adminOnly(req, res, next) {
 const clean = s => String(s ?? '').slice(0, 8000);
 const int = v => parseInt(v, 10) || 0;
 function storeWithStats(s) {
-  const r = db.prepare(`SELECT ROUND(AVG(rating),1) avg, COUNT(*) cnt FROM reviews WHERE store_id=? AND status='approved'`).get(s.id);
+  const r = db.prepare(`SELECT ROUND(AVG(rating),1) avg, COUNT(*) cnt FROM reviews WHERE store_id=? AND cast_id IS NULL AND status='approved'`).get(s.id);
   const area = s.area_id ? db.prepare('SELECT * FROM areas WHERE id=?').get(s.area_id) : null;
   return { ...s, rating_avg: r.avg || 0, review_count: r.cnt, area };
 }
@@ -121,22 +121,35 @@ app.get('/api/stores/:id', (req, res) => {
   if (!s) return res.status(404).json({ error: 'not found' });
   const out = storeWithStats(s);
   out.casts = db.prepare(`SELECT * FROM casts WHERE store_id=? AND status='published' ORDER BY sort_order`).all(s.id);
-  out.reviews = db.prepare(`SELECT * FROM reviews WHERE store_id=? AND status='approved' ORDER BY created_at DESC`).all(s.id);
+  out.reviews = db.prepare(`SELECT * FROM reviews WHERE store_id=? AND cast_id IS NULL AND status='approved' ORDER BY created_at DESC`).all(s.id);
   out.events = db.prepare(`SELECT * FROM events WHERE store_id=? AND status='published' ORDER BY event_date`).all(s.id);
   out.coupons = db.prepare(`SELECT * FROM coupons WHERE store_id=? AND status='published'`).all(s.id);
   res.json(out);
 });
 
 app.get('/api/casts', (req, res) => {
-  let sql = `SELECT c.*, s.name_ja store_name_ja, s.name_en store_name_en, s.name_zh store_name_zh FROM casts c JOIN stores s ON s.id=c.store_id WHERE c.status='published' AND s.status='published'`;
-  if (req.query.lang === 'en') sql += ' AND c.english_ok=1';
-  if (req.query.lang === 'zh') sql += ' AND c.chinese_ok=1';
-  if (req.query.popular === '1') sql += ' AND c.is_popular=1';
-  res.json(db.prepare(sql + ' ORDER BY c.is_popular DESC, c.sort_order').all());
+  const q = req.query;
+  let sql = `SELECT c.*, s.name_ja store_name_ja, s.name_en store_name_en, s.name_zh store_name_zh, s.area_id store_area_id FROM casts c JOIN stores s ON s.id=c.store_id WHERE c.status='published' AND s.status='published'`;
+  const p = [];
+  if (q.lang === 'en') sql += ' AND c.english_ok=1';
+  if (q.lang === 'zh') sql += ' AND c.chinese_ok=1';
+  if (q.popular === '1') sql += ' AND c.is_popular=1';
+  if (q.area)      { sql += ' AND s.area_id=?'; p.push(int(q.area)); }
+  if (q.height_min){ sql += ' AND c.height>=?'; p.push(int(q.height_min)); }
+  if (q.height_max){ sql += ' AND c.height<=?'; p.push(int(q.height_max)); }
+  if (q.bust)      { sql += ' AND c.bust=?'; p.push(clean(q.bust)); }
+  ['birthplace','style_type','alcohol','skill','face','body_style','hair'].forEach(k => {
+    if (q[k]) { sql += ` AND c.${k}=?`; p.push(clean(q[k])); }
+  });
+  res.json(db.prepare(sql + ' ORDER BY c.is_popular DESC, c.sort_order').all(...p));
 });
 app.get('/api/casts/:id', (req, res) => {
   const c = db.prepare(`SELECT c.*, s.name_ja store_name_ja, s.name_en store_name_en, s.name_zh store_name_zh FROM casts c JOIN stores s ON s.id=c.store_id WHERE c.id=? AND c.status='published'`).get(int(req.params.id));
   if (!c) return res.status(404).json({ error: 'not found' });
+  c.reviews = db.prepare(`SELECT * FROM reviews WHERE cast_id=? AND status='approved' ORDER BY created_at DESC`).all(c.id);
+  const r = db.prepare(`SELECT ROUND(AVG(rating),1) avg, COUNT(*) cnt FROM reviews WHERE cast_id=? AND status='approved'`).get(c.id);
+  c.rating_avg = r.avg || 0; c.review_count = r.cnt;
+  c.others = db.prepare(`SELECT c2.id, c2.display_name, c2.name, c2.photo, c2.hue, c2.english_ok, c2.chinese_ok, c2.height, c2.recommend_ja, c2.recommend_en, c2.recommend_zh, s2.name_ja store_name_ja, s2.name_en store_name_en, s2.name_zh store_name_zh FROM casts c2 JOIN stores s2 ON s2.id=c2.store_id WHERE c2.store_id=? AND c2.id!=? AND c2.status='published' ORDER BY c2.is_popular DESC, c2.sort_order LIMIT 8`).all(c.store_id, c.id);
   res.json(c);
 });
 
@@ -171,8 +184,9 @@ app.get('/api/reviews/summary', (req, res) => {
 app.post('/api/reviews', (req, res) => {
   const b = req.body;
   if (!b.store_id || !b.body) return res.status(400).json({ error: 'missing fields' });
-  db.prepare(`INSERT INTO reviews (store_id,user_id,author_name,rating,title,body,visit_date,language,status) VALUES (?,?,?,?,?,?,?,?,'pending')`)
-    .run(int(b.store_id), int(b.user_id) || null, clean(b.author_name || 'Guest'), Math.min(5, Math.max(1, int(b.rating) || 5)), clean(b.title), clean(b.body), clean(b.visit_date), clean(b.language || 'en'));
+  if (!b.cast_id && !b.store_id) return res.status(400).json({ error: 'missing fields' });
+  db.prepare(`INSERT INTO reviews (store_id,cast_id,user_id,author_name,rating,title,body,visit_date,language,status) VALUES (?,?,?,?,?,?,?,?,?,'pending')`)
+    .run(int(b.store_id) || null, int(b.cast_id) || null, int(b.user_id) || null, clean(b.author_name || 'Guest'), Math.min(5, Math.max(1, int(b.rating) || 5)), clean(b.title), clean(b.body), clean(b.visit_date), clean(b.language || 'en'));
   res.json({ ok: true, message: 'pending_approval' });
 });
 
@@ -233,9 +247,9 @@ app.post('/api/messages', auth, (req, res) => {
 /* ---------- ADMIN ---------- */
 const TABLES = {
   areas:   ['slug','name_ja','name_en','name_zh','sort_order','status'],
-  stores:  ['area_id','name_ja','name_en','name_zh','desc_ja','desc_en','desc_zh','logo','cover_image','hue','genre','address','google_map_url','open_hours','closed_days','phone','line_url','instagram','website','budget_min','budget_max','charge','service_fee','payment_methods','foreigner_welcome','english_ok','chinese_ok','credit_card_ok','reservation_ok','cast_count','is_recommended','sort_order','status'],
-  casts:   ['store_id','name','display_name','photo','hue','profile_ja','profile_en','profile_zh','height','hobbies','favorites','languages','english_ok','chinese_ok','recommend_ja','recommend_en','recommend_zh','sns_instagram','is_popular','sort_order','status'],
-  reviews: ['store_id','author_name','rating','rating_service','rating_atmosphere','rating_price','rating_cast','rating_foreigner','title','body','visit_date','language','status'],
+  stores:  ['area_id','name_ja','name_en','name_zh','desc_ja','desc_en','desc_zh','logo','cover_image','images','hue','genre','address','google_map_url','open_hours','closed_days','phone','line_url','instagram','website','budget_min','budget_max','charge','service_fee','payment_methods','foreigner_welcome','english_ok','chinese_ok','credit_card_ok','reservation_ok','cast_count','is_recommended','sort_order','status'],
+  casts:   ['store_id','name','display_name','photo','photos','hue','profile_ja','profile_en','profile_zh','height','hobbies','favorites','languages','english_ok','chinese_ok','recommend_ja','recommend_en','recommend_zh','sns_instagram','is_popular','sort_order','status','bust','birthplace','style_type','alcohol','skill','face','body_style','hair'],
+  reviews: ['store_id','cast_id','author_name','rating','rating_service','rating_atmosphere','rating_price','rating_cast','rating_foreigner','title','body','visit_date','language','status'],
   events:  ['store_id','title_ja','title_en','title_zh','desc_ja','desc_en','desc_zh','event_date','start_time','end_time','image','hue','status'],
   coupons: ['store_id','title_ja','title_en','title_zh','desc_ja','desc_en','desc_zh','conditions_ja','conditions_en','conditions_zh','code','valid_until','image','hue','status'],
   blogs:   ['slug','category','title_ja','title_en','title_zh','body_ja','body_en','body_zh','seo_title','seo_description','image','hue','status'],

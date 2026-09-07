@@ -155,6 +155,13 @@ CREATE TABLE IF NOT EXISTS settings (
 );
 `);
 
+/* ---------- migration: 新規カラム追加 (冪等・既存DB互換) ---------- */
+function addCol(t, c, def) { try { db.prepare(`ALTER TABLE ${t} ADD COLUMN ${c} ${def}`).run(); } catch (e) {} }
+addCol('stores', 'images', 'TEXT');           // 店舗写真(複数, JSON配列)
+addCol('reviews', 'cast_id', 'INTEGER');      // キャスト口コミ用
+['photos','bust','birthplace','style_type','alcohol','skill','face','body_style','hair']
+  .forEach(c => addCol('casts', c, 'TEXT'));  // 複数写真 + 絞り込み検索項目
+
 /* ---------- seed ---------- */
 const areaCount = db.prepare('SELECT COUNT(*) c FROM areas').get().c;
 if (areaCount === 0) {
@@ -200,15 +207,15 @@ if (areaCount === 0) {
     '池袋的人气俱乐部。与活泼的公关共度欢乐夜晚。',
     260,'club','東京都豊島区西池袋1-20-5','https://maps.google.com/?q=Ikebukuro+Tokyo','19:00 - 01:00','年中無休','03-1234-0006','','','',12000,35000,'¥6,000','15%','Cash, VISA, Master',1,1,1,1,1,22,0,6);
 
-  const insCast = db.prepare(`INSERT INTO casts (store_id,name,display_name,photo,hue,profile_ja,profile_en,profile_zh,height,hobbies,favorites,languages,english_ok,chinese_ok,recommend_ja,recommend_en,recommend_zh,sns_instagram,is_popular,sort_order) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
-  insCast.run(1,'美咲','MISAKI','',330,'六本木店No.1。英語ペラペラで海外のお客様に大人気。','No.1 at Roppongi. Fluent in English and loved by international guests.','六本木店No.1。英语流利，深受海外客人喜爱。',162,'旅行・ワイン','シャンパン','ja,en',1,0,'英語OK! 笑顔が素敵な人気キャスト','English OK! Beloved for her smile','会说英语！以笑容著称的人气公关','https://instagram.com/misaki',1,1);
-  insCast.run(1,'麗奈','REINA','',320,'中国語対応可能。落ち着いた大人の魅力。','Speaks Chinese. A calm, mature charm.','会中文。成熟稳重的魅力。',158,'カラオケ','日本酒','ja,zh',0,1,'中国語OKのおすすめキャスト','Recommended: Chinese OK','推荐：会中文','',1,2);
-  insCast.run(1,'あんな','ANNA','',340,'明るく元気なムードメーカー。','A bright, cheerful mood-maker.','开朗活泼的气氛担当。',160,'ダンス','カクテル','ja',0,0,'ノリの良さNo.1','Best energy in the club','气氛最好的公关','',0,3);
-  insCast.run(2,'さくら','SAKURA','',350,'歌舞伎町の癒やし系。英語勉強中。','The soothing presence of Kabukicho. Studying English.','歌舞伎町的治愈系。正在学习英语。',155,'読書','紅茶','ja',0,0,'優しい接客でリピート多数','Gentle service, many repeat guests','服务温柔，回头客众多','',1,1);
-  insCast.run(2,'りん','RIN','',10,'元モデルのスタイル抜群キャスト。','Former model with stunning style.','前模特，身材出众。',168,'ヨガ','ワイン','ja,en',1,0,'スタイル抜群!','Amazing style','身材超棒！','',1,2);
-  insCast.run(3,'ゆり','YURI','',45,'銀座の高級感あふれるキャスト。英語・中国語OK。','Elegant Ginza cast. English & Chinese OK.','银座的高贵公关。会英语和中文。',163,'ゴルフ','シャンパン','ja,en,zh',1,1,'トリリンガルの高級キャスト','Trilingual premium cast','会三种语言的高级公关','',1,1);
-  insCast.run(4,'もも','MOMO','',300,'渋谷の元気印!英語OK。','Shibuya’s bundle of energy! English OK.','涩谷的元气担当！会英语。',157,'ショッピング','スイーツ','ja,en',1,0,'初めての方におすすめ','Great for first-timers','推荐初次体验的客人','',1,1);
-  insCast.run(6,'なな','NANA','',260,'池袋の人気者。中国語対応。','Ikebukuro favorite. Chinese OK.','池袋的人气公关。会中文。',159,'アニメ','焼酎','ja,zh',0,1,'中国語OK','Chinese OK','会中文','',1,1);
+  const insCast = db.prepare(`INSERT INTO casts (store_id,name,display_name,photo,photos,hue,profile_ja,profile_en,profile_zh,height,hobbies,favorites,languages,english_ok,chinese_ok,recommend_ja,recommend_en,recommend_zh,sns_instagram,is_popular,sort_order,status,bust,birthplace,style_type,alcohol,skill,face,body_style,hair) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+  insCast.run(1,'美咲','MISAKI','','[]',330,'六本木店No.1。英語ペラペラで海外のお客様に大人気。','No.1 at Roppongi. Fluent in English and loved by international guests.','六本木店No.1。英语流利，深受海外客人喜爱。',162,'旅行・ワイン','シャンパン','ja,en',1,0,'英語OK! 笑顔が素敵な人気キャスト','English OK! Beloved for her smile','会说英语！以笑容著称的人气公关','https://instagram.com/misaki',1,1,'published','85〜89','東京','清楚','強い','経験者','綺麗系','スレンダー','ロング');
+  insCast.run(1,'麗奈','REINA','','[]',320,'中国語対応可能。落ち着いた大人の魅力。','Speaks Chinese. A calm, mature charm.','会中文。成熟稳重的魅力。',158,'カラオケ','日本酒','ja,zh',0,1,'中国語OKのおすすめキャスト','Recommended: Chinese OK','推荐：会中文','',1,2,'published','80〜84','神奈川','お姉さん','普通','ベテラン','クール系','普通','ミディアム');
+  insCast.run(1,'あんな','ANNA','','[]',340,'明るく元気なムードメーカー。','A bright, cheerful mood-maker.','开朗活泼的气氛担当。',160,'ダンス','カクテル','ja',0,0,'ノリの良さNo.1','Best energy in the club','气氛最好的公关','',0,3,'published','70〜79','埼玉','ギャル','強い','初心者','可愛い系','普通','ミディアム');
+  insCast.run(2,'さくら','SAKURA','','[]',350,'歌舞伎町の癒やし系。英語勉強中。','The soothing presence of Kabukicho. Studying English.','歌舞伎町的治愈系。正在学习英语。',155,'読書','紅茶','ja',0,0,'優しい接客でリピート多数','Gentle service, many repeat guests','服务温柔，回头客众多','',1,1,'published','80〜84','千葉','癒やし','弱い','経験者','癒やし系','スレンダー','ロング');
+  insCast.run(2,'りん','RIN','','[]',10,'元モデルのスタイル抜群キャスト。','Former model with stunning style.','前模特，身材出众。',168,'ヨガ','ワイン','ja,en',1,0,'スタイル抜群!','Amazing style','身材超棒！','',1,2,'published','85〜89','東京','モデル','普通','経験者','綺麗系','モデル体型','ロング');
+  insCast.run(3,'ゆり','YURI','','[]',45,'銀座の高級感あふれるキャスト。英語・中国語OK。','Elegant Ginza cast. English & Chinese OK.','银座的高贵公关。会英语和中文。',163,'ゴルフ','シャンパン','ja,en,zh',1,1,'トリリンガルの高級キャスト','Trilingual premium cast','会三种语言的高级公关','',1,1,'published','85〜89','東京','清楚','普通','ベテラン','綺麗系','スレンダー','ミディアム');
+  insCast.run(4,'もも','MOMO','','[]',300,'渋谷の元気印!英語OK。','Shibuya’s bundle of energy! English OK.','涩谷的元气担当！会英语。',157,'ショッピング','スイーツ','ja,en',1,0,'初めての方におすすめ','Great for first-timers','推荐初次体验的客人','',1,1,'published','90〜94','大阪','可愛い','強い','初心者','可愛い系','グラマー','ボブ');
+  insCast.run(6,'なな','NANA','','[]',260,'池袋の人気者。中国語対応。','Ikebukuro favorite. Chinese OK.','池袋的人气公关。会中文。',159,'アニメ','焼酎','ja,zh',0,1,'中国語OK','Chinese OK','会中文','',1,1,'published','80〜84','東京','可愛い','普通','未経験','ハーフ系','普通','ショート');
 
   const insReview = db.prepare(`INSERT INTO reviews (store_id,author_name,rating,rating_service,rating_atmosphere,rating_price,rating_cast,rating_foreigner,title,body,visit_date,language,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`);
   insReview.run(1,'Michael (USA)',5,5,5,4,5,5,'Amazing night in Roppongi!','Staff spoke perfect English and made everything easy. The girls were friendly and the atmosphere was luxurious. Highly recommended for foreigners!', '2026-08-10','en','approved');
