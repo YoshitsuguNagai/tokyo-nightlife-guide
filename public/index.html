@@ -120,6 +120,15 @@ h1,h2,h3{line-height:1.35}
 .flt-chips .chip{padding:7px 12px;min-height:34px;font-size:11.5px}
 .more-toggle{margin-top:12px;width:100%;background:none;border:1px dashed var(--line);color:var(--sub);border-radius:10px;padding:11px;font-size:12.5px;cursor:pointer;letter-spacing:.05em}
 .more-toggle:hover{border-color:var(--gold);color:var(--gold2)}
+/* V4: lightbox / password eye */
+.lbox{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.93);display:flex;align-items:center;justify-content:center}
+.lbox img{max-width:92vw;max-height:82vh;object-fit:contain;border-radius:8px}
+.lbox .lb-x{position:absolute;top:18px;right:18px;background:rgba(255,255,255,.1);border:1px solid var(--line);color:#fff;border-radius:50%;width:42px;height:42px;font-size:18px;cursor:pointer}
+.lbox .lb-a{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.08);border:1px solid var(--line);color:var(--gold2);border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.lbox .lb-a.l{left:10px}.lbox .lb-a.r{right:10px}
+.eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--sub);cursor:pointer;padding:6px}
+.pw{position:relative}
+.pw input{padding-right:42px}
 footer{border-top:1px solid var(--line);margin-top:56px;padding:34px 16px;color:var(--sub);font-size:11.5px;text-align:center;letter-spacing:.08em}
 footer .logo{font-size:15px}
 </style>
@@ -157,6 +166,8 @@ const ICONS = {
  book:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
  phone:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
  send:'<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+ eye:'<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+ eyeOff:'<path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M6.61 6.61A13.5 13.5 0 0 0 2 12s3 8 10 8a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/>',
  pen:'<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
  chevL:'<path d="m15 18-6-6 6-6"/>',
  chevR:'<path d="m9 18 6-6-6-6"/>'
@@ -186,7 +197,9 @@ const I = {
   f_area:'Club Area',f_height:'Height',f_bust:'Bust',f_birthplace:'Birthplace',f_style:'Style',f_alcohol:'Alcohol',f_skill:'Hospitality',f_face:'Looks',f_body:'Figure',f_hair:'Hair',
   f_h1:'Up to 155cm',f_h2:'156 – 160cm',f_h3:'161 – 165cm',f_h4:'166cm+',
   more_filters:'＋ More Filters',close_filters:'− Close Filters',clear:'Clear',apply:'Search with these filters',
-  rv_store:'Club Review',rv_cast:'Cast Review'},
+  rv_store:'Club Review',rv_cast:'Cast Review',
+  chat_club:'Chat with Club',reply_from_store:'Reply from the Club',reply_from_cast:'Reply from the Cast',reply_from_site:'Reply from Tokyo Nightlife Guide',reply_ph:'Write a reply...',
+  h1:'Under 150cm',h2:'150 – 159cm',h3:'160 – 169cm',h4:'170cm+',f_lang:'Languages'},
  ja:{find_club:'お店を探す',find_girl:'キャストを探す',reviews:'口コミ',events:'イベント',coupons:'クーポン',blog:'ブログ',home:'ホーム',back:'戻る',
   hero1:'東京の<em>夜</em>を、発見する',hero2:'東京のベストクラブ・キャバクラ・ナイトライフ体験を見つけよう',
   where:'どこへ行きますか?',search:'検索',area:'エリア',genre:'ジャンル',budget:'予算',all:'すべて',
@@ -208,7 +221,9 @@ const I = {
   f_area:'店舗エリア',f_height:'身長',f_bust:'バスト',f_birthplace:'出身地',f_style:'系統',f_alcohol:'お酒',f_skill:'接待スキル',f_face:'顔立ち',f_body:'スタイル',f_hair:'髪型',
   f_h1:'〜155cm',f_h2:'156〜160cm',f_h3:'161〜165cm',f_h4:'166cm〜',
   more_filters:'＋ さらに条件を追加',close_filters:'− 条件を閉じる',clear:'クリア',apply:'この条件で検索',
-  rv_store:'店舗口コミ',rv_cast:'キャスト口コミ'},
+  rv_store:'店舗口コミ',rv_cast:'キャスト口コミ',
+  chat_club:'お店とチャット',reply_from_store:'店舗からの返信',reply_from_cast:'キャストからの返信',reply_from_site:'Tokyo Nightlife Guideからの返信',reply_ph:'返信を入力...',
+  h1:'150cm未満',h2:'150〜159cm',h3:'160〜169cm',h4:'170cm以上',f_lang:'言語'},
  zh:{find_club:'查找店铺',find_girl:'查找公关',reviews:'评价',events:'活动',coupons:'优惠券',blog:'博客',home:'首页',back:'返回',
   hero1:'探索<em>东京</em>夜生活',hero2:'寻找东京最好的俱乐部、夜总会和夜生活体验',
   where:'您想去哪里?',search:'搜索',area:'区域',genre:'类型',budget:'预算',all:'全部',
@@ -230,7 +245,9 @@ const I = {
   f_area:'店铺区域',f_height:'身高',f_bust:'胸围',f_birthplace:'出身地',f_style:'类型',f_alcohol:'酒量',f_skill:'待客技巧',f_face:'长相',f_body:'身材',f_hair:'发型',
   f_h1:'〜155cm',f_h2:'156〜160cm',f_h3:'161〜165cm',f_h4:'166cm〜',
   more_filters:'＋ 添加更多条件',close_filters:'− 收起条件',clear:'清除',apply:'按条件搜索',
-  rv_store:'店铺评价',rv_cast:'公关评价'}
+  rv_store:'店铺评价',rv_cast:'公关评价',
+  chat_club:'与店铺聊天',reply_from_store:'店铺的回复',reply_from_cast:'公关的回复',reply_from_site:'Tokyo Nightlife Guide的回复',reply_ph:'输入回复...',
+  h1:'150cm以下',h2:'150〜159cm',h3:'160〜169cm',h4:'170cm以上',f_lang:'语言'},
 };
 let LANG = localStorage.getItem('tng_lang') || 'en';
 const t = k => (I[LANG] && I[LANG][k]) || I.en[k] || k;
@@ -254,7 +271,7 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;
 const grad = h => `linear-gradient(135deg, hsl(${h||45},42%,20%), hsl(${(h||45)+38},50%,11%))`;
 const stars = n => '★★★★★'.slice(0, Math.round(n)) + '☆☆☆☆☆'.slice(0, 5 - Math.round(n));
 function toast(msg){ const d = document.createElement('div'); d.className = 'toast'; d.innerHTML = esc(msg); document.body.appendChild(d); setTimeout(() => d.remove(), 2500); }
-function modal(html){ const m = document.createElement('div'); m.className = 'modal'; m.onclick = e => { if (e.target === m) m.remove(); }; m.innerHTML = `<div class="box">${html}</div>`; document.body.appendChild(m); return m; }
+function modal(html){ const m = document.createElement('div'); m.className = 'modal'; m.onclick = e => { if (e.target === m) m.remove(); }; m.innerHTML = `<div class="box" style="position:relative"><button type="button" onclick="this.closest('.modal').remove()" style="position:absolute;top:12px;right:12px;background:none;border:1px solid var(--line);color:var(--sub);border-radius:50%;width:32px;height:32px;cursor:pointer">✕</button>${html}</div>`; document.body.appendChild(m); return m; }
 function needLogin(){ if (ME) return false; toast(t('need_login')); loginModal(); return true; }
 const imgStyle = (url, h) => url ? `background-image:url('${esc(url)}')` : `background:${grad(h)}`;
 const photoArr = (json, main) => { let a = []; try { a = JSON.parse(json || '[]'); } catch(e){} if (main) a.unshift(main); return a; };
@@ -265,16 +282,37 @@ function carousel(items, hue){ /* items: [{url,label}] */
   if (!items.length) items = [{ url: null, label: '◆' }];
   const id = 'car' + (++CAR_N);
   const slides = items.concat(items.length === 1 ? [] : []);
-  return `<div class="car" id="${id}">
+  const _urls = items.map(s=>s.url);
+  return `<div class="car" id="${id}" onclick="void(0)">
     <div class="car-view"><div class="car-track" id="${id}-t">
-      ${slides.map((s, i) => `<div class="car-slide${i===0?' on':''}" data-i="${i}" onclick="carGo('${id}',${i})"><div class="im" style="${s.url?`background-image:url('${esc(s.url)}')`:`background:${grad(hue)}`}">${s.url?'':esc(s.label||'◆')}</div></div>`).join('')}
+      ${slides.map((s, i) => `<div class="car-slide${i===0?' on':''}" data-i="${i}" onclick="carClick('${id}',${i})"><div class="im" style="${s.url?`background-image:url('${esc(s.url)}')`:`background:${grad(hue)}`}">${s.url?'':esc(s.label||'◆')}</div></div>`).join('')}
     </div></div>
     ${slides.length>1?`<button type="button" class="car-arrow l" onclick="carMove('${id}',-1)">${ic('chevL',18)}</button>
     <button type="button" class="car-arrow r" onclick="carMove('${id}',1)">${ic('chevR',18)}</button>
     <div class="car-dots" id="${id}-d">${slides.map((s,i)=>`<i class="${i===0?'on':''}" onclick="carGo('${id}',${i})"></i>`).join('')}</div>`:''}
   </div>`;
 }
-function carState(id){ const el = document.getElementById(id); return el ? (el._s = el._s || { i: 0 }) : { i: 0 }; }
+function carState(id){ const el = document.getElementById(id); if (el && !el._urls) el._urls = [...el.querySelectorAll('.car-slide .im')].map(x=>{ const m=/url\('([^']+)'/.exec(x.getAttribute('style')||''); return m?m[1]:null; }); return el ? (el._s = el._s || { i: 0 }) : { i: 0 }; }
+/* ---- lightbox ---- */
+let LB = { urls: [], i: 0 };
+function openLightbox(urls, i){
+  LB.urls = urls.filter(Boolean); LB.i = Math.max(0, LB.urls.indexOf(urls[i]));
+  renderLb();
+}
+function renderLb(){
+  document.querySelectorAll('.lbox').forEach(x=>x.remove());
+  if (!LB.urls.length) return;
+  const d = document.createElement('div'); d.className = 'lbox';
+  d.innerHTML = `<img src="${esc(LB.urls[LB.i])}">
+    <button type="button" class="lb-x" onclick="closeLb()">✕</button>
+    ${LB.urls.length>1?`<button type="button" class="lb-a l" onclick="lbMove(-1)">${ic('chevL',20)}</button><button type="button" class="lb-a r" onclick="lbMove(1)">${ic('chevR',20)}</button>`:''}`;
+  d.onclick = e => { if (e.target === d) closeLb(); };
+  let sx=0; d.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
+  d.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx; if(dx<-40)lbMove(1); else if(dx>40)lbMove(-1);});
+  document.body.appendChild(d);
+}
+function lbMove(d){ LB.i = (LB.i + d + LB.urls.length) % LB.urls.length; renderLb(); }
+function closeLb(){ document.querySelectorAll('.lbox').forEach(x=>x.remove()); }
 function carInit(id, n){
   const el = document.getElementById(id); if (!el) return;
   el._n = n; carLayout(id);
@@ -296,6 +334,7 @@ function carLayout(id){
   const dots = document.getElementById(id + '-d');
   if (dots) [...dots.children].forEach((d, i) => d.classList.toggle('on', i === st.i));
 }
+function carClick(id, i){ const el=document.getElementById(id); const st=carState(id); if (st.i===i && el._urls && el._urls[i]) openLightbox(el._urls, i); else carGo(id, i); }
 function carGo(id, i){ const el = document.getElementById(id); if (!el) return; const st = carState(id); st.i = Math.max(0, Math.min((el._n||1)-1, i)); carLayout(id); }
 function carMove(id, d){ const el = document.getElementById(id); if (!el) return; carGo(id, carState(id).i + d); }
 
@@ -340,7 +379,8 @@ function reviewCard(r){
   return `<div class="review"><div class="h"><span class="stars">${stars(r.rating)}</span><span class="who">${esc(r.author_name)} · ${esc((r.created_at||'').slice(0,10))}</span></div>
     ${r.title?`<div style="font-weight:700;margin-top:7px">${esc(r.title)}</div>`:''}
     <div style="color:#cfc9bb;margin-top:5px;font-size:13px">${esc(r.body)}</div>
-    ${r.store_name_en?`<div class="meta" style="margin-top:7px">${ic('home',12)} ${esc(r['store_name_'+LANG]||r.store_name_en)}</div>`:''}</div>`;
+    ${r.store_name_en?`<div class="meta" style="margin-top:7px">${ic('home',12)} ${esc(r['store_name_'+LANG]||r.store_name_en)}</div>`:''}
+    ${r.reply_body?`<div style="margin-top:10px;background:var(--bg3);border-left:2px solid var(--gold);border-radius:0 8px 8px 0;padding:10px 12px"><div style="font-size:11px;color:var(--gold2);margin-bottom:4px">${r.reply_role==='store'?t('reply_from_store'):r.reply_role==='cast'?t('reply_from_cast'):t('reply_from_site')} · ${esc(r.reply_by||'')}</div><div style="font-size:13px;color:#d9d4c7">${esc(r.reply_body)}</div></div>`:''}</div>`;
 }
 function eventCard(e){
   const today = new Date().toISOString().slice(0,10);
@@ -375,13 +415,14 @@ async function pageHome(){
   <section class="sec"><h2><em>◆</em>${t('pop_girls')}</h2><span class="more" onclick="go('casts')">${t('view')} →</span><div class="grid">${casts.slice(0,6).map(castCard).join('')||`<div class="empty">—</div>`}</div></section>
   <section class="sec"><h2><em>◆</em>${t('tonight')}</h2><span class="more" onclick="go('events')">${t('view')} →</span><div class="grid">${events.slice(0,4).map(eventCard).join('')||`<div class="empty">—</div>`}</div></section>
   <section class="sec"><h2><em>◆</em>${t('sp_coupons')}</h2><span class="more" onclick="go('coupons')">${t('view')} →</span><div class="grid">${coupons.slice(0,4).map(couponCard).join('')||`<div class="empty">—</div>`}</div></section>
-  <section class="sec"><h2><em>◆</em>${t('latest_rev')}</h2><div style="display:flex;align-items:baseline;gap:12px;margin-top:10px"><span class="big-rating">${summary.avg}</span><span class="stars" style="font-size:20px">${stars(summary.avg)}</span><span style="color:var(--sub)">(${summary.cnt})</span></div>
+  <section class="sec" id="latest-reviews"><h2><em>◆</em>${t('latest_rev')}</h2><div style="display:flex;align-items:baseline;gap:12px;margin-top:10px"><span class="big-rating">${summary.avg}</span><span class="stars" style="font-size:20px">${stars(summary.avg)}</span><span style="color:var(--sub)">(${summary.cnt})</span></div>
     <div style="margin-top:12px">${reviews.slice(0,3).map(reviewCard).join('')||`<div class="empty">—</div>`}
     <div style="margin-top:16px"><button type="button" class="btn ghost" onclick="reviewPicker()">${ic('pen',14)} ${t('write_review')}</button></div></section>
   <section class="sec"><h2><em>◆</em>${t('guide')}</h2><div class="grid">${blogs.slice(0,3).map(b=>`<div class="card" onclick="go('blog','${b.slug}')"><div class="ph" style="height:118px;background:${grad(b.hue)}">${ic('book',32)}</div><div class="bd"><span class="tag g">${esc(b.category||'')}</span><h3 style="margin-top:7px">${esc(L(b,'title'))}</h3><div class="meta">${esc(b.seo_description||'')}</div></div></div>`).join('')}</div></section>
   <section class="sec" style="text-align:center;padding:34px 0"><h2 style="font-size:27px">${t('find_perfect')}</h2><button type="button" class="btn" style="margin-top:16px;padding:15px 44px" onclick="go('stores')">${t('find_club')}</button></section>
   </div>`;
 }
+function goLatestReviews(){ go('home'); setTimeout(()=>{ const el=document.getElementById('latest-reviews'); if(el) el.scrollIntoView({behavior:'smooth'}); }, 350); }
 function doSearch(sq, sa, sg, sb){
   const p = new URLSearchParams();
   const v = id => document.getElementById(id);
@@ -408,7 +449,7 @@ async function pageStores(qs){
       <select id="sb2"><option value="">${t('budget')} — ${t('all')}</option>${[['0-50000','b1'],['50000-100000','b2'],['100000-','b3']].map(b=>`<option value="${b[0]}" ${cur.get('budget')===b[0]?'selected':''}>${t(b[1])}</option>`).join('')}</select>
       <button type="button" class="btn" onclick="doSearch('sq2','sa2','sg2','sb2')">${ic('search',15)} ${t('search')}</button>
     </div>
-    <div class="filters"><span class="chip ${cur.get('lang')==='en'?'on':''}" id="ce" onclick="this.classList.toggle('on')">${t('eng_ok')}</span><span class="chip ${cur.get('lang')==='zh'?'on':''}" id="cz" onclick="this.classList.toggle('on')">${t('zh_ok')}</span><span class="chip ${cur.get('foreigner')==='1'?'on':''}" id="cf" onclick="this.classList.toggle('on')">${t('fw')}</span><span class="chip ${cur.get('card')==='1'?'on':''}" id="cc" onclick="this.classList.toggle('on')">${ic('card',12)} ${t('card_ok')}</span><span class="chip" onclick="go('stores','sort=popular')">★ ${t('reviews_of')}</span></div>
+    <div class="filters"><span class="chip ${cur.get('lang')==='en'?'on':''}" id="ce" onclick="this.classList.toggle('on')">${t('eng_ok')}</span><span class="chip ${cur.get('lang')==='zh'?'on':''}" id="cz" onclick="this.classList.toggle('on')">${t('zh_ok')}</span><span class="chip ${cur.get('foreigner')==='1'?'on':''}" id="cf" onclick="this.classList.toggle('on')">${t('fw')}</span><span class="chip ${cur.get('card')==='1'?'on':''}" id="cc" onclick="this.classList.toggle('on')">${ic('card',12)} ${t('card_ok')}</span><span class="chip" onclick="goLatestReviews()">★ ${t('reviews_of')}</span></div>
   </div>
   <div class="grid" style="margin-top:16px">${stores.map(storeCard).join('')||`<div class="empty">—</div>`}</div></section></div>`;
 }
@@ -472,7 +513,7 @@ async function pageStore(id){
   <div class="fixed-cta">
     ${s.line_url?`<a class="btn ghost notranslate" href="${esc(s.line_url)}" target="_blank" rel="noopener" translate="no">LINE</a>`:''}
     <button type="button" class="btn ghost" onclick="fav('store',${s.id})">${ic('heart',15)}</button>
-    <button type="button" class="btn" onclick="contactStore(${s.id},'${esc(L(s,'name')).replace(/'/g,'')}')">${ic('message',14)} ${t('message')}</button>
+    <button type="button" class="btn" onclick="contactStore(${s.id},'${esc(L(s,'name')).replace(/'/g,'')}')">${ic('message',14)} ${t('chat_club')}</button>
     ${s.reservation_ok?`<button type="button" class="btn" onclick="contactStore(${s.id},'${esc(L(s,'name')).replace(/'/g,'')}')">${t('reserve')}</button>`:''}
   </div>`;
 }
@@ -516,32 +557,45 @@ async function pageCast(id){
   ${c.others && c.others.length ? `<section class="sec"><h2><em>◆</em>${t('other_cast')}</h2><div class="grid">${c.others.map(castCard).join('')}</div></section>` : ''}
   </div>
   <div class="fixed-cta"><button type="button" class="btn ghost" onclick="fav('cast',${c.id})">${ic('heart',15)}</button>
-  <button type="button" class="btn" onclick="contactStore(${c.store_id},'${esc((c['store_name_'+LANG]||c.store_name_en)).replace(/'/g,'')}',${c.id})">${ic('message',14)} ${t('message')}</button>
+  <button type="button" class="btn" onclick="contactStore(${c.store_id},'${esc((c['store_name_'+LANG]||c.store_name_en)).replace(/'/g,'')}',${c.id})">${ic('message',14)} ${t('chat_club')}</button>
   <button type="button" class="btn ghost" onclick="go('store',${c.store_id})">${t('visit_club')}</button></div>`;
 }
 /* ---- キャスト検索 (詳細フィルター) ---- */
 const CAST_OPTS = {
-  bust: ['〜79','80〜84','85〜89','90〜94','95〜'],
-  birthplace: ['東京','神奈川','埼玉','千葉','大阪','その他'],
-  style_type: ['清楚','ギャル','モデル','お姉さん','可愛い','癒やし'],
-  alcohol: ['強い','普通','弱い','飲めない'],
-  skill: ['ベテラン','経験者','初心者','未経験'],
+  bust: ['B','C','D','E','F','G','H以上'],
+  birthplace: ['北海道・東北','関東','信越・北陸','東海','関西','中国','四国','九州・沖縄','海外'],
+  style_type: ['綺麗','セクシー','ギャル','童顔','ハーフ顔'],   /* 表示「系統」(内部キー style_type) */
+  alcohol: ['強い','飲む','飲めない'],
+  skill: ['話し上手','聞き上手','盛り上げ上手','接待上手','ゴルフ'],
   face: ['綺麗系','可愛い系','クール系','癒やし系','ハーフ系'],
-  body_style: ['スレンダー','普通','グラマー','モデル体型'],
-  hair: ['ロング','ミディアム','ショート','ボブ']
+  body_style: ['スレンダー','普通','グラマー','モデル体型'],    /* 表示「スタイル」 */
+  hair: ['ショート','ミディアム','ロング'],
+  langs: ['日本語','英語','中国語']
 };
-const CAST_MAIN = ['height','bust','style_type','face'];   /* 常時表示 */
-const CAST_MORE = ['birthplace','alcohol','skill','body_style','hair']; /* さらに条件 */
 let CAST_F = {};
 function chipGroup(key, values){
-  return `<div class="flt-group"><div class="flt-title">${t('f_'+key)}</div><div class="flt-chips">
-    ${values.map(v=>`<span class="chip ${CAST_F[key]===v?'on':''}" onclick="castChip('${key}','${esc(v)}')">${esc(v)}</span>`).join('')}</div></div>`;
+  const sel = CAST_F[key] || [];
+  return `<div class="flt-group"><div class="flt-title">${key==='langs'?t('f_lang'):t('f_'+key)}</div><div class="flt-chips">
+    ${values.map(v=>`<span class="chip ${sel.includes(v)?'on':''}" onclick="castChip('${key}','${esc(v)}')">${esc(v)}</span>`).join('')}</div></div>`;
 }
-function castChip(k, v){ CAST_F[k] = (CAST_F[k] === v) ? undefined : v; renderCastList(); }
-function castSel(k, v){ CAST_F[k] = v || undefined; renderCastList(); }
+/* 複数選択対応: 押すと選択/解除、即時で検索へ反映 */
+function castChip(k, v){
+  const cur = CAST_F[k] || [];
+  CAST_F[k] = cur.includes(v) ? cur.filter(x=>x!==v) : cur.concat([v]);
+  if (!CAST_F[k].length) delete CAST_F[k];
+  document.querySelectorAll(`.flt-chips .chip`).forEach(c => {
+    if (c.textContent === v && c.closest('.flt-group').querySelector('.flt-title').textContent) c.classList.toggle('on', (CAST_F[k]||[]).includes(v));
+  });
+  renderCastList();
+}
+function castSel(k, v){ if(v) CAST_F[k]=[v]; else delete CAST_F[k]; renderCastList(); }
 async function renderCastList(){
   const p = new URLSearchParams();
-  Object.entries(CAST_F).forEach(([k, v]) => { if (v !== undefined && v !== '') p.set(k, v); });
+  Object.entries(CAST_F).forEach(([k, v]) => {
+    if (k === '_hr') return;
+    if (k === 'langs') { const arr = v||[]; if (arr.includes('英語')) p.set('lang','en'); else if (arr.includes('中国語')) p.set('lang','zh'); return; }
+    if (Array.isArray(v) && v.length) p.set(k, v[0]); /* サーバーは先頭値で絞込(後方互換) */
+  });
   const cs = await API('/api/casts?' + p.toString());
   const el = document.getElementById('cast-results');
   if (el) el.innerHTML = cs.map(castCard).join('') || `<div class="empty">—</div>`;
@@ -554,10 +608,10 @@ async function pageCasts(){
     <div class="flt-group"><div class="flt-title">${t('f_area')}</div>
       <select style="max-width:100%" onchange="castSel('area',this.value)"><option value="">${t('all')}</option>${areas.map(a=>`<option value="${a.id}">${esc(L(a,'name'))}</option>`).join('')}</select></div>
     <div class="flt-group"><div class="flt-title">${t('f_height')}</div><div class="flt-chips">
-      ${[['0-155','f_h1'],['156-160','f_h2'],['161-165','f_h3'],['166-999','f_h4']].map(h=>`<span class="chip" id="hchip" onclick="castHeight('${h[0]}',this)">${t(h[1])}</span>`).join('')}</div></div>
+      ${[['0-149','h1'],['150-159','h2'],['160-169','h3'],['170-999','h4']].map(h=>`<span class="chip" onclick="castHeight('${h[0]}',this)">${t(h[1])}</span>`).join('')}</div></div>
     ${chipGroup('bust', CAST_OPTS.bust)}${chipGroup('style_type', CAST_OPTS.style_type)}${chipGroup('face', CAST_OPTS.face)}
     <div id="more-filters" style="display:none">
-      ${chipGroup('birthplace', CAST_OPTS.birthplace)}${chipGroup('alcohol', CAST_OPTS.alcohol)}${chipGroup('skill', CAST_OPTS.skill)}${chipGroup('body_style', CAST_OPTS.body_style)}${chipGroup('hair', CAST_OPTS.hair)}
+      ${chipGroup('birthplace', CAST_OPTS.birthplace)}${chipGroup('alcohol', CAST_OPTS.alcohol)}${chipGroup('skill', CAST_OPTS.skill)}${chipGroup('body_style', CAST_OPTS.body_style)}${chipGroup('hair', CAST_OPTS.hair)}${chipGroup('langs', CAST_OPTS.langs)}
     </div>
     <button type="button" class="more-toggle" id="more-btn" onclick="toggleMore()">${t('more_filters')}</button>
     <div class="row" style="margin-top:14px"><button type="button" class="btn ghost" onclick="CAST_F={};renderCastList();document.querySelectorAll('#more-filters .chip,.flt-chips .chip').forEach(c=>c.classList.remove('on'))">${t('clear')}</button>
@@ -664,16 +718,18 @@ function reviewModal(storeId, castId, targetName){
     <button type="button" class="btn" style="width:100%" onclick="submitReview(${storeId},${castId||null},this)">${t('submit')}</button>`);
 }
 function submitReview(storeId, castId, btn){
+  if (btn.disabled) return; btn.disabled = true; btn.textContent = '...';
   API('/api/reviews',{method:'POST',body:JSON.stringify({ store_id: storeId, cast_id: castId,
     rating:+document.getElementById('rv-r').value, author_name:document.getElementById('rv-n').value,
     title:document.getElementById('rv-t').value, body:document.getElementById('rv-b').value, language:LANG })})
   .then(()=>{ btn.closest('.modal').remove(); toast(t('review_saved')); });
 }
+function pwToggle(id, btn){ const el = document.getElementById(id); const show = el.type === 'password'; el.type = show ? 'text' : 'password'; btn.innerHTML = ic(show ? 'eyeOff' : 'eye', 17); }
 function loginModal(){
   modal(`<h3>${t('login')} / ${t('register')}</h3>
   <div class="field"><label>Name (${t('register')})</label><input id="au-n"></div>
   <div class="field"><label>Email</label><input id="au-e" type="email"></div>
-  <div class="field"><label>Password</label><input id="au-p" type="password"></div>
+  <div class="field"><label>Password</label><div class="pw"><input id="au-p" type="password"><button type="button" class="eye" onclick="pwToggle('au-p',this)">${ic('eye',17)}</button></div></div>
   <div class="row"><button type="button" class="btn" onclick="authDo('login')">${t('login')}</button><button type="button" class="btn ghost" onclick="authDo('register')">${t('register')}</button></div>`);
 }
 async function authDo(mode){

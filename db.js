@@ -161,6 +161,15 @@ addCol('stores', 'images', 'TEXT');           // 店舗写真(複数, JSON配列
 addCol('reviews', 'cast_id', 'INTEGER');      // キャスト口コミ用
 ['photos','bust','birthplace','style_type','alcohol','skill','face','body_style','hair']
   .forEach(c => addCol('casts', c, 'TEXT'));  // 複数写真 + 絞り込み検索項目
+/* V4 追加カラム (冪等) */
+addCol('casts', 'sns_tiktok', 'TEXT');
+addCol('casts', 'sns_x', 'TEXT');
+addCol('users', 'cast_id', 'INTEGER');        // キャストアカウントの紐付け
+addCol('messages', 'conversation_id', 'TEXT');
+addCol('reviews', 'reply_body', 'TEXT');
+addCol('reviews', 'reply_by', 'TEXT');
+addCol('reviews', 'reply_role', 'TEXT');
+addCol('reviews', 'reply_at', 'TEXT');
 
 /* ---------- seed ---------- */
 const areaCount = db.prepare('SELECT COUNT(*) c FROM areas').get().c;
@@ -208,14 +217,28 @@ if (areaCount === 0) {
     260,'club','東京都豊島区西池袋1-20-5','https://maps.google.com/?q=Ikebukuro+Tokyo','19:00 - 01:00','年中無休','03-1234-0006','','','',12000,35000,'¥6,000','15%','Cash, VISA, Master',1,1,1,1,1,22,0,6);
 
   const insCast = db.prepare(`INSERT INTO casts (store_id,name,display_name,photo,photos,hue,profile_ja,profile_en,profile_zh,height,hobbies,favorites,languages,english_ok,chinese_ok,recommend_ja,recommend_en,recommend_zh,sns_instagram,is_popular,sort_order,status,bust,birthplace,style_type,alcohol,skill,face,body_style,hair) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
-  insCast.run(1,'美咲','MISAKI','','[]',330,'六本木店No.1。英語ペラペラで海外のお客様に大人気。','No.1 at Roppongi. Fluent in English and loved by international guests.','六本木店No.1。英语流利，深受海外客人喜爱。',162,'旅行・ワイン','シャンパン','ja,en',1,0,'英語OK! 笑顔が素敵な人気キャスト','English OK! Beloved for her smile','会说英语！以笑容著称的人气公关','https://instagram.com/misaki',1,1,'published','85〜89','東京','清楚','強い','経験者','綺麗系','スレンダー','ロング');
-  insCast.run(1,'麗奈','REINA','','[]',320,'中国語対応可能。落ち着いた大人の魅力。','Speaks Chinese. A calm, mature charm.','会中文。成熟稳重的魅力。',158,'カラオケ','日本酒','ja,zh',0,1,'中国語OKのおすすめキャスト','Recommended: Chinese OK','推荐：会中文','',1,2,'published','80〜84','神奈川','お姉さん','普通','ベテラン','クール系','普通','ミディアム');
-  insCast.run(1,'あんな','ANNA','','[]',340,'明るく元気なムードメーカー。','A bright, cheerful mood-maker.','开朗活泼的气氛担当。',160,'ダンス','カクテル','ja',0,0,'ノリの良さNo.1','Best energy in the club','气氛最好的公关','',0,3,'published','70〜79','埼玉','ギャル','強い','初心者','可愛い系','普通','ミディアム');
-  insCast.run(2,'さくら','SAKURA','','[]',350,'歌舞伎町の癒やし系。英語勉強中。','The soothing presence of Kabukicho. Studying English.','歌舞伎町的治愈系。正在学习英语。',155,'読書','紅茶','ja',0,0,'優しい接客でリピート多数','Gentle service, many repeat guests','服务温柔，回头客众多','',1,1,'published','80〜84','千葉','癒やし','弱い','経験者','癒やし系','スレンダー','ロング');
-  insCast.run(2,'りん','RIN','','[]',10,'元モデルのスタイル抜群キャスト。','Former model with stunning style.','前模特，身材出众。',168,'ヨガ','ワイン','ja,en',1,0,'スタイル抜群!','Amazing style','身材超棒！','',1,2,'published','85〜89','東京','モデル','普通','経験者','綺麗系','モデル体型','ロング');
-  insCast.run(3,'ゆり','YURI','','[]',45,'銀座の高級感あふれるキャスト。英語・中国語OK。','Elegant Ginza cast. English & Chinese OK.','银座的高贵公关。会英语和中文。',163,'ゴルフ','シャンパン','ja,en,zh',1,1,'トリリンガルの高級キャスト','Trilingual premium cast','会三种语言的高级公关','',1,1,'published','85〜89','東京','清楚','普通','ベテラン','綺麗系','スレンダー','ミディアム');
-  insCast.run(4,'もも','MOMO','','[]',300,'渋谷の元気印!英語OK。','Shibuya’s bundle of energy! English OK.','涩谷的元气担当！会英语。',157,'ショッピング','スイーツ','ja,en',1,0,'初めての方におすすめ','Great for first-timers','推荐初次体验的客人','',1,1,'published','90〜94','大阪','可愛い','強い','初心者','可愛い系','グラマー','ボブ');
-  insCast.run(6,'なな','NANA','','[]',260,'池袋の人気者。中国語対応。','Ikebukuro favorite. Chinese OK.','池袋的人气公关。会中文。',159,'アニメ','焼酎','ja,zh',0,1,'中国語OK','Chinese OK','会中文','',1,1,'published','80〜84','東京','可愛い','普通','未経験','ハーフ系','普通','ショート');
+  insCast.run(1,'美咲','MISAKI','','[]',330,'六本木店No.1。英語ペラペラで海外のお客様に大人気。','No.1 at Roppongi. Fluent in English and loved by international guests.','六本木店No.1。英语流利，深受海外客人喜爱。',162,'旅行・ワイン','シャンパン','ja,en',1,0,'英語OK! 笑顔が素敵な人気キャスト','English OK! Beloved for her smile','会说英语！以笑容著称的人气公关','https://instagram.com/misaki',1,1,'published','D','関東','綺麗','強い','話し上手','綺麗系','スレンダー','ロング');
+  insCast.run(1,'麗奈','REINA','','[]',320,'中国語対応可能。落ち着いた大人の魅力。','Speaks Chinese. A calm, mature charm.','会中文。成熟稳重的魅力。',158,'カラオケ','日本酒','ja,zh',0,1,'中国語OKのおすすめキャスト','Recommended: Chinese OK','推荐：会中文','',1,2,'published','C','関東','セクシー','飲む','聞き上手','クール系','普通','ミディアム');
+  insCast.run(1,'あんな','ANNA','','[]',340,'明るく元気なムードメーカー。','A bright, cheerful mood-maker.','开朗活泼的气氛担当。',160,'ダンス','カクテル','ja',0,0,'ノリの良さNo.1','Best energy in the club','气氛最好的公关','',0,3,'published','B','関東','ギャル','強い','盛り上げ上手','可愛い系','普通','ミディアム');
+  insCast.run(2,'さくら','SAKURA','','[]',350,'歌舞伎町の癒やし系。英語勉強中。','The soothing presence of Kabukicho. Studying English.','歌舞伎町的治愈系。正在学习英语。',155,'読書','紅茶','ja',0,0,'優しい接客でリピート多数','Gentle service, many repeat guests','服务温柔，回头客众多','',1,1,'published','C','関東','童顔','飲めない','聞き上手','癒やし系','スレンダー','ロング');
+  insCast.run(2,'りん','RIN','','[]',10,'元モデルのスタイル抜群キャスト。','Former model with stunning style.','前模特，身材出众。',168,'ヨガ','ワイン','ja,en',1,0,'スタイル抜群!','Amazing style','身材超棒！','',1,2,'published','D','関東','綺麗','飲む','接待上手','綺麗系','モデル体型','ロング');
+  insCast.run(3,'ゆり','YURI','','[]',45,'銀座の高級感あふれるキャスト。英語・中国語OK。','Elegant Ginza cast. English & Chinese OK.','银座的高贵公关。会英语和中文。',163,'ゴルフ','シャンパン','ja,en,zh',1,1,'トリリンガルの高級キャスト','Trilingual premium cast','会三种语言的高级公关','',1,1,'published','D','関東','綺麗','飲む','ゴルフ','綺麗系','スレンダー','ミディアム');
+  insCast.run(4,'もも','MOMO','','[]',300,'渋谷の元気印!英語OK。','Shibuya’s bundle of energy! English OK.','涩谷的元气担当！会英语。',157,'ショッピング','スイーツ','ja,en',1,0,'初めての方におすすめ','Great for first-timers','推荐初次体验的客人','',1,1,'published','F','関西','ギャル','強い','盛り上げ上手','可愛い系','グラマー','ボブ');
+  insCast.run(6,'なな','NANA','','[]',260,'池袋の人気者。中国語対応。','Ikebukuro favorite. Chinese OK.','池袋的人气公关。会中文。',159,'アニメ','焼酎','ja,zh',0,1,'中国語OK','Chinese OK','会中文','',1,1,'published','C','海外','ハーフ顔','飲む','話し上手','ハーフ系','普通','ショート');
+  /* テスト用仮画像 (Cloudinaryの公式サンプル画像を使用・管理画面から差替え可能) */
+  const DP = 'https://res.cloudinary.com/demo/image/upload/w_900,h_620,c_fill/';
+  const S1 = JSON.stringify([DP + 'sample.jpg', DP + 'sample2.jpg', DP + 'samples/food/spices.jpg']);
+  const S2 = JSON.stringify([DP + 'samples/landscapes/beach-boat.jpg', DP + 'sample.jpg', DP + 'samples/food/dessert.jpg']);
+  const S3 = JSON.stringify([DP + 'samples/landscapes/nature-mountains.jpg', DP + 'samples/food/pot-mussels.jpg', DP + 'sample2.jpg']);
+  const C1 = JSON.stringify([DP + 'sample.jpg', DP + 'samples/animals/cat.jpg', DP + 'samples/people/bicycle.jpg', DP + 'sample2.jpg']);
+  const C2 = JSON.stringify([DP + 'sample2.jpg', DP + 'samples/people/smiling-man.jpg', DP + 'samples/food/spices.jpg']);
+  db.prepare("UPDATE stores SET images=? WHERE id IN (1,2)").run(S1);
+  db.prepare("UPDATE stores SET images=? WHERE id IN (3,4)").run(S2);
+  db.prepare("UPDATE stores SET images=? WHERE id IN (5,6)").run(S3);
+  [1,2,3].forEach(i => db.prepare("UPDATE casts SET photos=? WHERE id=?").run(C1, i));
+  [4,5,6,7,8].forEach(i => db.prepare("UPDATE casts SET photos=? WHERE id=?").run(C2, i));
+  db.prepare("UPDATE events SET image=?").run(DP + 'samples/landscapes/beach-boat.jpg');
+  db.prepare("UPDATE coupons SET image=?").run(DP + 'samples/food/dessert.jpg');
 
   const insReview = db.prepare(`INSERT INTO reviews (store_id,author_name,rating,rating_service,rating_atmosphere,rating_price,rating_cast,rating_foreigner,title,body,visit_date,language,status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`);
   insReview.run(1,'Michael (USA)',5,5,5,4,5,5,'Amazing night in Roppongi!','Staff spoke perfect English and made everything easy. The girls were friendly and the atmosphere was luxurious. Highly recommended for foreigners!', '2026-08-10','en','approved');
@@ -255,10 +278,13 @@ if (areaCount === 0) {
     '从预约到结账，介绍日本俱乐部的流程。\n\n1. 预约或直接到店\n2. 入座\n3. 与公关聊天\n4. 结账',
     'How to Enjoy Japanese Clubs | Tokyo Nightlife Guide','Step-by-step guide to enjoying clubs in Japan.',320,'published');
 
-  /* admin + demo user */
-  const insUser = db.prepare('INSERT INTO users (name,email,password_hash,country,language,role) VALUES (?,?,?,?,?,?)');
-  insUser.run('Administrator','admin@tng.jp',hashPassword('admin123'),'JP','ja','admin');
-  insUser.run('Demo User','user@tng.jp',hashPassword('user123'),'US','en','user');
+  /* admin + demo accounts */
+  const insUser = db.prepare('INSERT INTO users (name,email,password_hash,country,language,role,store_id,cast_id) VALUES (?,?,?,?,?,?,?,?)');
+  insUser.run('Administrator','admin@tng.jp',hashPassword(process.env.ADMIN_INITIAL_PASSWORD || 'admin123'),'JP','ja','admin',null,null);
+  insUser.run('Demo User','user@tng.jp',hashPassword('user123'),'US','en','user',null,null);
+  insUser.run('VELVET Club Admin','club1@tng.jp',hashPassword('club123'),'JP','ja','store',1,null);
+  insUser.run('KOHAKU Club Admin','club2@tng.jp',hashPassword('club123'),'JP','ja','store',2,null);
+  insUser.run('MISAKI (Cast)','cast1@tng.jp',hashPassword('cast123'),'JP','ja','cast',1,1);
 
   const insSet = db.prepare('INSERT INTO settings (key,value) VALUES (?,?)');
   [['site_name','Tokyo Nightlife Guide'],['site_name_ja','東京ナイトライフガイド'],['site_name_zh','东京夜生活指南'],
@@ -272,7 +298,25 @@ if (areaCount === 0) {
 
 /* ---------- migration: 旧ジャンル値→新体系 (冪等・既存データ互換) ---------- */
 db.exec("UPDATE stores SET genre='cabaret' WHERE genre IN ('cabaret','cabaret')");
-db.exec("UPDATE stores SET genre='club' WHERE genre='club'");
+db.exec("UPDATE stores SET genre='club' WHERE genre='casual'");
+
+/* V4 migrations (冪等・既存データ保持) */
+db.exec("UPDATE casts SET birthplace='関東' WHERE birthplace IN ('東京','神奈川','埼玉','千葉')");
+db.exec("UPDATE casts SET birthplace='関西' WHERE birthplace IN ('大阪','京都','兵庫')");
+db.exec("UPDATE casts SET style_type='綺麗' WHERE style_type IN ('清楚','モデル','お姉さん')");
+db.exec("UPDATE casts SET style_type='童顔' WHERE style_type IN ('可愛い','癒やし')");
+db.exec("UPDATE casts SET alcohol='飲む' WHERE alcohol='普通'");
+db.exec("UPDATE casts SET alcohol='飲めない' WHERE alcohol='弱い'");
+db.exec("UPDATE casts SET skill='接待上手' WHERE skill IN ('ベテラン','経験者')");
+db.exec("UPDATE casts SET skill='話し上手' WHERE skill IN ('初心者','未経験')");
+db.exec("UPDATE casts SET hair='ミディアム' WHERE hair='ボブ'");
+db.exec("UPDATE casts SET bust='B' WHERE bust='〜79'");
+db.exec("UPDATE casts SET bust='C' WHERE bust='80〜84'");
+db.exec("UPDATE casts SET bust='D' WHERE bust='85〜89'");
+db.exec("UPDATE casts SET bust='F' WHERE bust='90〜94'");
+db.exec("UPDATE casts SET bust='H以上' WHERE bust='95〜'");
+db.exec("UPDATE messages SET conversation_id='u'||user_id||'-c'||cast_id WHERE conversation_id IS NULL AND cast_id IS NOT NULL");
+db.exec("UPDATE messages SET conversation_id='u'||user_id||'-s'||store_id WHERE conversation_id IS NULL AND store_id IS NOT NULL");
 
 module.exports = { db, hashPassword, verifyPassword };
 

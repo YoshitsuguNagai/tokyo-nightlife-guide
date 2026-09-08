@@ -48,10 +48,23 @@ function auth(req, res, next) {
   if (!row || row.is_blocked) return res.status(401).json({ error: 'unauthorized' });
   req.user = row; next();
 }
+function staffOnly(req, res, next) {
+  if (!['admin','store','cast'].includes(req.user.role)) return res.status(403).json({ error: 'forbidden' });
+  next();
+}
 function adminOnly(req, res, next) {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   next();
 }
+/* リソース所有権チェック: admin=全権限 / store=自店舗のみ / cast=自分のみ */
+const owns = {
+  stores:  (u,id)=> u.role==='admin' || (u.role==='store' && u.store_id===id),
+  casts:   (u,id)=>{ if(u.role==='admin')return true; const c=db.prepare('SELECT store_id FROM casts WHERE id=?').get(id); if(!c)return false; return (u.role==='store'&&u.store_id===c.store_id)||(u.role==='cast'&&u.cast_id===id); },
+  reviews: (u,id)=>{ if(u.role==='admin')return true; const r=db.prepare('SELECT store_id,cast_id FROM reviews WHERE id=?').get(id); if(!r)return false; if(u.role==='store')return r.store_id===u.store_id; if(u.role==='cast')return r.cast_id===u.cast_id; return false; },
+  events:  (u,id)=>{ if(u.role==='admin')return true; const r=db.prepare('SELECT store_id FROM events WHERE id=?').get(id); return !!(r&&u.role==='store'&&u.store_id===r.store_id); },
+  coupons: (u,id)=>{ if(u.role==='admin')return true; const r=db.prepare('SELECT store_id FROM coupons WHERE id=?').get(id); return !!(r&&u.role==='store'&&u.store_id===r.store_id); }
+};
+const convId = (uid, sid, cid) => cid ? `u${uid}-c${cid}` : `u${uid}-s${sid}`;
 
 /* ---------- utils ---------- */
 const clean = s => String(s ?? '').slice(0, 8000);
@@ -210,12 +223,12 @@ app.post('/api/auth/login', (req, res) => {
   const u = db.prepare('SELECT * FROM users WHERE email=?').get(clean(req.body.email).toLowerCase());
   if (!u || !verifyPassword(String(req.body.password), u.password_hash) || u.is_blocked)
     return res.status(401).json({ error: 'invalid credentials' });
-  res.json({ token: makeToken(u.id), user: { id: u.id, name: u.name, email: u.email, role: u.role, language: u.language } });
+  res.json({ token: makeToken(u.id), user: { id: u.id, name: u.name, email: u.email, role: u.role, language: u.language, store_id: u.store_id, cast_id: u.cast_id } });
 });
 app.get('/api/me', auth, (req, res) => {
   const u = req.user;
   res.json({
-    id: u.id, name: u.name, email: u.email, country: u.country, language: u.language, role: u.role,
+    id: u.id, name: u.name, email: u.email, country: u.country, language: u.language, role: u.role, store_id: u.store_id, cast_id: u.cast_id,
     favorites: db.prepare('SELECT * FROM favorites WHERE user_id=?').all(u.id),
     coupons: db.prepare(`SELECT uc.id uid, c.* FROM user_coupons uc JOIN coupons c ON c.id=uc.coupon_id WHERE uc.user_id=?`).all(u.id),
     messages: db.prepare('SELECT * FROM messages WHERE user_id=? ORDER BY created_at DESC').all(u.id)
@@ -241,6 +254,36 @@ app.post('/api/messages', auth, (req, res) => {
   db.prepare(`INSERT INTO messages (user_id,store_id,cast_id,direction,body,lang_original,body_ja,body_en,body_zh) VALUES (?,?,?,'user_to_store',?,?,?,?,?)`)
     .run(req.user.id, int(store_id), int(cast_id) || null, clean(body), lang,
       naiveTranslate(body, lang, 'ja'), naiveTranslate(body, lang, 'en'), naiveTranslate(body, lang, 'zh'));
+  const cid = convId(req.user.id, int(store_id), int(cast_id));
+  db.prepare('UPDATE messages SET conversation_id=? WHERE id=last_insert_rowid()').run(cid);
+  res.json({ ok: true });
+});
+/* 会話スレッド取得 (本人 or 権限者のみ) */
+app.get('/api/messages/thread', auth, (req, res) => {
+  const cid = clean(req.query.cid || '');
+  const m = /^u(\d+)-([sc])(\d+)$/.exec(cid);
+  if (!m) return res.status(400).json({ error: 'bad cid' });
+  const uid = int(m[1]), sid = int(m[3]);
+  const u = req.user;
+  const allowed = u.role==='admin' || u.id===uid ||
+    (m[2]==='s' && u.role==='store' && u.store_id===sid) ||
+    (m[2]==='c' && u.role==='cast' && u.cast_id===sid);
+  if (!allowed) return res.status(403).json({ error: 'forbidden' });
+  const rows = db.prepare('SELECT * FROM messages WHERE conversation_id=? ORDER BY created_at').all(cid);
+  db.prepare(`UPDATE messages SET is_read=1 WHERE conversation_id=? AND direction='user_to_store'`).run(cid); // 店側が読んだ
+  res.json(rows);
+});
+/* 口コミ公式返信 (店舗管理者/キャスト本人/Super Admin のみ) */
+app.post('/api/reviews/:id/reply', auth, staffOnly, (req, res) => {
+  const r = db.prepare('SELECT * FROM reviews WHERE id=?').get(int(req.params.id));
+  if (!r) return res.status(404).json({ error: 'not found' });
+  const u = req.user; let role = null;
+  if (u.role === 'admin') role = 'site';
+  else if (u.role === 'store' && r.store_id === u.store_id) role = 'store';
+  else if (u.role === 'cast' && r.cast_id === u.cast_id) role = 'cast';
+  if (!role) return res.status(403).json({ error: 'forbidden' });
+  db.prepare(`UPDATE reviews SET reply_body=?, reply_by=?, reply_role=?, reply_at=datetime('now') WHERE id=?`)
+    .run(clean(req.body.body), clean(u.name), role, r.id);
   res.json({ ok: true });
 });
 
@@ -259,51 +302,97 @@ const TABLES = {
   settings:['key','value']
 };
 
-app.get('/api/admin/stats', auth, adminOnly, (req, res) => {
+app.get('/api/admin/stats', auth, staffOnly, (req, res) => {
   const c = t => db.prepare(`SELECT COUNT(*) n FROM ${t}`).get().n;
   res.json({ stores: c('stores'), casts: c('casts'), users: c('users'), reviews: c('reviews'),
     pending_reviews: db.prepare(`SELECT COUNT(*) n FROM reviews WHERE status='pending'`).get().n,
-    messages: c('messages'), events: c('events'), coupons: c('coupons'), blogs: c('blogs') });
+    messages: c('messages'), events: c('events'), coupons: c('coupons'), blogs: c('blogs'),
+    unread_msgs: req.user.role==='admin' ? db.prepare(`SELECT COUNT(*) n FROM messages WHERE is_read=0 AND direction='user_to_store'`).get().n
+      : req.user.role==='store' ? db.prepare(`SELECT COUNT(*) n FROM messages WHERE is_read=0 AND direction='user_to_store' AND store_id=?`).get(req.user.store_id).n
+      : db.prepare(`SELECT COUNT(*) n FROM messages WHERE is_read=0 AND direction='user_to_store' AND cast_id=?`).get(req.user.cast_id).n });
 });
-app.get('/api/admin/:table', auth, adminOnly, (req, res) => {
-  if (!TABLES[req.params.table]) return res.status(404).json({ error: 'unknown table' });
-  let rows = db.prepare(`SELECT * FROM ${req.params.table} ORDER BY ${req.params.table === 'settings' ? 'key' : 'id DESC'} LIMIT 500`).all();
+app.get('/api/admin/:table', auth, staffOnly, (req, res) => {
+  const tbl = req.params.table;
+  if (!TABLES[tbl]) return res.status(404).json({ error: 'unknown table' });
+  if (tbl === 'settings' && req.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  if (tbl === 'users' && req.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  let rows = db.prepare(`SELECT * FROM ${tbl} ORDER BY ${tbl === 'settings' ? 'key' : 'id DESC'} LIMIT 500`).all();
+  const u = req.user;
+  if (u.role === 'store') {
+    if (tbl === 'stores') rows = rows.filter(r => r.id === u.store_id);
+    if (['casts','events','coupons','notifications'].includes(tbl)) rows = rows.filter(r => r.store_id === u.store_id);
+    if (tbl === 'reviews') rows = rows.filter(r => r.store_id === u.store_id);
+    if (tbl === 'messages') rows = rows.filter(r => r.store_id === u.store_id);
+  } else if (u.role === 'cast') {
+    if (tbl === 'casts') rows = rows.filter(r => r.id === u.cast_id);
+    if (tbl === 'reviews') rows = rows.filter(r => r.cast_id === u.cast_id);
+    if (tbl === 'messages') rows = rows.filter(r => r.cast_id === u.cast_id);
+    if (['stores','events','coupons','blogs','areas','notifications'].includes(tbl)) return res.status(403).json({ error: 'forbidden' });
+  }
   const q = req.query.q;
   if (q) { const needle = String(q).toLowerCase(); rows = rows.filter(r => JSON.stringify(r).toLowerCase().includes(needle)); }
   res.json(rows);
 });
-app.post('/api/admin/:table', auth, adminOnly, (req, res) => {
+app.post('/api/admin/:table', auth, staffOnly, (req, res) => {
   const cols = TABLES[req.params.table];
   if (!cols) return res.status(404).json({ error: 'unknown table' });
+  const tbl = req.params.table, u = req.user;
+  if (tbl === 'users' && u.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  if (tbl === 'settings' && u.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  if (u.role === 'cast' && tbl !== 'casts') return res.status(403).json({ error: 'forbidden' });
+  if (u.role === 'store' && ['blogs','areas','users','settings'].includes(tbl)) return res.status(403).json({ error: 'forbidden' });
+  if (u.role !== 'admin' && req.body.store_id && owns.stores && tbl !== 'stores') {
+    if (u.role === 'store' && int(req.body.store_id) !== u.store_id) return res.status(403).json({ error: 'forbidden' });
+  }
+  if (u.role === 'cast') req.body.store_id = (db.prepare('SELECT store_id FROM casts WHERE id=?').get(u.cast_id)||{}).store_id;
   const keys = cols.filter(k => req.body[k] !== undefined);
   if (!keys.length) return res.status(400).json({ error: 'no fields' });
-  const r = db.prepare(`INSERT INTO ${req.params.table} (${keys.join(',')}) VALUES (${keys.map(() => '?').join(',')})`)
+  const r = db.prepare(`INSERT INTO ${tbl} (${keys.join(',')}) VALUES (${keys.map(() => '?').join(',')})`)
     .run(...keys.map(k => typeof req.body[k] === 'number' ? req.body[k] : clean(req.body[k])));
   res.json({ id: r.lastInsertRowid });
 });
-app.put('/api/admin/:table/:id', auth, adminOnly, (req, res) => {
+app.put('/api/admin/:table/:id', auth, staffOnly, (req, res) => {
   const cols = TABLES[req.params.table];
   if (!cols) return res.status(404).json({ error: 'unknown table' });
+  const tbl = req.params.table, u = req.user, rid = req.params.id;
+  if (tbl === 'users' && u.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  if (tbl === 'settings' && u.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  if (u.role !== 'admin' && owns[tbl] && !owns[tbl](u, int(rid))) return res.status(403).json({ error: 'forbidden' });
+  if (u.role === 'cast' && tbl !== 'casts' && tbl !== 'reviews') return res.status(403).json({ error: 'forbidden' });
+  if (u.role === 'store' && ['blogs','areas'].includes(tbl)) return res.status(403).json({ error: 'forbidden' });
   const keys = cols.filter(k => req.body[k] !== undefined);
   if (!keys.length) return res.status(400).json({ error: 'no fields' });
-  const keyCol = req.params.table === 'settings' ? 'key' : 'id';
+  const keyCol = tbl === 'settings' ? 'key' : 'id';
   db.prepare(`UPDATE ${req.params.table} SET ${keys.map(k => k + '=?').join(',')} WHERE ${keyCol}=?`)
     .run(...keys.map(k => typeof req.body[k] === 'number' ? req.body[k] : clean(req.body[k])), req.params.id);
   res.json({ ok: true });
 });
-app.delete('/api/admin/:table/:id', auth, adminOnly, (req, res) => {
-  if (!TABLES[req.params.table]) return res.status(404).json({ error: 'unknown table' });
-  const keyCol = req.params.table === 'settings' ? 'key' : 'id';
+app.delete('/api/admin/:table/:id', auth, staffOnly, (req, res) => {
+  const tbl = req.params.table, u = req.user, rid = req.params.id;
+  if (!TABLES[tbl]) return res.status(404).json({ error: 'unknown table' });
+  if (u.role !== 'admin' && owns[tbl] && !owns[tbl](u, int(rid))) return res.status(403).json({ error: 'forbidden' });
+  if (u.role === 'cast') return res.status(403).json({ error: 'forbidden' });
+  if (u.role === 'store' && ['blogs','areas','users','settings','stores'].includes(tbl)) return res.status(403).json({ error: 'forbidden' });
+  const keyCol = tbl === 'settings' ? 'key' : 'id';
   db.prepare(`DELETE FROM ${req.params.table} WHERE ${keyCol}=?`).run(req.params.id);
   res.json({ ok: true });
 });
-app.post('/api/admin/messages/:id/reply', auth, adminOnly, (req, res) => {
+app.post('/api/admin/messages/:id/reply', auth, staffOnly, (req, res) => {
   const m = db.prepare('SELECT * FROM messages WHERE id=?').get(int(req.params.id));
   if (!m) return res.status(404).json({ error: 'not found' });
   const body = clean(req.body.body), lang = clean(req.body.lang || 'ja');
   db.prepare(`INSERT INTO messages (user_id,store_id,cast_id,direction,body,lang_original,body_ja,body_en,body_zh) VALUES (?,?,?,'store_to_user',?,?,?,?,?)`)
     .run(m.user_id, m.store_id, m.cast_id, body, lang,
       naiveTranslate(body, lang, 'ja'), naiveTranslate(body, lang, 'en'), naiveTranslate(body, lang, 'zh'));
+  res.json({ ok: true });
+});
+
+/* パスワード変更 (ログイン中のみ・平文保存なし) */
+app.post('/api/auth/password', auth, (req, res) => {
+  const u = db.prepare('SELECT * FROM users WHERE id=?').get(req.user.id);
+  if (!verifyPassword(String(req.body.current || ''), u.password_hash)) return res.status(400).json({ error: 'current password incorrect' });
+  if (!req.body.next || String(req.body.next).length < 8) return res.status(400).json({ error: 'new password must be 8+ chars' });
+  db.prepare('UPDATE users SET password_hash=? WHERE id=?').run(hashPassword(String(req.body.next)), u.id);
   res.json({ ok: true });
 });
 

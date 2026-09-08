@@ -149,3 +149,37 @@ public/uploads/    ローカル画像保存先（Cloudinary 未設定時のみ�
 - stores.images / casts.photos : 複数写真（JSON配列）
 - casts: bust, birthplace, style_type, alcohol, skill, face, body_style, hair（絞り込み検索用）
 - reviews.cast_id : キャスト口コミ識別
+
+
+---
+
+## 11. V4 追記（2026-09-08）
+
+### 新機能
+- **RBAC（3権限）**: Super Admin（全権限）/ Club Admin（自店舗のみ）/ Cast（自分のみ）。サーバー側でリソース所有権を検証し、他店舗・他キャストのデータは API レベルで 403
+- **お店とチャット**: 会話ID（u{user}-s{store} / u{user}-c{cast}）で完全分離。管理画面に未読件数バッジ表示
+- **口コミ公式返信**: Club Admin（自店舗）/ Cast（自分宛て）/ Super Admin が返信可能。サイト側に「店舗からの返信」等と明記表示
+- **ライトボックス**: カルーセルの中央写真をタップで全画面表示（左右操作・スワイプ・×/背景で閉じる）
+- **パスワード表示切替**（ログイン/新規登録）＋ 管理画面からの**パスワード変更**機能
+- キャストSNS: Instagram / TikTok / X（登録済みのみ表示）
+- キャスト検索の複数選択チップ化・言語フィルター追加・出身地9地域区分
+
+### テストアカウント（公開前に必ず削除・変更）
+| 役割 | メール | パスワード |
+|---|---|---|
+| Super Admin | admin@tng.jp | admin123 |
+| Club Admin（店舗1） | club1@tng.jp | club123 |
+| Cast（MISAKI） | cast1@tng.jp | cast123 |
+
+※ 本番では環境変数 `ADMIN_INITIAL_PASSWORD` を設定し、初回ログイン後すぐ管理画面の「パスワード変更」で変更してください。
+
+### V3→V4 データ移行
+- 既存 `data.sqlite` は削除しないでください。起動時に新カラムの自動追加（ALTER）と既存値の変換（身長・バスト・系統・会話IDなど）が冪等に実行されます
+- Renderでデータを永続化するには: Renderダッシュボード → 対象サービス →「Disks」→「Add Disk」→ Mount Path に `/opt/render/project/src/data` を指定し、環境変数は不要（db.js のパスを data/ 配下に変更する場合は `DATABASE_PATH` を利用）
+
+### 翻訳APIの本番化（推奨）
+`server.js` の `POST /api/translate` 内の `naiveTranslate` を DeepL API に差し替えてください。
+1. https://www.deepl.com/pro-api で無料アカウント作成（DeepL API Free = 月50万文字無料）
+2. アカウントページの「認証キー」をコピー
+3. Render → Environment に `DEEPL_API_KEY` として登録
+4. server.js の該当箇所で `https://api-free.deepl.com/v2/translate` へ POST する実装に差替え（1関数のみ）

@@ -74,7 +74,7 @@ input:focus,textarea:focus,select:focus{outline:1px solid var(--gold)}
 <script>
 let TOKEN = localStorage.getItem('tng_admin_token') || '';
 let VIEW = 'dashboard';
-let STATS = null, AREAS = [], STORES = [], CASTS = [];
+let STATS = null, AREAS = [], STORES = [], CASTS = [], ME_ROLE = 'admin', ME_STORE = null, ME_CAST = null;
 const API = (p, o) => fetch(p, { ...o, headers: { 'Content-Type':'application/json', Authorization:'Bearer '+TOKEN } }).then(async r => {
   if (r.status === 401) { TOKEN=''; localStorage.removeItem('tng_admin_token'); render(); throw new Error('auth'); }
   return r.json();
@@ -86,14 +86,14 @@ const ST_OPTS = { published:'公開', hidden:'非公開' };
 const BOOL_OPTS = { 1:'する', 0:'しない' };
 const PAY_OPTS = ['現金','VISA','Mastercard','AMEX','JCB','Diners','電子マネー','QR決済','その他'];
 const SEL = {
-  bust:['〜79','80〜84','85〜89','90〜94','95〜'],
-  birthplace:['東京','神奈川','埼玉','千葉','大阪','その他'],
-  style_type:['清楚','ギャル','モデル','お姉さん','可愛い','癒やし'],
-  alcohol:['強い','普通','弱い','飲めない'],
-  skill:['ベテラン','経験者','初心者','未経験'],
+  bust:['B','C','D','E','F','G','H以上'],
+  birthplace:['北海道・東北','関東','信越・北陸','東海','関西','中国','四国','九州・沖縄','海外'],
+  style_type:['綺麗','セクシー','ギャル','童顔','ハーフ顔'],
+  alcohol:['強い','飲む','飲めない'],
+  skill:['話し上手','聞き上手','盛り上げ上手','接待上手','ゴルフ'],
   face:['綺麗系','可愛い系','クール系','癒やし系','ハーフ系'],
   body_style:['スレンダー','普通','グラマー','モデル体型'],
-  hair:['ロング','ミディアム','ショート','ボブ']
+  hair:['ショート','ミディアム','ロング']
 };
 const selOpts = arr => Object.fromEntries(arr.map(v=>[v,v]));
 /* tr: 翻訳グループ。trバーは先頭の tr 項目にだけ表示 */
@@ -132,17 +132,17 @@ const F = {
   {k:'height',l:'身長（cm）',type:'number'},
   {k:'bust',l:'バスト',type:'select',opts:selOpts(SEL.bust)},
   {k:'birthplace',l:'出身地',type:'select',opts:selOpts(SEL.birthplace)},
-  {k:'style_type',l:'系統',type:'select',opts:selOpts(SEL.style_type)},
+  {k:'style_type',l:'系統（検索「系統」と連動）',type:'select',opts:selOpts(SEL.style_type)},
   {k:'alcohol',l:'お酒',type:'select',opts:selOpts(SEL.alcohol)},
   {k:'skill',l:'接待スキル',type:'select',opts:selOpts(SEL.skill)},
   {k:'face',l:'顔立ち',type:'select',opts:selOpts(SEL.face)},
-  {k:'body_style',l:'スタイル',type:'select',opts:selOpts(SEL.body_style)},
+  {k:'body_style',l:'スタイル（検索「スタイル」と連動）',type:'select',opts:selOpts(SEL.body_style)},
   {k:'hair',l:'髪型',type:'select',opts:selOpts(SEL.hair)},
   {k:'hobbies',l:'趣味'},{k:'favorites',l:'好きなもの'},
-  {k:'languages',l:'話せる言語（例: ja,en,zh）'},
+  {k:'languages',l:'対応言語（複数選択可）',type:'langchecks'},
   {k:'english_ok',l:'英語対応',type:'bool'},{k:'chinese_ok',l:'中国語対応',type:'bool'},
   {k:'recommend_ja',l:'おすすめコメント（日本語）',tr:'recommend'},{k:'recommend_en',l:'おすすめコメント（English）'},{k:'recommend_zh',l:'おすすめコメント（中文）'},
-  {k:'sns_instagram',l:'Instagram URL'},
+  {k:'sns_instagram',l:'Instagram URL'},{k:'sns_tiktok',l:'TikTok URL'},{k:'sns_x',l:'X（旧Twitter）URL'},
   {k:'is_popular',l:'人気キャストに表示',type:'bool'},{k:'sort_order',l:'掲載順',type:'number'},
   {k:'status',l:'掲載ステータス',type:'select',opts:ST_OPTS}],
  areas:[{k:'slug',l:'スラッグ（英小文字 例: roppongi）'},{k:'name_ja',l:'名前（日本語）',tr:'name'},{k:'name_en',l:'名前（English）'},{k:'name_zh',l:'名前（中文）'},{k:'sort_order',l:'表示順',type:'number'},{k:'status',l:'ステータス',type:'select',opts:ST_OPTS}],
@@ -186,16 +186,23 @@ async function render(){
   if (!TOKEN) {
     root.innerHTML = `<div class="login-wrap"><h1>◆ TNG 管理画面</h1>
       <div class="field"><label style="font-size:11px;color:var(--sub)">メールアドレス</label><input id="le" value="admin@tng.jp"></div>
-      <div class="field"><label style="font-size:11px;color:var(--sub)">パスワード</label><input id="lp" type="password" placeholder="初期: admin123（必ず変更）"></div>
+      <div class="field"><label style="font-size:11px;color:var(--sub)">パスワード</label><input id="lp" type="password"></div>
       <button class="btn" style="width:100%" onclick="login()">ログイン</button></div>`;
     return;
   }
+  const me = await API('/api/me').catch(()=>null);
+  if (!me || !['admin','store','cast'].includes(me.role)) { TOKEN=''; localStorage.removeItem('tng_admin_token'); root.innerHTML='<div class="login-wrap"><h1>◆ TNG 管理画面</h1><p style="color:#e74c3c;font-size:13px;margin-bottom:12px">管理者・店舗・キャストのアカウントでログインしてください</p><div class="field"><input id="le" placeholder="メールアドレス"></div><div class="field"><input id="lp" type="password" placeholder="パスワード"></div><button class="btn" style="width:100%" onclick="login()">ログイン</button></div>'; return; }
+  ME_ROLE = me.role; ME_STORE = me.store_id; ME_CAST = me.cast_id;
   STATS = await API('/api/admin/stats').catch(()=>null);
   if (!STATS) return;
   AREAS = await API('/api/admin/areas'); STORES = await API('/api/admin/stores'); CASTS = await API('/api/admin/casts');
-  const pend = STATS.pending_reviews || 0;
+  const pend = STATS.pending_reviews || 0, unread = STATS.unread_msgs || 0;
+  const visMenu = MENU.filter(m => ME_ROLE==='admin' ? true : ME_ROLE==='store' ? !['areas','users','blogs','settings'].includes(m[0]) : ['dashboard','casts','reviews','messages'].includes(m[0]));
+  if (!visMenu.find(m=>m[0]===VIEW)) VIEW='dashboard';
   root.innerHTML = `<div class="layout"><nav class="side"><h1>◆ <span>TNG Admin</span></h1>
-    ${MENU.map(m=>`<a class="${VIEW===m[0]?'on':''}" onclick="go('${m[0]}')">${m[1]} <span>${m[2]}</span>${m[0]==='reviews'&&pend?`<b class="pend">${pend}</b>`:''}</a>`).join('')}
+    <div style="padding:0 12px 10px;font-size:10px;color:var(--sub)">${ME_ROLE==='admin'?'Super Admin':ME_ROLE==='store'?'Club Admin':'Cast'}</div>
+    ${visMenu.map(m=>`<a class="${VIEW===m[0]?'on':''}" onclick="go('${m[0]}')">${m[1]} <span>${m[2]}</span>${m[0]==='reviews'&&pend?`<b class="pend">${pend}</b>`:''}${m[0]==='messages'&&unread?`<b class="pend" style="background:#1f5fc0">${unread}</b>`:''}</a>`).join('')}
+    <a onclick="pwChangeModal()">🔒 <span>パスワード変更</span></a>
     <a onclick="localStorage.removeItem('tng_admin_token');TOKEN='';render()">⏻ <span>ログアウト</span></a>
     <a href="/" target="_blank">↗ <span>サイトを見る</span></a></nav>
     <main class="main" id="main"></main></div>`;
@@ -217,7 +224,7 @@ function go(v){ VIEW = v; render(); }
 async function login(){
   const r = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ email: document.getElementById('le').value, password: document.getElementById('lp').value }) }).then(r=>r.json());
-  if (r.error || r.user.role !== 'admin') return toast('管理者アカウントでログインしてください');
+  if (r.error || !['admin','store','cast'].includes(r.user.role)) return toast('管理者・店舗・キャストのアカウントでログインしてください');
   TOKEN = r.token; localStorage.setItem('tng_admin_token', TOKEN); render();
 }
 const badge = s => s ? `<span class="badge ${s==='published'||s==='approved'?'pub':s==='pending'?'pen':s==='rejected'?'rej':'hide'}">${esc(({published:'公開',hidden:'非公開',approved:'承認',pending:'未承認',rejected:'非承認',draft:'下書き',sent:'送信済み'})[s]||s)}</span>` : '';
@@ -238,6 +245,7 @@ function tableHtml(table, rows){
     if (c==='__kind') return r.cast_id?`<span class="badge castbadge">キャスト</span>`:`<span class="badge storebadge">店舗</span>`;
     if (c==='__target') return r.cast_id?esc((CASTS.find(x=>x.id===r.cast_id)||{}).display_name||'#'+r.cast_id):esc((STORES.find(x=>x.id===r.store_id)||{}).name_ja||'#'+r.store_id);
     if (c==='status') return badge(r[c]);
+    if (c==='body') return esc(short(r[c])) + (r.reply_body ? '<br><span style="color:var(--gold2);font-size:10px">↩ ' + esc(short(r.reply_body)) + '</span>' : '');
     if (c==='area_id'||c==='store_id') return esc((c==='area_id'?AREAS:STORES).find(a=>a.id===r[c])?.name_ja||r[c]||'');
     return esc(short(r[c]));
   };
@@ -248,7 +256,7 @@ function tableHtml(table, rows){
     <div style="overflow:auto"><table><tr>${cols.map(c=>`<th>${head(c)}</th>`).join('')}<th>操作</th></tr>
     ${rows.map(r=>`<tr>${cols.map(c=>`<td>${cell(r,c)}</td>`).join('')}
       <td style="white-space:nowrap">
-      ${table==='reviews'?`<button class="btn ghost sm" onclick="rowTranslate(${r.id},this)">翻訳</button>`:''}
+      ${table==='reviews'?`<button class="btn ghost sm" onclick="rowTranslate(${r.id},this)">翻訳</button><button class="btn ghost sm" onclick="replyReview(${r.id})">返信</button>`:''}
       <button class="btn ghost sm" onclick="editRow('${table}',${r.id!=null?r.id:`'${r.key}'`})">編集</button>
       ${table==='reviews'&&r.status==='pending'?`<button class="btn sm" onclick="quickApprove(${r.id})">承認</button>`:''}
       ${table!=='settings'?`<button class="btn danger sm" onclick="delRow('${table}',${r.id})">削除</button>`:''}</td></tr>`).join('')}</table></div>`;
@@ -262,6 +270,21 @@ async function doSearch(table){
 async function quickApprove(id){
   await API('/api/admin/reviews/' + id, { method:'PUT', body: JSON.stringify({ status:'approved' }) });
   toast('口コミを承認しました'); render();
+}
+function replyReview(id){
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = `<div class="box"><h3>口コミへ公式返信</h3>
+    <div class="frm"><div class="full"><textarea id="rr" rows="4" placeholder="ご来店ありがとうございます。またのお越しをお待ちしております。"></textarea></div></div>
+    <div style="margin-top:14px;display:flex;gap:8px"><button class="btn" onclick="doReplyReview(${id},this)">返信を公開</button>
+    <button class="btn ghost" onclick="this.closest('.modal').remove()">閉じる</button></div></div>`;
+  m.onclick = e => { if (e.target === m) m.remove(); };
+  document.body.appendChild(m);
+}
+async function doReplyReview(id, btn){
+  const body = document.getElementById('rr').value.trim(); if (!body) return;
+  const r = await fetch('/api/reviews/' + id + '/reply', { method:'POST', headers:{'Content-Type':'application/json',Authorization:'Bearer '+TOKEN}, body: JSON.stringify({ body }) }).then(r=>r.json());
+  if (r.error) return toast(r.error === 'forbidden' ? 'この口コミへの返信権限がありません' : r.error);
+  btn.closest('.modal').remove(); toast('公式返信を公開しました'); render();
 }
 /* 口コミ一覧の「翻訳」ボタン: 本文を日英中へ翻訳してモーダル表示 */
 async function rowTranslate(id, btn){
@@ -305,6 +328,9 @@ async function editRow(table, id){
       else if (f.type === 'area') inp = `<select data-k="${f.k}" data-num="1"><option value="">— 選択 —</option>${AREAS.map(a=>`<option value="${a.id}" ${row&&row[f.k]===a.id?'selected':''}>${esc(a.name_ja)}</option>`).join('')}</select>`;
       else if (f.type === 'store') inp = `<select data-k="${f.k}" data-num="1"><option value="">— 選択 —</option>${STORES.map(s=>`<option value="${s.id}" ${row&&row[f.k]===s.id?'selected':''}>#${s.id} ${esc(s.name_ja)}</option>`).join('')}</select>`;
       else if (f.type === 'cast') inp = `<select data-k="${f.k}" data-num="1"><option value="">— 店舗口コミ（キャスト指定なし）—</option>${CASTS.map(c=>`<option value="${c.id}" ${row&&row[f.k]===c.id?'selected':''}>${esc(c.display_name||c.name)}（${esc((STORES.find(s=>s.id===c.store_id)||{}).name_ja||'')}）</option>`).join('')}</select>`;
+      else if (f.type === 'langchecks') { const cur = String(val||'').split(',').map(x=>x.trim()).filter(Boolean);
+        const LMAP = [['ja','日本語'],['en','英語'],['zh','中国語']];
+        inp = `<div class="cbg" data-k="${f.k}" data-cbg="1">${LMAP.map(p=>`<label><input type="checkbox" value="${p[0]}" ${cur.includes(p[0])?'checked':''}>${p[1]}</label>`).join('')}</div>`; }
       else if (f.type === 'paychecks') { const cur = String(val||'').split(',').map(x=>x.trim()).filter(Boolean);
         inp = `<div class="cbg" data-k="${f.k}" data-cbg="1">${PAY_OPTS.map(p=>`<label><input type="checkbox" value="${p}" ${cur.includes(p)?'checked':''}>${p}</label>`).join('')}</div>`; }
       else if (f.type === 'image') inp = `<div class="upzone">
@@ -382,7 +408,9 @@ async function saveRow(table, id, btn){
   const data = {};
   btn.closest('.box').querySelectorAll('[data-k]').forEach(el => {
     if (el.dataset.imgs) { data[el.dataset.k] = el.dataset.val || '[]'; return; }
-    if (el.dataset.cbg) { data[el.dataset.k] = [...el.querySelectorAll('input:checked')].map(c=>c.value).join(', '); return; }
+    if (el.dataset.cbg) { data[el.dataset.k] = [...el.querySelectorAll('input:checked')].map(c=>c.value).join(', ');
+      if (el.dataset.k === 'languages') { data.english_ok = [...el.querySelectorAll('input:checked')].some(c=>c.value==='en') ? 1 : 0; data.chinese_ok = [...el.querySelectorAll('input:checked')].some(c=>c.value==='zh') ? 1 : 0; }
+      return; }
     if (el.type === 'hidden' || el.tagName === 'SELECT' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')
       data[el.dataset.k] = (el.dataset.num || el.type === 'number') ? (el.value === '' ? null : (parseInt(el.value, 10) || 0)) : el.value;
   });
@@ -396,6 +424,21 @@ async function delRow(table, id){
   await API(`/api/admin/${table}/${id}`, { method:'DELETE' }); toast('削除しました'); render();
 }
 
+function pwChangeModal(){
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = `<div class="box"><h3>パスワード変更</h3>
+    <div class="frm"><div class="full"><label>現在のパスワード</label><input id="pw-c" type="password"></div>
+    <div class="full"><label>新しいパスワード（8文字以上）</label><input id="pw-n" type="password"></div></div>
+    <div style="margin-top:14px;display:flex;gap:8px"><button class="btn" onclick="pwChange(this)">変更する</button>
+    <button class="btn ghost" onclick="this.closest('.modal').remove()">閉じる</button></div></div>`;
+  m.onclick = e => { if (e.target === m) m.remove(); };
+  document.body.appendChild(m);
+}
+async function pwChange(btn){
+  const r = await API('/api/auth/password', { method:'POST', body: JSON.stringify({ current: document.getElementById('pw-c').value, next: document.getElementById('pw-n').value }) });
+  if (r.error) return toast(r.error === 'current password incorrect' ? '現在のパスワードが違います' : '8文字以上にしてください');
+  btn.closest('.modal').remove(); toast('パスワードを変更しました');
+}
 /* DM管理 */
 async function renderMessages(main){
   const rows = await API('/api/admin/messages');
