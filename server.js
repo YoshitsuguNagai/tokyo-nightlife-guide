@@ -20,20 +20,32 @@ const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 /* ---------- 簡易翻訳 (本番は翻訳APIに差替え。README参照) ---------- */
-const DICT = [
-  ['こんにちは', 'Hello', '你好'], ['ありがとう', 'Thank you', '谢谢'], ['ありがとうございます', 'Thank you very much', '非常感谢'],
-  ['予約', 'Reservation', '预约'], ['今夜', 'Tonight', '今晚'], ['イベント', 'Event', '活动'], ['クーポン', 'Coupon', '优惠券'],
-  ['お待ちしています', 'We look forward to seeing you', '期待您的光临'], ['ご来店', 'your visit', '光临'],
-  ['初回', 'First visit', '首次'], ['無料', 'Free', '免费'], ['本日', 'Today', '今天'], ['限定', 'Limited', '限定'],
-  ['キャンペーン', 'Campaign', '优惠活动'], ['特典', 'Special offer', '特典'], ['おすすめ', 'Recommended', '推荐'],
-  ['ようこそ', 'Welcome', '欢迎'], ['開催', 'Held', '举办'], ['店舗', 'Club', '店铺'], ['キャスト', 'Cast', '公关']
-];
-function naiveTranslate(text, from, to) {
-  if (from === to || !text) return text || '';
-  let out = String(text);
-  const pick = (row, l) => l === 'ja' ? row[0] : l === 'en' ? row[1] : row[2];
-  for (const row of DICT) { const s = pick(row, from), d = pick(row, to); if (s && s !== d) out = out.split(s).join(d); }
-  return out === text ? `[${to.toUpperCase()}] ` + text : out;
+/* ---------- 翻訳 (DeepL優先・未設定時はキー不要のGoogle翻訳endpointにフォールバック) ---------- */
+const TR_CACHE = new Map();
+async function translateText(text, from, to) {
+  text = String(text || '').slice(0, 4000);
+  if (!text.trim() || from === to) return text;
+  const ck = from + '|' + to + '|' + text;
+  if (TR_CACHE.has(ck)) return TR_CACHE.get(ck);
+  let out = null;
+  try {
+    const key = process.env.DEEPL_API_KEY;
+    if (key) {
+      const r = await fetch('https://api-free.deepl.com/v2/translate', {
+        method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ auth_key: key, text, source_lang: from.toUpperCase(), target_lang: to === 'zh' ? 'ZH' : to.toUpperCase() })
+      }).then(r => r.json());
+      out = r.translations && r.translations[0] && r.translations[0].text;
+    }
+    if (!out) {
+      const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&sl=' + from + '&tl=' + (to === 'zh' ? 'zh-CN' : to) + '&q=' + encodeURIComponent(text);
+      const r = await fetch(url).then(r => r.json());
+      out = ((r && r[0]) || []).map(x => x[0]).join('');
+    }
+  } catch (e) { out = null; }
+  if (!out) out = text; // ネットワーク不通時は原文を返す(壊れた[EN]表記は出さない)
+  TR_CACHE.set(ck, out);
+  return out;
 }
 
 /* ---------- auth ---------- */
@@ -198,15 +210,17 @@ app.post('/api/reviews', (req, res) => {
   const b = req.body;
   if (!b.store_id || !b.body) return res.status(400).json({ error: 'missing fields' });
   if (!b.cast_id && !b.store_id) return res.status(400).json({ error: 'missing fields' });
+  if (String(b.body || '').trim().length < 200) return res.status(400).json({ error: 'min_200' });
   db.prepare(`INSERT INTO reviews (store_id,cast_id,user_id,author_name,rating,title,body,visit_date,language,status) VALUES (?,?,?,?,?,?,?,?,?,'pending')`)
     .run(int(b.store_id) || null, int(b.cast_id) || null, int(b.user_id) || null, clean(b.author_name || 'Guest'), Math.min(5, Math.max(1, int(b.rating) || 5)), clean(b.title), clean(b.body), clean(b.visit_date), clean(b.language || 'en'));
   res.json({ ok: true, message: 'pending_approval' });
 });
 
 /* 翻訳 */
-app.post('/api/translate', (req, res) => {
+app.post('/api/translate', async (req, res) => {
   const { text, from, to } = req.body;
-  res.json({ translated: naiveTranslate(clean(text), clean(from || 'ja'), clean(to || 'en')) });
+  const translated = await translateText(clean(text), clean(from || 'ja'), clean(to || 'en'));
+  res.json({ translated });
 });
 
 /* ---------- AUTH ---------- */
@@ -247,13 +261,13 @@ app.post('/api/coupons/:id/get', auth, (req, res) => {
   try { db.prepare('INSERT INTO user_coupons (user_id,coupon_id) VALUES (?,?)').run(req.user.id, int(req.params.id)); } catch (e) {}
   res.json({ ok: true });
 });
-app.post('/api/messages', auth, (req, res) => {
+app.post('/api/messages', auth, async (req, res) => {
   const { store_id, cast_id, body } = req.body;
   if (!store_id || !body) return res.status(400).json({ error: 'missing fields' });
   const lang = req.user.language || 'en';
   db.prepare(`INSERT INTO messages (user_id,store_id,cast_id,direction,body,lang_original,body_ja,body_en,body_zh) VALUES (?,?,?,'user_to_store',?,?,?,?,?)`)
     .run(req.user.id, int(store_id), int(cast_id) || null, clean(body), lang,
-      naiveTranslate(body, lang, 'ja'), naiveTranslate(body, lang, 'en'), naiveTranslate(body, lang, 'zh'));
+      await translateText(body, lang, 'ja'), await translateText(body, lang, 'en'), await translateText(body, lang, 'zh'));
   const cid = convId(req.user.id, int(store_id), int(cast_id));
   db.prepare('UPDATE messages SET conversation_id=? WHERE id=last_insert_rowid()').run(cid);
   res.json({ ok: true });
@@ -339,6 +353,23 @@ app.post('/api/admin/:table', auth, staffOnly, (req, res) => {
   const tbl = req.params.table, u = req.user;
   if (tbl === 'users' && u.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   if (tbl === 'settings' && u.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  if (tbl === 'users') { // 初期パスワード設定 or 招待リンク発行
+    const b = req.body;
+    if (!b.email) return res.status(400).json({ error: 'email required' });
+    try {
+      const hasPw = b.password && String(b.password).length >= 8;
+      const pw = hasPw ? String(b.password) : crypto.randomBytes(9).toString('hex');
+      const r = db.prepare('INSERT INTO users (name,email,password_hash,country,language,role,store_id,cast_id) VALUES (?,?,?,?,?,?,?,?)')
+        .run(clean(b.name), clean(b.email).toLowerCase(), hashPassword(pw), clean(b.country || ''), clean(b.language || 'ja'), clean(b.role || 'user'), int(b.store_id) || null, int(b.cast_id) || null);
+      let invite = null;
+      if (!hasPw) {
+        const t = crypto.randomBytes(24).toString('hex');
+        db.prepare('INSERT INTO password_resets (token,email,expires) VALUES (?,?,?)').run(t, clean(b.email).toLowerCase(), Date.now() + 7*24*3600*1000);
+        invite = '/?reset=' + t;
+      }
+      return res.json({ id: r.lastInsertRowid, invite });
+    } catch (e) { return res.status(400).json({ error: 'email already registered' }); }
+  }
   if (u.role === 'cast' && tbl !== 'casts') return res.status(403).json({ error: 'forbidden' });
   if (u.role === 'store' && ['blogs','areas','users','settings'].includes(tbl)) return res.status(403).json({ error: 'forbidden' });
   if (u.role !== 'admin' && req.body.store_id && owns.stores && tbl !== 'stores') {
@@ -377,16 +408,36 @@ app.delete('/api/admin/:table/:id', auth, staffOnly, (req, res) => {
   db.prepare(`DELETE FROM ${req.params.table} WHERE ${keyCol}=?`).run(req.params.id);
   res.json({ ok: true });
 });
-app.post('/api/admin/messages/:id/reply', auth, staffOnly, (req, res) => {
+app.post('/api/admin/messages/:id/reply', auth, staffOnly, async (req, res) => {
   const m = db.prepare('SELECT * FROM messages WHERE id=?').get(int(req.params.id));
   if (!m) return res.status(404).json({ error: 'not found' });
   const body = clean(req.body.body), lang = clean(req.body.lang || 'ja');
   db.prepare(`INSERT INTO messages (user_id,store_id,cast_id,direction,body,lang_original,body_ja,body_en,body_zh) VALUES (?,?,?,'store_to_user',?,?,?,?,?)`)
     .run(m.user_id, m.store_id, m.cast_id, body, lang,
-      naiveTranslate(body, lang, 'ja'), naiveTranslate(body, lang, 'en'), naiveTranslate(body, lang, 'zh'));
+      await translateText(body, lang, 'ja'), await translateText(body, lang, 'en'), await translateText(body, lang, 'zh'));
   res.json({ ok: true });
 });
 
+/* パスワードリセット (メール→再設定リンク→新PW) */
+db.exec(`CREATE TABLE IF NOT EXISTS password_resets (token TEXT PRIMARY KEY, email TEXT, expires INTEGER, used INTEGER DEFAULT 0)`);
+app.post('/api/auth/forgot', (req, res) => {
+  const email = clean(req.body.email).toLowerCase();
+  const u = db.prepare('SELECT id FROM users WHERE email=?').get(email);
+  if (!u) return res.json({ ok: true }); // 存在可否を外部に漏らさない
+  const t = crypto.randomBytes(24).toString('hex');
+  db.prepare('INSERT INTO password_resets (token,email,expires) VALUES (?,?,?)').run(t, email, Date.now() + 24*3600*1000);
+  // 本来はSMTPでメール送信。未設定の開発段階ではリンクを返す(README参照)
+  res.json({ ok: true, link: '/?reset=' + t, note: 'smtp_not_configured' });
+});
+app.post('/api/auth/reset', (req, res) => {
+  const t = clean(req.body.token), pw = String(req.body.password || '');
+  if (pw.length < 8) return res.status(400).json({ error: 'password must be 8+ chars' });
+  const r = db.prepare('SELECT * FROM password_resets WHERE token=? AND used=0').get(t);
+  if (!r || r.expires < Date.now()) return res.status(400).json({ error: 'invalid or expired link' });
+  db.prepare('UPDATE users SET password_hash=? WHERE email=?').run(hashPassword(pw), r.email);
+  db.prepare('UPDATE password_resets SET used=1 WHERE token=?').run(t);
+  res.json({ ok: true });
+});
 /* パスワード変更 (ログイン中のみ・平文保存なし) */
 app.post('/api/auth/password', auth, (req, res) => {
   const u = db.prepare('SELECT * FROM users WHERE id=?').get(req.user.id);

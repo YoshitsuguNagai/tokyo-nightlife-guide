@@ -153,6 +153,9 @@ CREATE TABLE IF NOT EXISTS notifications (
 CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY, value TEXT
 );
+CREATE TABLE IF NOT EXISTS password_resets (
+  token TEXT PRIMARY KEY, email TEXT, expires INTEGER, used INTEGER DEFAULT 0
+);
 `);
 
 /* ---------- migration: 新規カラム追加 (冪等・既存DB互換) ---------- */

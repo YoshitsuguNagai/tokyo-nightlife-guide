@@ -198,7 +198,7 @@ const I = {
   f_h1:'Up to 155cm',f_h2:'156 – 160cm',f_h3:'161 – 165cm',f_h4:'166cm+',
   more_filters:'＋ More Filters',close_filters:'− Close Filters',clear:'Clear',apply:'Search with these filters',
   rv_store:'Club Review',rv_cast:'Cast Review',
-  chat_club:'Chat with Club',reply_from_store:'Reply from the Club',reply_from_cast:'Reply from the Cast',reply_from_site:'Reply from Tokyo Nightlife Guide',reply_ph:'Write a reply...',
+  chat_club:'Chat with Club',chat_cast:'Chat with Cast',rv_min:'Please write at least 200 characters.',rv_ph:'Please describe the atmosphere, service, pricing and highlights in 200+ characters.',forgot:'Forgot password?',reset_sent:'Reset link issued. (Email sending requires SMTP setup - see README)',reset_done:'Password updated. Please log in.',new_pw:'New password (8+ chars)',set_pw:'Set Password',reply_from_store:'Reply from the Club',reply_from_cast:'Reply from the Cast',reply_from_site:'Reply from Tokyo Nightlife Guide',reply_ph:'Write a reply...',
   h1:'Under 150cm',h2:'150 – 159cm',h3:'160 – 169cm',h4:'170cm+',f_lang:'Languages'},
  ja:{find_club:'お店を探す',find_girl:'キャストを探す',reviews:'口コミ',events:'イベント',coupons:'クーポン',blog:'ブログ',home:'ホーム',back:'戻る',
   hero1:'東京の<em>夜</em>を、発見する',hero2:'東京のベストクラブ・キャバクラ・ナイトライフ体験を見つけよう',
@@ -222,7 +222,7 @@ const I = {
   f_h1:'〜155cm',f_h2:'156〜160cm',f_h3:'161〜165cm',f_h4:'166cm〜',
   more_filters:'＋ さらに条件を追加',close_filters:'− 条件を閉じる',clear:'クリア',apply:'この条件で検索',
   rv_store:'店舗口コミ',rv_cast:'キャスト口コミ',
-  chat_club:'お店とチャット',reply_from_store:'店舗からの返信',reply_from_cast:'キャストからの返信',reply_from_site:'Tokyo Nightlife Guideからの返信',reply_ph:'返信を入力...',
+  chat_club:'お店とチャット',chat_cast:'キャストとチャット',rv_min:'口コミは200文字以上で入力してください。',rv_ph:'お店の雰囲気、接客、料金、良かった点などを200文字以上で詳しくご記入ください。',forgot:'パスワードを忘れた方',reset_sent:'再設定リンクを発行しました。(メール送信はSMTP設定が必要です。README参照)',reset_done:'パスワードを更新しました。ログインしてください。',new_pw:'新しいパスワード（8文字以上）',set_pw:'設定する',reply_from_store:'店舗からの返信',reply_from_cast:'キャストからの返信',reply_from_site:'Tokyo Nightlife Guideからの返信',reply_ph:'返信を入力...',
   h1:'150cm未満',h2:'150〜159cm',h3:'160〜169cm',h4:'170cm以上',f_lang:'言語'},
  zh:{find_club:'查找店铺',find_girl:'查找公关',reviews:'评价',events:'活动',coupons:'优惠券',blog:'博客',home:'首页',back:'返回',
   hero1:'探索<em>东京</em>夜生活',hero2:'寻找东京最好的俱乐部、夜总会和夜生活体验',
@@ -246,7 +246,7 @@ const I = {
   f_h1:'〜155cm',f_h2:'156〜160cm',f_h3:'161〜165cm',f_h4:'166cm〜',
   more_filters:'＋ 添加更多条件',close_filters:'− 收起条件',clear:'清除',apply:'按条件搜索',
   rv_store:'店铺评价',rv_cast:'公关评价',
-  chat_club:'与店铺聊天',reply_from_store:'店铺的回复',reply_from_cast:'公关的回复',reply_from_site:'Tokyo Nightlife Guide的回复',reply_ph:'输入回复...',
+  chat_club:'与店铺聊天',chat_cast:'与公关聊天',rv_min:'请填写200字以上的评价。',rv_ph:'请用200字以上详细描述店铺氛围、服务、价格和亮点。',forgot:'忘记密码',reset_sent:'已发送重置链接。（发送邮件需配置SMTP，见README）',reset_done:'密码已更新，请登录。',new_pw:'新密码（8位以上）',set_pw:'设置',reply_from_store:'店铺的回复',reply_from_cast:'公关的回复',reply_from_site:'Tokyo Nightlife Guide的回复',reply_ph:'输入回复...',
   h1:'150cm以下',h2:'150〜159cm',h3:'160〜169cm',h4:'170cm以上',f_lang:'语言'},
 };
 let LANG = localStorage.getItem('tng_lang') || 'en';
@@ -358,7 +358,7 @@ function featTags(s){
 function storeCard(s){
   return `<div class="card" onclick="go('store',${s.id})">
     <div class="ph" style="${imgStyle(s.cover_image, s.hue)}">${s.cover_image?'':esc(L(s,'name')).charAt(0)}${s.is_recommended?`<span class="badge">VIP</span>`:''}</div>
-    <div class="bd"><h3>${esc(L(s,'name'))}</h3>
+    <div class="bd"><div style="display:flex;align-items:center;gap:8px">${s.logo?`<img src="${esc(s.logo)}" alt="" style="width:30px;height:30px;object-fit:contain;border-radius:6px;background:var(--bg3);border:1px solid var(--line);padding:2px;flex:none">`:''}<h3 style="min-width:0">${esc(L(s,'name'))}</h3></div>
       <div class="stars">${stars(s.rating_avg)} <span style="color:var(--sub)">${s.rating_avg||'-'} (${s.review_count})</span></div>
       <div class="meta"><span>${ic('pin',12)} ${s.area?esc(L(s.area,'name')):''}</span><span>${ic('clock',12)} ${esc(s.open_hours||'')}</span></div>
       <div class="meta"><span>${ic('banknote',12)} ¥${(s.budget_min||0).toLocaleString()}〜</span></div>
@@ -475,12 +475,12 @@ async function pageStore(id){
   const photos = photoArr(s.images, s.cover_image);
   const hero = photos.length > 1
     ? carousel(photos.map(u => ({ url: u, label: L(s,'name').charAt(0) })), s.hue)
-    : `<div class="detail-hero" style="${imgStyle(s.cover_image, s.hue)}"><div><h1>${esc(L(s,'name'))}</h1>
-      <div class="stars" style="font-size:15px">${stars(s.rating_avg)} ${s.rating_avg} (${s.review_count} ${t('reviews_of')})</div></div></div>`;
+    : `<div class="detail-hero" style="${imgStyle(s.cover_image, s.hue)}"><div style="display:flex;align-items:center;gap:12px">${s.logo?`<img src="${esc(s.logo)}" alt="" style="width:52px;height:52px;object-fit:contain;border-radius:10px;background:rgba(20,20,22,.75);border:1px solid var(--line);padding:4px">`:''}<div><h1>${esc(L(s,'name'))}</h1>
+      <div class="stars" style="font-size:15px">${stars(s.rating_avg)} ${s.rating_avg} (${s.review_count} ${t('reviews_of')})</div></div></div></div>`;
   return `${hero}
   <div class="wrap">${backBtn()}
-  ${photos.length>1?`<div style="margin-top:16px"><h1 style="font-family:var(--serif);font-size:28px;font-weight:600">${esc(L(s,'name'))}</h1>
-    <div class="stars" style="font-size:15px">${stars(s.rating_avg)} ${s.rating_avg} (${s.review_count} ${t('reviews_of')})</div></div>`:''}
+  ${photos.length>1?`<div style="margin-top:16px;display:flex;align-items:center;gap:14px">${s.logo?`<img src="${esc(s.logo)}" alt="" style="width:56px;height:56px;object-fit:contain;border-radius:10px;background:var(--bg3);border:1px solid var(--line);padding:4px">`:''}<div><h1 style="font-family:var(--serif);font-size:28px;font-weight:600">${esc(L(s,'name'))}</h1>
+    <div class="stars" style="font-size:15px">${stars(s.rating_avg)} ${s.rating_avg} (${s.review_count} ${t('reviews_of')})</div></div></div>`:''}
   <div class="meta" style="margin-top:14px"><span>${ic('pin',13)} ${s.area?esc(L(s.area,'name')):''}</span><span>${ic('clock',13)} ${esc(s.open_hours||'')}</span><span>${ic('banknote',13)} ¥${(s.budget_min||0).toLocaleString()}〜¥${(s.budget_max||0).toLocaleString()}</span></div>
   <div style="margin-top:9px">${featTags(s)}${s.reservation_ok?`<span class="tag">${t('reserve_ok')}</span>`:''}</div>
   <div class="sns-row">
@@ -557,7 +557,7 @@ async function pageCast(id){
   ${c.others && c.others.length ? `<section class="sec"><h2><em>◆</em>${t('other_cast')}</h2><div class="grid">${c.others.map(castCard).join('')}</div></section>` : ''}
   </div>
   <div class="fixed-cta"><button type="button" class="btn ghost" onclick="fav('cast',${c.id})">${ic('heart',15)}</button>
-  <button type="button" class="btn" onclick="contactStore(${c.store_id},'${esc((c['store_name_'+LANG]||c.store_name_en)).replace(/'/g,'')}',${c.id})">${ic('message',14)} ${t('chat_club')}</button>
+  <button type="button" class="btn" onclick="contactStore(${c.store_id},'${esc(c.display_name||c.name).replace(/'/g,'')}',${c.id})">${ic('message',14)} ${t('chat_cast')}</button>
   <button type="button" class="btn ghost" onclick="go('store',${c.store_id})">${t('visit_club')}</button></div>`;
 }
 /* ---- キャスト検索 (詳細フィルター) ---- */
@@ -714,23 +714,58 @@ function reviewModal(storeId, castId, targetName){
     <div class="field"><label>★</label><select id="rv-r">${[5,4,3,2,1].map(n=>`<option>${n}</option>`).join('')}</select></div>
     <div class="field"><label>Name</label><input id="rv-n" value="${esc(ME?ME.name:'')}"></div>
     <div class="field"><label>Title</label><input id="rv-t"></div>
-    <div class="field"><label>Review</label><textarea id="rv-b" rows="4"></textarea></div>
-    <button type="button" class="btn" style="width:100%" onclick="submitReview(${storeId},${castId||null},this)">${t('submit')}</button>`);
+    <div class="field"><label>Review</label><textarea id="rv-b" rows="5" placeholder="${t('rv_ph')}" oninput="rvCount()"></textarea>
+    <div id="rv-c" style="font-size:11px;color:var(--sub);text-align:right;margin-top:4px">0 / 200</div></div>
+    <div id="rv-err" style="font-size:12px;color:#e08080;display:none;margin-bottom:8px">${t('rv_min')}</div>
+    <button type="button" class="btn" id="rv-btn" style="width:100%;opacity:.45" disabled onclick="submitReview(${storeId},${castId||null},this)">${t('submit')}</button>`);
+}
+function rvCount(){
+  const n = (document.getElementById('rv-b').value||'').trim().length;
+  const c = document.getElementById('rv-c'), b = document.getElementById('rv-btn'), e = document.getElementById('rv-err');
+  c.textContent = n + ' / 200' + (n >= 200 ? ' ✓' : '');
+  c.style.color = n >= 200 ? 'var(--gold2)' : 'var(--sub)';
+  const ok = n >= 200; b.disabled = !ok; b.style.opacity = ok ? '1' : '.45';
+  if (e) e.style.display = (n > 0 && n < 200) ? 'block' : 'none';
 }
 function submitReview(storeId, castId, btn){
-  if (btn.disabled) return; btn.disabled = true; btn.textContent = '...';
+  if (btn.disabled) return;
+  const body = document.getElementById('rv-b').value.trim();
+  if (body.length < 200) { document.getElementById('rv-err').style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = '...';
   API('/api/reviews',{method:'POST',body:JSON.stringify({ store_id: storeId, cast_id: castId,
     rating:+document.getElementById('rv-r').value, author_name:document.getElementById('rv-n').value,
     title:document.getElementById('rv-t').value, body:document.getElementById('rv-b').value, language:LANG })})
-  .then(()=>{ btn.closest('.modal').remove(); toast(t('review_saved')); });
+  .then(r=>{ if (r.error) { btn.disabled = false; btn.textContent = t('submit'); document.getElementById('rv-err').style.display = 'block'; return; } btn.closest('.modal').remove(); toast(t('review_saved')); });
 }
 function pwToggle(id, btn){ const el = document.getElementById(id); const show = el.type === 'password'; el.type = show ? 'text' : 'password'; btn.innerHTML = ic(show ? 'eyeOff' : 'eye', 17); }
+function forgotModal(){
+  document.querySelectorAll('.modal').forEach(m=>m.remove());
+  modal(`<h3>${t('forgot')}</h3>
+  <div class="field"><label>Email</label><input id="fg-e" type="email"></div>
+  <button type="button" class="btn" style="width:100%" onclick="doForgot(this)">${t('send')}</button>
+  <div id="fg-msg" style="font-size:12px;color:var(--gold2);margin-top:10px;word-break:break-all"></div>`);
+}
+async function doForgot(btn){
+  const r = await API('/api/auth/forgot', { method:'POST', body: JSON.stringify({ email: document.getElementById('fg-e').value }) });
+  document.getElementById('fg-msg').textContent = t('reset_sent') + (r.link ? ' ' + location.origin + r.link : '');
+}
+function resetModal(token){
+  modal(`<h3>${t('new_pw')}</h3>
+  <div class="field"><div class="pw"><input id="rs-p" type="password"><button type="button" class="eye" onclick="pwToggle('rs-p',this)">${ic('eye',17)}</button></div></div>
+  <button type="button" class="btn" style="width:100%" onclick="doReset('${token}',this)">${t('set_pw')}</button>`);
+}
+async function doReset(token, btn){
+  const r = await API('/api/auth/reset', { method:'POST', body: JSON.stringify({ token, password: document.getElementById('rs-p').value }) });
+  if (r.error) return toast(r.error);
+  btn.closest('.modal').remove(); toast(t('reset_done')); loginModal();
+}
 function loginModal(){
   modal(`<h3>${t('login')} / ${t('register')}</h3>
   <div class="field"><label>Name (${t('register')})</label><input id="au-n"></div>
   <div class="field"><label>Email</label><input id="au-e" type="email"></div>
   <div class="field"><label>Password</label><div class="pw"><input id="au-p" type="password"><button type="button" class="eye" onclick="pwToggle('au-p',this)">${ic('eye',17)}</button></div></div>
-  <div class="row"><button type="button" class="btn" onclick="authDo('login')">${t('login')}</button><button type="button" class="btn ghost" onclick="authDo('register')">${t('register')}</button></div>`);
+  <div class="row"><button type="button" class="btn" onclick="authDo('login')">${t('login')}</button><button type="button" class="btn ghost" onclick="authDo('register')">${t('register')}</button></div>
+  <div style="text-align:center;margin-top:12px"><a style="font-size:12px;color:var(--sub);cursor:pointer" onclick="forgotModal()">${t('forgot')}</a></div>`);
 }
 async function authDo(mode){
   const body = { email: document.getElementById('au-e').value, password: document.getElementById('au-p').value, name: document.getElementById('au-n').value, language: LANG };
@@ -759,6 +794,8 @@ function setSiteName(){
   if (n) { document.getElementById('sitename').textContent = n; document.getElementById('f_sitename').textContent = n; }
 }
 (async () => {
+  const rs = new URLSearchParams(location.search).get('reset');
+  if (rs) { setTimeout(() => resetModal(rs), 600); }
   SETTINGS = await API('/api/settings');
   document.documentElement.lang = LANG;
   setSiteName();

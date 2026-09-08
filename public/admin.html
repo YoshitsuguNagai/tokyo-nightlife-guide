@@ -175,11 +175,11 @@ const F = {
   {k:'title',l:'タイトル'},{k:'body',l:'本文',type:'textarea'},
   {k:'visit_date',l:'利用日'},{k:'language',l:'投稿言語',type:'select',opts:{ja:'日本語',en:'English',zh:'中文'}},
   {k:'status',l:'承認状態',type:'select',opts:{pending:'未承認',approved:'承認（公開）',rejected:'非承認',hidden:'非表示'}}],
- users:[{k:'name',l:'名前'},{k:'email',l:'メールアドレス'},{k:'country',l:'国'},{k:'language',l:'使用言語',type:'select',opts:{ja:'日本語',en:'English',zh:'中文'}},{k:'role',l:'権限',type:'select',opts:{user:'ユーザー',store:'店舗',admin:'管理者'}},{k:'store_id',l:'店舗（店舗権限の場合）',type:'store'},{k:'is_blocked',l:'アカウント停止',type:'select',opts:{0:'有効',1:'停止中'}}],
+ users:[{k:'name',l:'名前'},{k:'email',l:'メールアドレス'},{k:'country',l:'国'},{k:'language',l:'使用言語',type:'select',opts:{ja:'日本語',en:'English',zh:'中文'}},{k:'role',l:'権限',type:'select',opts:{user:'一般ユーザー',store:'店舗管理者（Club Admin）',cast:'キャスト（Cast）',admin:'管理者（Super Admin）'}},{k:'store_id',l:'対象店舗（店舗管理者の場合）',type:'store'},{k:'cast_id',l:'対象キャスト（キャストの場合）',type:'cast'},{k:'password',l:'初期パスワード（8文字以上・空欄で招待リンク発行）'},{k:'is_blocked',l:'アカウント停止',type:'select',opts:{0:'有効',1:'停止中'}}],
  notifications:[{k:'store_id',l:'店舗',type:'store'},{k:'user_id',l:'送信先ユーザーID（空=全員）',type:'number'},{k:'template_ja',l:'メッセージ（日本語）',type:'textarea',tr:'template'},{k:'template_en',l:'メッセージ（English）',type:'textarea'},{k:'template_zh',l:'メッセージ（中文）',type:'textarea'},{k:'channel',l:'送信チャネル',type:'select',opts:{dm:'DM',email:'メール',line:'LINE'}},{k:'status',l:'状態',type:'select',opts:{draft:'下書き',sent:'送信済み'}}],
  settings:[{k:'key',l:'キー'},{k:'value',l:'値',type:'textarea'}]
 };
-const MENU = [['dashboard','▦','Dashboard'],['stores','◆','店舗'],['casts','◇','キャスト'],['areas','◎','エリア'],['users','◉','ユーザー'],['reviews','★','口コミ'],['messages','✉','DM'],['blogs','▤','ブログ'],['events','▣','イベント'],['coupons','▢','クーポン'],['notifications','♪','お礼・通知'],['settings','⚙','サイト設定']];
+const MENU = [['dashboard','▦','Dashboard'],['stores','◆','店舗'],['casts','◇','キャスト'],['areas','◎','エリア'],['users','◉','ユーザー'],['reviews','★','口コミ'],['messages','✉','DM'],['blogs','▤','ブログ'],['events','▣','イベント'],['coupons','▢','クーポン'],['notifications','♪','お知らせ・通知'],['settings','⚙','サイト設定']];
 
 async function render(){
   const root = document.getElementById('root');
@@ -395,6 +395,8 @@ async function uploadImg(input, key){
 async function autoTr(group, btn){
   const ja = document.querySelector(`[data-k="${group}_ja"]`);
   if (!ja || !ja.value.trim()) return toast('先に日本語を入力してください');
+  const hasExisting = ['en','zh'].some(to => (document.querySelector(`[data-k="${group}_${to}"]`)||{}).value?.trim());
+  if (hasExisting && !confirm('英語・中国語の既存の翻訳を上書きしますか?（手動で修正済みの内容は失われます）')) return;
   btn.disabled = true; btn.textContent = '翻訳中...';
   for (const to of ['en','zh']) {
     const r = await API('/api/translate', { method:'POST', body: JSON.stringify({ text: ja.value, from:'ja', to }) });
@@ -417,6 +419,15 @@ async function saveRow(table, id, btn){
   const r = await API(id == null ? '/api/admin/' + table : `/api/admin/${table}/${id}`,
     { method: id == null ? 'POST' : 'PUT', body: JSON.stringify(data) });
   if (r.error) return toast(r.error);
+  if (table === 'users' && id == null && r.invite) {
+    btn.closest('.modal').remove();
+    const m = document.createElement('div'); m.className = 'modal';
+    m.innerHTML = `<div class="box"><h3>ユーザーを作成しました（招待リンク）</h3>
+      <p style="font-size:13px;color:var(--sub);margin:10px 0">本人に以下のリンクを共有してください。リンクからパスワードを設定できます（7日間有効）。</p>
+      <input readonly value="${location.origin}${r.invite}" onclick="this.select()" style="font-size:12px">
+      <div style="margin-top:14px"><button class="btn ghost" onclick="this.closest('.modal').remove()">閉じる</button></div></div>`;
+    document.body.appendChild(m); toast('ユーザーを作成しました'); render(); return;
+  }
   btn.closest('.modal').remove(); toast('保存しました'); render();
 }
 async function delRow(table, id){
