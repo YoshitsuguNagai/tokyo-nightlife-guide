@@ -262,11 +262,12 @@ app.post('/api/coupons/:id/get', auth, (req, res) => {
   res.json({ ok: true });
 });
 app.post('/api/messages', auth, async (req, res) => {
-  const { store_id, cast_id, body } = req.body;
+  const { store_id, cast_id, body, kind, resv_date, resv_time, resv_people } = req.body;
   if (!store_id || !body) return res.status(400).json({ error: 'missing fields' });
   const lang = req.user.language || 'en';
-  db.prepare(`INSERT INTO messages (user_id,store_id,cast_id,direction,body,lang_original,body_ja,body_en,body_zh) VALUES (?,?,?,'user_to_store',?,?,?,?,?)`)
-    .run(req.user.id, int(store_id), int(cast_id) || null, clean(body), lang,
+  const mkind = clean(kind || (cast_id ? 'cast_chat' : 'store_chat'));
+  db.prepare(`INSERT INTO messages (user_id,store_id,cast_id,direction,body,lang_original,body_ja,body_en,body_zh,kind,resv_date,resv_time,resv_people) VALUES (?,?,?,'user_to_store',?,?,?,?,?,?,?,?,?,?)`)
+    .run(req.user.id, int(store_id), int(cast_id) || null, clean(body), lang, mkind, clean(resv_date||''), clean(resv_time||''), int(resv_people) || null,
       await translateText(body, lang, 'ja'), await translateText(body, lang, 'en'), await translateText(body, lang, 'zh'));
   const cid = convId(req.user.id, int(store_id), int(cast_id));
   db.prepare('UPDATE messages SET conversation_id=? WHERE id=last_insert_rowid()').run(cid);
@@ -296,8 +297,11 @@ app.post('/api/reviews/:id/reply', auth, staffOnly, (req, res) => {
   else if (u.role === 'store' && r.store_id === u.store_id) role = 'store';
   else if (u.role === 'cast' && r.cast_id === u.cast_id) role = 'cast';
   if (!role) return res.status(403).json({ error: 'forbidden' });
-  db.prepare(`UPDATE reviews SET reply_body=?, reply_by=?, reply_role=?, reply_at=datetime('now') WHERE id=?`)
-    .run(clean(req.body.body), clean(u.name), role, r.id);
+  let byName = clean(u.name);
+  if (role === 'store') byName = (db.prepare('SELECT name_ja FROM stores WHERE id=?').get(r.store_id)||{}).name_ja || u.name;
+  if (role === 'cast') byName = (db.prepare('SELECT display_name FROM casts WHERE id=?').get(r.cast_id)||{}).display_name || u.name;
+  db.prepare(`UPDATE reviews SET reply_body=?, reply_by=?, reply_role=?, reply_at=datetime('now','+9 hours') WHERE id=?`)
+    .run(clean(req.body.body), byName, role, r.id);
   res.json({ ok: true });
 });
 
@@ -307,11 +311,11 @@ const TABLES = {
   stores:  ['area_id','name_ja','name_en','name_zh','desc_ja','desc_en','desc_zh','logo','cover_image','images','hue','genre','address','google_map_url','open_hours','closed_days','phone','line_url','instagram','website','budget_min','budget_max','charge','service_fee','payment_methods','foreigner_welcome','english_ok','chinese_ok','credit_card_ok','reservation_ok','cast_count','is_recommended','sort_order','status'],
   casts:   ['store_id','name','display_name','photo','photos','hue','profile_ja','profile_en','profile_zh','height','hobbies','favorites','languages','english_ok','chinese_ok','recommend_ja','recommend_en','recommend_zh','sns_instagram','is_popular','sort_order','status','bust','birthplace','style_type','alcohol','skill','face','body_style','hair'],
   reviews: ['store_id','cast_id','author_name','rating','rating_service','rating_atmosphere','rating_price','rating_cast','rating_foreigner','title','body','visit_date','language','status'],
-  events:  ['store_id','title_ja','title_en','title_zh','desc_ja','desc_en','desc_zh','event_date','start_time','end_time','image','hue','status'],
-  coupons: ['store_id','title_ja','title_en','title_zh','desc_ja','desc_en','desc_zh','conditions_ja','conditions_en','conditions_zh','code','valid_until','image','hue','status'],
+  events:  ['store_id','title_ja','title_en','title_zh','desc_ja','desc_en','desc_zh','event_date','start_time','end_date','end_time','image','hue','status'],
+  coupons: ['store_id','title_ja','title_en','title_zh','desc_ja','desc_en','desc_zh','conditions_ja','conditions_en','conditions_zh','code','valid_from','valid_until','image','hue','status'],
   blogs:   ['slug','category','title_ja','title_en','title_zh','body_ja','body_en','body_zh','seo_title','seo_description','image','hue','status'],
   users:   ['name','email','country','language','role','store_id','is_blocked'],
-  messages:['user_id','store_id','cast_id','direction','body','lang_original','body_ja','body_en','body_zh','is_read','is_reported'],
+  messages:['user_id','store_id','cast_id','direction','body','lang_original','body_ja','body_en','body_zh','is_read','is_reported','kind','resv_date','resv_time','resv_people'],
   notifications:['store_id','user_id','template_ja','template_en','template_zh','channel','status'],
   settings:['key','value']
 };

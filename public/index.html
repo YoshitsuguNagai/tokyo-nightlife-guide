@@ -63,6 +63,7 @@ h1,h2,h3{line-height:1.35}
 .stars{color:var(--gold);font-size:12px;letter-spacing:2.5px}
 .tag{display:inline-flex;align-items:center;gap:4px;background:var(--bg3);border-radius:6px;padding:3px 8px;font-size:10.5px;color:var(--sub);margin:3px 3px 0 0;letter-spacing:.03em}
 .tag.g{color:var(--gold2);border:1px solid #3a3220;background:rgba(201,162,39,.07)}
+.fav-on{background:rgba(201,162,39,.14)!important}
 .row{display:flex;gap:8px;margin-top:11px}
 .row .btn{flex:1}
 .detail-hero{min-height:230px;display:flex;align-items:flex-end;padding:20px;position:relative;background-size:cover;background-position:center}
@@ -198,7 +199,7 @@ const I = {
   f_h1:'Up to 155cm',f_h2:'156 – 160cm',f_h3:'161 – 165cm',f_h4:'166cm+',
   more_filters:'＋ More Filters',close_filters:'− Close Filters',clear:'Clear',apply:'Search with these filters',
   rv_store:'Club Review',rv_cast:'Cast Review',
-  chat_club:'Chat with Club',chat_cast:'Chat with Cast',rv_min:'Please write at least 200 characters.',rv_ph:'Please describe the atmosphere, service, pricing and highlights in 200+ characters.',forgot:'Forgot password?',reset_sent:'Reset link issued. (Email sending requires SMTP setup - see README)',reset_done:'Password updated. Please log in.',new_pw:'New password (8+ chars)',set_pw:'Set Password',reply_from_store:'Reply from the Club',reply_from_cast:'Reply from the Cast',reply_from_site:'Reply from Tokyo Nightlife Guide',reply_ph:'Write a reply...',
+  chat_club:'Chat with Club',reservation:'Reservation',inquiry:'Inquiry',fav_add:'Added to favorites',fav_del:'Removed from favorites',fav_stores:'Favorite Clubs',fav_casts:'Favorite Cast',coupon_expired:'Expired',resv_date:'Preferred date',resv_time:'Preferred time',resv_people:'Guests',view_coupon:'View Coupon',chat_cast:'Chat with Cast',rv_min:'Please write at least 200 characters.',rv_ph:'Please describe the atmosphere, service, pricing and highlights in 200+ characters.',forgot:'Forgot password?',reset_sent:'Reset link issued. (Email sending requires SMTP setup - see README)',reset_done:'Password updated. Please log in.',new_pw:'New password (8+ chars)',set_pw:'Set Password',reply_from_store:'Reply from the Club',reply_from_cast:'Reply from the Cast',reply_from_site:'Reply from Tokyo Nightlife Guide',reply_ph:'Write a reply...',
   h1:'Under 150cm',h2:'150 – 159cm',h3:'160 – 169cm',h4:'170cm+',f_lang:'Languages'},
  ja:{find_club:'お店を探す',find_girl:'キャストを探す',reviews:'口コミ',events:'イベント',coupons:'クーポン',blog:'ブログ',home:'ホーム',back:'戻る',
   hero1:'東京の<em>夜</em>を、発見する',hero2:'東京のベストクラブ・キャバクラ・ナイトライフ体験を見つけよう',
@@ -222,7 +223,7 @@ const I = {
   f_h1:'〜155cm',f_h2:'156〜160cm',f_h3:'161〜165cm',f_h4:'166cm〜',
   more_filters:'＋ さらに条件を追加',close_filters:'− 条件を閉じる',clear:'クリア',apply:'この条件で検索',
   rv_store:'店舗口コミ',rv_cast:'キャスト口コミ',
-  chat_club:'お店とチャット',chat_cast:'キャストとチャット',rv_min:'口コミは200文字以上で入力してください。',rv_ph:'お店の雰囲気、接客、料金、良かった点などを200文字以上で詳しくご記入ください。',forgot:'パスワードを忘れた方',reset_sent:'再設定リンクを発行しました。(メール送信はSMTP設定が必要です。README参照)',reset_done:'パスワードを更新しました。ログインしてください。',new_pw:'新しいパスワード（8文字以上）',set_pw:'設定する',reply_from_store:'店舗からの返信',reply_from_cast:'キャストからの返信',reply_from_site:'Tokyo Nightlife Guideからの返信',reply_ph:'返信を入力...',
+  chat_club:'お店とチャット',reservation:'予約希望',inquiry:'問い合わせ',fav_add:'お気に入りに追加しました',fav_del:'お気に入りから削除しました',fav_stores:'お気に入り店舗',fav_casts:'お気に入りキャスト',coupon_expired:'期限切れ',resv_date:'希望日',resv_time:'希望時間',resv_people:'人数',view_coupon:'クーポン詳細',chat_cast:'キャストとチャット',rv_min:'口コミは200文字以上で入力してください。',rv_ph:'お店の雰囲気、接客、料金、良かった点などを200文字以上で詳しくご記入ください。',forgot:'パスワードを忘れた方',reset_sent:'再設定リンクを発行しました。(メール送信はSMTP設定が必要です。README参照)',reset_done:'パスワードを更新しました。ログインしてください。',new_pw:'新しいパスワード（8文字以上）',set_pw:'設定する',reply_from_store:'店舗からの返信',reply_from_cast:'キャストからの返信',reply_from_site:'Tokyo Nightlife Guideからの返信',reply_ph:'返信を入力...',
   h1:'150cm未満',h2:'150〜159cm',h3:'160〜169cm',h4:'170cm以上',f_lang:'言語'},
  zh:{find_club:'查找店铺',find_girl:'查找公关',reviews:'评价',events:'活动',coupons:'优惠券',blog:'博客',home:'首页',back:'返回',
   hero1:'探索<em>东京</em>夜生活',hero2:'寻找东京最好的俱乐部、夜总会和夜生活体验',
@@ -246,7 +247,7 @@ const I = {
   f_h1:'〜155cm',f_h2:'156〜160cm',f_h3:'161〜165cm',f_h4:'166cm〜',
   more_filters:'＋ 添加更多条件',close_filters:'− 收起条件',clear:'清除',apply:'按条件搜索',
   rv_store:'店铺评价',rv_cast:'公关评价',
-  chat_club:'与店铺聊天',chat_cast:'与公关聊天',rv_min:'请填写200字以上的评价。',rv_ph:'请用200字以上详细描述店铺氛围、服务、价格和亮点。',forgot:'忘记密码',reset_sent:'已发送重置链接。（发送邮件需配置SMTP，见README）',reset_done:'密码已更新，请登录。',new_pw:'新密码（8位以上）',set_pw:'设置',reply_from_store:'店铺的回复',reply_from_cast:'公关的回复',reply_from_site:'Tokyo Nightlife Guide的回复',reply_ph:'输入回复...',
+  chat_club:'与店铺聊天',reservation:'预约',inquiry:'咨询',fav_add:'已添加到收藏',fav_del:'已从收藏删除',fav_stores:'收藏的店铺',fav_casts:'收藏的公关',coupon_expired:'已过期',resv_date:'希望日期',resv_time:'希望时间',resv_people:'人数',view_coupon:'优惠券详情',chat_cast:'与公关聊天',rv_min:'请填写200字以上的评价。',rv_ph:'请用200字以上详细描述店铺氛围、服务、价格和亮点。',forgot:'忘记密码',reset_sent:'已发送重置链接。（发送邮件需配置SMTP，见README）',reset_done:'密码已更新，请登录。',new_pw:'新密码（8位以上）',set_pw:'设置',reply_from_store:'店铺的回复',reply_from_cast:'公关的回复',reply_from_site:'Tokyo Nightlife Guide的回复',reply_ph:'输入回复...',
   h1:'150cm以下',h2:'150〜159cm',h3:'160〜169cm',h4:'170cm以上',f_lang:'语言'},
 };
 let LANG = localStorage.getItem('tng_lang') || 'en';
@@ -389,7 +390,7 @@ function eventCard(e){
     <div class="meta">${esc(L(e,'desc')).slice(0,60)}</div></div></div>`;
 }
 function couponCard(c){
-  return `<div class="card" onclick="go('store',${c.store_id})"><div class="ph" style="height:118px;${imgStyle(c.image, c.hue)}">${c.image?'':ic('ticket',34)}</div>
+  return `<div class="card" onclick="couponDetail(${c.id})"><div class="ph" style="height:118px;${imgStyle(c.image, c.hue)}">${c.image?'':ic('ticket',34)}</div>
     <div class="bd"><h3>${esc(L(c,'title'))}</h3><div class="meta"><span>${ic('home',12)} ${esc(c['store_name_'+LANG]||c.store_name_en)}</span><span>${ic('clock',12)} ${t('valid')}: ${c.valid_until||'-'}</span></div>
     <div class="meta">${esc(L(c,'desc'))}</div>
     <div class="row"><button type="button" class="btn sm" onclick="event.stopPropagation();getCoupon(${c.id})">${t('get_coupon')}</button><button type="button" class="btn sm ghost" onclick="event.stopPropagation();go('store',${c.store_id})">${t('view')}</button></div></div>`;
@@ -512,9 +513,9 @@ async function pageStore(id){
   </div>
   <div class="fixed-cta">
     ${s.line_url?`<a class="btn ghost notranslate" href="${esc(s.line_url)}" target="_blank" rel="noopener" translate="no">LINE</a>`:''}
-    <button type="button" class="btn ghost" onclick="fav('store',${s.id})">${ic('heart',15)}</button>
+    <button type="button" class="btn ghost" onclick="fav('store',${s.id},this)">${ic('heart',15)}</button>
     <button type="button" class="btn" onclick="contactStore(${s.id},'${esc(L(s,'name')).replace(/'/g,'')}')">${ic('message',14)} ${t('chat_club')}</button>
-    ${s.reservation_ok?`<button type="button" class="btn" onclick="contactStore(${s.id},'${esc(L(s,'name')).replace(/'/g,'')}')">${t('reserve')}</button>`:''}
+    ${s.reservation_ok?`<button type="button" class="btn" onclick="contactStore(${s.id},'${esc(L(s,'name')).replace(/'/g,'')}',null,'reservation')">${t('reserve')}</button>`:''}
   </div>`;
 }
 function tab(btn, name){
@@ -556,11 +557,23 @@ async function pageCast(id){
   ${c.reviews && c.reviews.length ? `<section class="sec"><h2><em>◆</em>${t('rv_cast')} (${c.reviews.length})</h2>${c.reviews.map(reviewCard).join('')}</section>` : ''}
   ${c.others && c.others.length ? `<section class="sec"><h2><em>◆</em>${t('other_cast')}</h2><div class="grid">${c.others.map(castCard).join('')}</div></section>` : ''}
   </div>
-  <div class="fixed-cta"><button type="button" class="btn ghost" onclick="fav('cast',${c.id})">${ic('heart',15)}</button>
+  <div class="fixed-cta"><button type="button" class="btn ghost" onclick="fav('cast',${c.id},this)">${ic('heart',15)}</button>
   <button type="button" class="btn" onclick="contactStore(${c.store_id},'${esc(c.display_name||c.name).replace(/'/g,'')}',${c.id})">${ic('message',14)} ${t('chat_cast')}</button>
   <button type="button" class="btn ghost" onclick="go('store',${c.store_id})">${t('visit_club')}</button></div>`;
 }
 /* ---- キャスト検索 (詳細フィルター) ---- */
+const CAST_TR = {
+  bust:{en:{},zh:{}},
+  birthplace:{en:{'北海道・東北':'Hokkaido / Tohoku','関東':'Kanto','信越・北陸':'Shinetsu / Hokuriku','東海':'Tokai','関西':'Kansai','中国':'Chugoku','四国':'Shikoku','九州・沖縄':'Kyushu / Okinawa','海外':'Overseas'},zh:{'北海道・東北':'北海道·东北','関東':'关东','信越・北陸':'信越·北陆','東海':'东海','関西':'关西','中国':'中国地区','四国':'四国','九州・沖縄':'九州·冲绳','海外':'海外'}},
+  style_type:{en:{'綺麗':'Beautiful','セクシー':'Sexy','ギャル':'Gal','童顔':'Baby face','ハーフ顔':'Half'},zh:{'綺麗':'漂亮','セクシー':'性感','ギャル':'辣妹','童顔':'童颜','ハーフ顔':'混血颜'}},
+  alcohol:{en:{'強い':'Strong','飲む':'Drinks','飲めない':"Can't drink"},zh:{'強い':'酒量好','飲む':'会喝','飲めない':'不能喝'}},
+  skill:{en:{'話し上手':'Good talker','聞き上手':'Good listener','盛り上げ上手':'Lively','接待上手':'Great host','ゴルフ':'Golf'},zh:{'話し上手':'健谈','聞き上手':'善于倾听','盛り上げ上手':'活跃气氛','接待上手':'待客周到','ゴルフ':'高尔夫'}},
+  face:{en:{'綺麗系':'Beautiful','可愛い系':'Cute','クール系':'Cool','癒やし系':'Healing','ハーフ系':'Half'},zh:{'綺麗系':'漂亮系','可愛い系':'可爱系','クール系':'冷酷系','癒やし系':'治愈系','ハーフ系':'混血系'}},
+  body_style:{en:{'スレンダー':'Slender','普通':'Average','グラマー':'Glamorous','ややぽっちゃり':'Curvy','モデル体型':'Model'},zh:{'スレンダー':'苗条','普通':'普通','グラマー':'丰满','ややぽっちゃり':'微丰满','モデル体型':'模特身材'}},
+  hair:{en:{'ショート':'Short','ミディアム':'Medium','ロング':'Long'},zh:{'ショート':'短发','ミディアム':'中长发','ロング':'长发'}},
+  langs:{en:{'日本語':'Japanese','英語':'English','中国語':'Chinese'},zh:{'日本語':'日语','英語':'英语','中国語':'中文'}}
+};
+const tv = (key, v) => (CAST_TR[key] && CAST_TR[key][LANG] && CAST_TR[key][LANG][v]) || v;
 const CAST_OPTS = {
   bust: ['B','C','D','E','F','G','H以上'],
   birthplace: ['北海道・東北','関東','信越・北陸','東海','関西','中国','四国','九州・沖縄','海外'],
@@ -576,16 +589,14 @@ let CAST_F = {};
 function chipGroup(key, values){
   const sel = CAST_F[key] || [];
   return `<div class="flt-group"><div class="flt-title">${key==='langs'?t('f_lang'):t('f_'+key)}</div><div class="flt-chips">
-    ${values.map(v=>`<span class="chip ${sel.includes(v)?'on':''}" onclick="castChip('${key}','${esc(v)}')">${esc(v)}</span>`).join('')}</div></div>`;
+    ${values.map(v=>`<span class="chip ${sel.includes(v)?'on':''}" onclick="castChip('${key}','${esc(v)}',this)">${esc(tv(key,v))}</span>`).join('')}</div></div>`;
 }
 /* 複数選択対応: 押すと選択/解除、即時で検索へ反映 */
-function castChip(k, v){
+function castChip(k, v, el){
   const cur = CAST_F[k] || [];
   CAST_F[k] = cur.includes(v) ? cur.filter(x=>x!==v) : cur.concat([v]);
   if (!CAST_F[k].length) delete CAST_F[k];
-  document.querySelectorAll(`.flt-chips .chip`).forEach(c => {
-    if (c.textContent === v && c.closest('.flt-group').querySelector('.flt-title').textContent) c.classList.toggle('on', (CAST_F[k]||[]).includes(v));
-  });
+  if (el) el.classList.toggle('on', (CAST_F[k]||[]).includes(v));
   renderCastList();
 }
 function castSel(k, v){ if(v) CAST_F[k]=[v]; else delete CAST_F[k]; renderCastList(); }
@@ -669,14 +680,16 @@ async function pageBlog(slug){
 }
 async function pageMypage(){
   if (!ME) { loginModal(); return `<div class="wrap"><div class="empty">—</div></div>`; }
-  const u = await API('/api/me');
-  const favStores = u.favorites.filter(f => f.target_type === 'store');
-  const favCasts = u.favorites.filter(f => f.target_type === 'cast');
+  const [u, allStores, allCasts] = await Promise.all([API('/api/me'), API('/api/stores'), API('/api/casts')]);
+  const favS = u.favorites.filter(f => f.target_type === 'store').map(f => allStores.find(s => s.id === f.target_id)).filter(Boolean);
+  const favC = u.favorites.filter(f => f.target_type === 'cast').map(f => allCasts.find(c => c.id === f.target_id)).filter(Boolean);
+  const today = new Date().toISOString().slice(0,10);
   return `<div class="wrap"><section class="sec"><h2><em>◆</em>${t('mypage')}</h2>
-  <div class="meta" style="margin:10px 0">${ic('user',14)} ${esc(u.name||'')} · ${esc(u.email)} ${u.role==='admin'?`· <a href="/admin.html" style="color:var(--gold)">${t('admin')}</a>`:''}</div>
+  <div class="meta" style="margin:10px 0">${ic('user',14)} ${esc(u.name||'')} · ${esc(u.email)} ${['admin','store','cast'].includes(u.role)?`· <a href="/admin.html" style="color:var(--gold)">${t('admin')}</a>`:''}</div>
   <button type="button" class="btn sm ghost" onclick="localStorage.removeItem('tng_token');TOKEN='';ME=null;go('home')">${t('logout')}</button>
-  <h2 style="margin-top:28px"><em>◆</em>${t('my_coupons')}</h2><div class="grid">${u.coupons.map(c=>`<div class="card"><div class="bd"><h3>${esc(L(c,'title'))}</h3><div class="meta">${t('code')}: <b style="color:var(--gold)">${esc(c.code||'')}</b> · ${t('valid')}: ${c.valid_until||'-'}</div></div></div>`).join('')||`<div class="empty">—</div>`}</div>
-  <h2 style="margin-top:28px"><em>◆</em>${t('favs')}</h2><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${favStores.map(f=>`<span class="chip" onclick="go('store',${f.target_id})">${ic('home',12)} #${f.target_id}</span>`).join('')}${favCasts.map(f=>`<span class="chip" onclick="go('cast',${f.target_id})">${ic('user',12)} #${f.target_id}</span>`).join('')||''}</div>
+  <h2 style="margin-top:28px"><em>◆</em>${t('my_coupons')}</h2><div class="grid">${u.coupons.map(c=>{const exp=c.valid_until&&c.valid_until<today;return `<div class="card" onclick="couponDetail(${c.id})" style="${exp?'opacity:.55':''}"><div class="bd"><h3>${esc(L(c,'title'))}</h3><div class="meta">${t('code')}: <b style="color:var(--gold)">${esc(c.code||'')}</b></div><div class="meta">${exp?`<span style="color:#e08080">${t('coupon_expired')}</span>`:`${t('valid')}: ${c.valid_until||'-'}`}</div></div></div>`}).join('')||`<div class="empty">—</div>`}</div>
+  <h2 style="margin-top:28px"><em>◆</em>${t('fav_stores')}</h2><div class="grid">${favS.map(storeCard).join('')||`<div class="empty">—</div>`}</div>
+  <h2 style="margin-top:28px"><em>◆</em>${t('fav_casts')}</h2><div class="grid">${favC.map(castCard).join('')||`<div class="empty">—</div>`}</div>
   <h2 style="margin-top:28px"><em>◆</em>${t('messages')}</h2>
   ${u.messages.map(m=>`<div class="msg-bubble"><div style="font-size:11px;color:var(--sub)">${m.direction==='user_to_store'?'→':'←'} ${esc((m.created_at||'').slice(0,16))}</div>
     <div>${esc(m['body_'+LANG]||m.body)}</div><div class="tr">${t('original')}: ${esc(m.body)}</div></div>`).join('')||`<div class="empty">—</div>`}
@@ -684,20 +697,56 @@ async function pageMypage(){
 }
 
 /* ================= actions ================= */
-function fav(type, id){ if (needLogin()) return; API('/api/favorites', { method:'POST', body: JSON.stringify({ target_type: type, target_id: id }) }).then(() => toast('♥')); }
-function getCoupon(id){ if (needLogin()) return; API(`/api/coupons/${id}/get`, { method:'POST' }).then(() => toast(t('coupon_saved'))); }
-function contactStore(storeId, name, castId){
-  if (needLogin()) return;
-  const m = modal(`<h3>${esc(name)}</h3>
-    <div class="field"><label>${t('message')} (${LANG.toUpperCase()})</label><textarea id="msgbody" rows="4" placeholder="Hello! I'd like to visit tonight."></textarea></div>
-    <button type="button" class="btn" style="width:100%" onclick="sendMsg(${storeId},${castId||null},this)">${ic('send',14)} ${t('send')}</button>
-    <p style="font-size:11px;color:var(--sub);margin-top:11px">${t('translated')}</p>`);
-  m.querySelector('textarea').focus();
+async function couponDetail(id){
+  const cs = await API('/api/coupons');
+  const c = cs.find(x => x.id === id); if (!c) return;
+  const today = new Date().toISOString().slice(0,10);
+  const exp = c.valid_until && c.valid_until < today;
+  modal(`<h3>${ic('ticket',16)} ${esc(L(c,'title'))}</h3>
+    ${exp?`<div style="color:#e08080;font-weight:700;margin-bottom:8px">${t('coupon_expired')}</div>`:''}
+    <div class="meta" style="margin-bottom:10px">${ic('home',12)} ${esc(c['store_name_'+LANG]||c.store_name_en)} · ${t('valid')}: ${c.valid_until||'-'}</div>
+    <div class="panel" style="padding:0 0 12px">${esc(L(c,'desc'))}</div>
+    ${L(c,'conditions')?`<div style="font-size:12px;color:var(--sub)">${esc(L(c,'conditions'))}</div>`:''}
+    <div style="background:var(--bg3);border:1px dashed var(--gold);border-radius:10px;padding:14px;text-align:center;margin:14px 0"><span style="font-size:11px;color:var(--sub)">${t('code')}</span><br><b style="font-size:22px;letter-spacing:.12em;color:var(--gold2)">${esc(c.code||'')}</b></div>
+    <div class="row"><button type="button" class="btn ghost" onclick="this.closest('.modal').remove();go('store',${c.store_id})">${t('visit_club')}</button>
+    ${!exp?`<button type="button" class="btn" onclick="this.closest('.modal').remove();contactStore(${c.store_id},'${esc((c['store_name_'+LANG]||c.store_name_en)).replace(/'/g,'')}')">${ic('message',14)} ${t('contact')}</button>`:''}</div>`);
 }
-function sendMsg(storeId, castId, btn){
+/* 一覧のクーポンカード: 詳細はモーダルへ */
+function fav(type, id, btn){
+  if (needLogin()) return;
+  API('/api/favorites', { method:'POST', body: JSON.stringify({ target_type: type, target_id: id }) }).then(r => {
+    toast(r.favorited ? t('fav_add') : t('fav_del'));
+    if (btn) { btn.classList.toggle('fav-on', !!r.favorited); btn.innerHTML = ic('heart', 15); btn.style.color = r.favorited ? 'var(--gold)' : ''; btn.style.borderColor = r.favorited ? 'var(--gold)' : ''; }
+  });
+}
+function getCoupon(id){ if (needLogin()) return; API(`/api/coupons/${id}/get`, { method:'POST' }).then(() => toast(t('coupon_saved'))); }
+function contactStore(storeId, name, castId, kind){
+  if (needLogin()) return;
+  const isResv = kind === 'reservation';
+  const isCast = !!castId;
+  const title = isResv ? t('reservation') : (isCast ? t('chat_cast') : t('chat_club'));
+  modal(`<h3>${esc(name)}</h3>
+    <div style="font-size:12px;color:var(--gold2);margin-bottom:10px">${title}</div>
+    ${isResv?`<div class="filters" style="margin-top:0">
+      <input type="date" id="rsv-d" style="flex:1" min="${new Date().toISOString().slice(0,10)}">
+      <select id="rsv-t" style="flex:1">${Array.from({length:13},(_,i)=>{const h=18+Math.floor(i/2),m=i%2?'30':'00';return `<option>${h}:${m}</option>`}).join('')}</select>
+      <select id="rsv-p" style="flex:0 0 90px">${[1,2,3,4,5,6,7,8].map(n=>`<option>${n}</option>`).join('')}</select></div>`:''}
+    <div class="field" style="margin-top:10px"><label>${t('message')} (${LANG.toUpperCase()})</label><textarea id="msgbody" rows="4" placeholder="Hello! I'd like to visit tonight."></textarea></div>
+    <button type="button" class="btn" style="width:100%" onclick="sendMsg(${storeId},${castId||null},this,'${kind||''}')">${ic('send',14)} ${t('send')}</button>
+    <p style="font-size:11px;color:var(--sub);margin-top:11px">${t('translated')}</p>`);
+  const ta = document.getElementById('msgbody'); if (ta) ta.focus();
+}
+function sendMsg(storeId, castId, btn, kind){
   const body = document.getElementById('msgbody').value.trim(); if (!body) return;
-  API('/api/messages', { method:'POST', body: JSON.stringify({ store_id: storeId, cast_id: castId, body }) })
-    .then(() => { btn.closest('.modal').remove(); toast(t('msg_sent')); });
+  const payload = { store_id: storeId, cast_id: castId, body, kind: kind === 'reservation' ? 'reservation' : (castId ? 'cast_chat' : 'store_chat') };
+  if (kind === 'reservation') {
+    payload.resv_date = (document.getElementById('rsv-d')||{}).value || '';
+    payload.resv_time = (document.getElementById('rsv-t')||{}).value || '';
+    payload.resv_people = (document.getElementById('rsv-p')||{}).value || '';
+  }
+  btn.disabled = true;
+  API('/api/messages', { method:'POST', body: JSON.stringify(payload) })
+    .then(r => { if (r.error) { btn.disabled = false; return toast(r.error); } btn.closest('.modal').remove(); toast(t('msg_sent')); });
 }
 /* 口コミ: 店舗選択ピッカー → 投稿モーダル (店舗/キャスト両対応) */
 async function reviewPicker(){
@@ -725,7 +774,7 @@ function rvCount(){
   c.textContent = n + ' / 200' + (n >= 200 ? ' ✓' : '');
   c.style.color = n >= 200 ? 'var(--gold2)' : 'var(--sub)';
   const ok = n >= 200; b.disabled = !ok; b.style.opacity = ok ? '1' : '.45';
-  if (e) e.style.display = (n > 0 && n < 200) ? 'block' : 'none';
+  if (e) e.style.display = 'none';
 }
 function submitReview(storeId, castId, btn){
   if (btn.disabled) return;

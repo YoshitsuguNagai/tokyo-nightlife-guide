@@ -6,7 +6,10 @@ const Database = require('better-sqlite3');
 const crypto = require('crypto');
 const path = require('path');
 
-const db = new Database(path.join(__dirname, 'data.sqlite'));
+const fs = require('fs');
+const DB_PATH = process.env.DATABASE_PATH || path.join(__dirname, 'data.sqlite');
+try { fs.mkdirSync(path.dirname(DB_PATH), { recursive: true }); } catch (e) {}
+const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
@@ -173,6 +176,12 @@ addCol('reviews', 'reply_body', 'TEXT');
 addCol('reviews', 'reply_by', 'TEXT');
 addCol('reviews', 'reply_role', 'TEXT');
 addCol('reviews', 'reply_at', 'TEXT');
+addCol('events', 'end_date', 'TEXT');
+addCol('coupons', 'valid_from', 'TEXT');
+addCol('messages', 'kind', 'TEXT');        // store_chat | cast_chat | inquiry | reservation
+addCol('messages', 'resv_date', 'TEXT');
+addCol('messages', 'resv_time', 'TEXT');
+addCol('messages', 'resv_people', 'INTEGER');
 
 /* ---------- seed ---------- */
 const areaCount = db.prepare('SELECT COUNT(*) c FROM areas').get().c;

@@ -150,7 +150,7 @@ const F = {
   {k:'store_id',l:'開催店舗',type:'store'},
   {k:'title_ja',l:'イベント名（日本語）',tr:'title'},{k:'title_en',l:'イベント名（English）'},{k:'title_zh',l:'イベント名（中文）'},
   {k:'desc_ja',l:'説明（日本語）',type:'textarea',tr:'desc'},{k:'desc_en',l:'説明（English）',type:'textarea'},{k:'desc_zh',l:'説明（中文）',type:'textarea'},
-  {k:'event_date',l:'開催日（YYYY-MM-DD）'},{k:'start_time',l:'開始時間（例: 20:00）'},{k:'end_time',l:'終了時間'},
+  {k:'event_date',l:'開催開始日',type:'date'},{k:'start_time',l:'開催開始時間',type:'time'},{k:'end_date',l:'開催終了日（1日のみは同日）',type:'date'},{k:'end_time',l:'開催終了時間',type:'time'},
   {k:'image',l:'イベント画像',type:'image'},{k:'hue',l:'画像未設定時のテーマ色',type:'number'},
   {k:'status',l:'公開状態',type:'select',opts:ST_OPTS}],
  coupons:[
@@ -158,7 +158,7 @@ const F = {
   {k:'title_ja',l:'クーポン名（日本語）',tr:'title'},{k:'title_en',l:'クーポン名（English）'},{k:'title_zh',l:'クーポン名（中文）'},
   {k:'desc_ja',l:'説明（日本語）',type:'textarea',tr:'desc'},{k:'desc_en',l:'説明（English）',type:'textarea'},{k:'desc_zh',l:'説明（中文）',type:'textarea'},
   {k:'conditions_ja',l:'利用条件（日本語）',tr:'conditions'},{k:'conditions_en',l:'利用条件（English）'},{k:'conditions_zh',l:'利用条件（中文）'},
-  {k:'code',l:'クーポンコード'},{k:'valid_until',l:'有効期限（YYYY-MM-DD）'},
+  {k:'code',l:'クーポンコード'},{k:'valid_from',l:'利用開始日',type:'date'},{k:'valid_until',l:'有効期限',type:'date'},
   {k:'image',l:'クーポン画像',type:'image'},{k:'hue',l:'画像未設定時のテーマ色',type:'number'},
   {k:'status',l:'公開状態',type:'select',opts:ST_OPTS}],
  blogs:[
@@ -323,6 +323,8 @@ async function editRow(table, id){
       let inp = '';
       if (f.type === 'textarea') inp = `<textarea data-k="${f.k}" rows="4">${esc(val)}</textarea>`;
       else if (f.type === 'number') inp = `<input data-k="${f.k}" type="number" value="${esc(val)}" ${isSettings&&row&&f.k==='key'?'disabled':''}>`;
+      else if (f.type === 'date') inp = `<input data-k="${f.k}" type="date" value="${esc(val)}">`;
+      else if (f.type === 'time') inp = `<input data-k="${f.k}" type="time" value="${esc(val)}">`;
       else if (f.type === 'bool') inp = `<select data-k="${f.k}" data-num="1">${Object.entries(BOOL_OPTS).map(([v,l])=>`<option value="${v}" ${String(val)===v?'selected':''}>${l}</option>`).join('')}</select>`;
       else if (f.type === 'select') inp = `<select data-k="${f.k}"><option value="">— 未選択 —</option>${Object.entries(f.opts).map(([v,l])=>`<option value="${v}" ${String(val)===String(v)?'selected':''}>${l}</option>`).join('')}</select>`;
       else if (f.type === 'area') inp = `<select data-k="${f.k}" data-num="1"><option value="">— 選択 —</option>${AREAS.map(a=>`<option value="${a.id}" ${row&&row[f.k]===a.id?'selected':''}>${esc(a.name_ja)}</option>`).join('')}</select>`;
@@ -453,12 +455,15 @@ async function pwChange(btn){
 /* DM管理 */
 async function renderMessages(main){
   const rows = await API('/api/admin/messages');
+  const KIND = { store_chat:'店舗チャット', cast_chat:'キャストチャット', inquiry:'問い合わせ', reservation:'予約希望' };
   main.innerHTML = `<div class="top"><h2>✉ DM管理</h2></div>
-  <div style="overflow:auto"><table><tr><th>ID</th><th>方向</th><th>店舗</th><th>ユーザー</th><th>原文</th><th>日本語</th><th>English</th><th>中文</th><th>日時</th><th>操作</th></tr>
-  ${rows.map(m=>`<tr><td>${m.id}</td><td>${m.direction==='user_to_store'?'客→店':'店→客'}</td><td>${esc((STORES.find(s=>s.id===m.store_id)||{}).name_ja||m.store_id)}</td><td>${m.user_id}</td>
-    <td>${esc(short(m.body))}</td><td>${esc(short(m.body_ja))}</td><td>${esc(short(m.body_en))}</td><td>${esc(short(m.body_zh))}</td>
+  <div style="overflow:auto"><table><tr><th>ID</th><th>種類</th><th>方向</th><th>店舗</th><th>キャスト</th><th>ユーザー</th><th>原文</th><th>予約</th><th>既読</th><th>日時(JST)</th><th>操作</th></tr>
+  ${rows.map(m=>`<tr><td>${m.id}</td><td><span class="badge ${m.kind==='reservation'?'pen':m.kind==='cast_chat'?'castbadge':'storebadge'}">${KIND[m.kind]||'問い合わせ'}</span></td><td>${m.direction==='user_to_store'?'受信':'送信'}</td><td>${esc((STORES.find(s=>s.id===m.store_id)||{}).name_ja||m.store_id)}</td><td>${m.cast_id?esc((CASTS.find(c=>c.id===m.cast_id)||{}).display_name||m.cast_id):'—'}</td><td>${m.user_id}</td>
+    <td style="white-space:normal">${esc(short(m.body))}</td>
+    <td>${m.kind==='reservation'?`${esc(m.resv_date||'-')} ${esc(m.resv_time||'')} ${m.resv_people?m.resv_people+'名':''}`:'—'}</td>
+    <td>${m.is_read?'<span class="badge pub">既読</span>':'<span class="badge pen">未読</span>'}</td>
     <td>${esc((m.created_at||'').slice(0,16))}</td>
-    <td><button class="btn ghost sm" onclick="replyMsg(${m.id})">返信</button></td></tr>`).join('')||'<tr><td colspan="10" style="text-align:center;color:var(--sub)">メッセージはまだありません</td></tr>'}</table></div>`;
+    <td><button class="btn ghost sm" onclick="replyMsg(${m.id})">返信</button></td></tr>`).join('')||'<tr><td colspan="11" style="text-align:center;color:var(--sub)">メッセージはまだありません</td></tr>'}</table></div>`;
 }
 function replyMsg(id){
   const m = document.createElement('div'); m.className = 'modal';
