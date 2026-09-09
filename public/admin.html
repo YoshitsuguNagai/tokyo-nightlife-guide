@@ -1,1 +1,489 @@
+<!DOCTYPE html>
+<html lang="ja" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google" content="notranslate">
+<title>管理画面 | Tokyo Nightlife Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#c9a227;--bg:#0f0f10;--bg2:#171719;--bg3:#212124;--line:#2c2c30;--txt:#eee;--sub:#9a968c}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font-family:'Noto Sans JP','Hiragino Sans',Arial,sans-serif;font-size:14px;line-height:1.7}
+a{color:var(--gold)}
+.layout{display:flex;min-height:100vh}
+.side{width:216px;background:var(--bg2);border-right:1px solid var(--line);padding:16px 10px;position:sticky;top:0;height:100vh;overflow:auto;flex:none}
+.side h1{font-size:14px;color:var(--gold);padding:8px 10px;margin-bottom:10px;letter-spacing:.06em}
+.side a{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;color:var(--sub);cursor:pointer;font-size:13px;position:relative}
+.side a.on,.side a:hover{background:var(--bg3);color:var(--txt)}
+.pend{position:absolute;right:10px;background:#c0392b;color:#fff;font-size:10px;border-radius:10px;padding:1px 7px;font-weight:700}
+.main{flex:1;padding:22px;overflow:auto;min-width:0}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px;flex-wrap:wrap}
+.top h2{font-size:19px;letter-spacing:.04em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.stat{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:16px}
+.stat b{font-size:26px;color:var(--gold);font-weight:700}
+.stat.alert{border-color:#c0392b}.stat.alert b{color:#e74c3c}
+.notice{background:rgba(192,57,43,.12);border:1px solid #c0392b;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:13px}
+table{width:100%;border-collapse:collapse;background:var(--bg2);border-radius:10px;overflow:hidden;margin-top:12px}
+th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:12px;vertical-align:top}
+th{color:var(--sub);background:var(--bg3);white-space:nowrap}
+td{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;gap:6px;background:var(--gold);color:#141414;border:0;border-radius:8px;padding:9px 17px;font-weight:700;cursor:pointer;font-size:13px;font-family:inherit}
+.btn.ghost{background:var(--bg3);color:var(--txt);border:1px solid var(--line)}
+.btn.sm{padding:5px 11px;font-size:11px;min-height:32px}
+.btn.danger{background:#7a2626;color:#fff}
+.btn.tr{background:#1f3a5f;color:#cfe3ff;border:1px solid #2d4f7c}
+input,textarea,select{width:100%;background:var(--bg3);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:9px;font-size:13px;font-family:inherit;min-height:38px}
+input:focus,textarea:focus,select:focus{outline:1px solid var(--gold)}
+.frm{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.frm .full{grid-column:1/-1}
+.frm label{display:block;font-size:11px;color:var(--sub);margin-bottom:4px;letter-spacing:.03em}
+.help{font-size:10.5px;color:#7a766c;margin-top:3px}
+.trbar{grid-column:1/-1;display:flex;align-items:center;gap:10px;background:rgba(201,162,39,.06);border:1px dashed #4a3d1c;border-radius:8px;padding:8px 12px}
+.trbar span{font-size:11px;color:var(--sub)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:flex-start;justify-content:center;padding:26px 14px;z-index:50;overflow:auto}
+.modal .box{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:24px;width:100%;max-width:780px}
+.modal h3{font-size:16px}
+.searchbar{display:flex;gap:8px;margin-top:12px}
+.searchbar input{max-width:300px}
+.badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:10px;white-space:nowrap}
+.badge.pub{background:#1e3a1e;color:#8f8}.badge.pen{background:#3a3318;color:#fc6}.badge.hide{background:#333;color:#999}.badge.rej{background:#3a1e1e;color:#f88}
+.badge.castbadge{background:#1e2d3a;color:#7cc4f8}.badge.storebadge{background:#2d2416;color:var(--gold2)}
+.upzone{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.upzone img{width:110px;height:76px;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:#000}
+.upzone input[type=file]{display:none}
+.uplabel{display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px dashed var(--line);border-radius:8px;padding:9px 14px;font-size:12px;color:var(--sub);cursor:pointer;min-height:38px}
+.uplabel:hover{border-color:var(--gold);color:var(--gold2)}
+.multi-imgs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.multi-imgs .mi{position:relative}
+.multi-imgs .mi img{width:96px;height:68px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.multi-imgs .mi b{position:absolute;top:-6px;right:-6px;background:#7a2626;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.cbg{display:flex;flex-wrap:wrap;gap:6px 14px;background:var(--bg3);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.cbg label{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--txt);cursor:pointer;margin:0}
+.cbg input{width:auto;min-height:0}
+.login-wrap{max-width:370px;margin:110px auto;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:30px}
+.login-wrap h1{color:var(--gold);font-size:18px;margin-bottom:18px}
+.login-wrap .field{margin-bottom:11px}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--gold);color:#141414;padding:11px 24px;border-radius:24px;font-weight:700;z-index:99}
+.pw{position:relative}.pw input{padding-right:42px}
+.eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--sub);cursor:pointer;padding:6px}
+@media(max-width:820px){.side{width:60px;padding:12px 6px}.side a span,.side h1 span{display:none}.side a{justify-content:center}.pend{right:4px;top:4px}.frm{grid-template-columns:1fr}.main{padding:14px}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+let TOKEN = localStorage.getItem('tng_admin_token') || '';
+let VIEW = 'dashboard';
+let STATS = null, AREAS = [], STORES = [], CASTS = [], ME_ROLE = 'admin', ME_STORE = null, ME_CAST = null;
+const API = (p, o) => fetch(p, { ...o, headers: { 'Content-Type':'application/json', Authorization:'Bearer '+TOKEN } }).then(async r => {
+  if (r.status === 401) { TOKEN=''; localStorage.removeItem('tng_admin_token'); render(); throw new Error('auth'); }
+  return r.json();
+});
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){ const d = document.createElement('div'); d.className='toast'; d.textContent=m; document.body.appendChild(d); setTimeout(()=>d.remove(),2200); }
 
+const ST_OPTS = { published:'公開', hidden:'非公開' };
+const BOOL_OPTS = { 1:'する', 0:'しない' };
+const PAY_OPTS = ['現金','VISA','Mastercard','AMEX','JCB','Diners','電子マネー','QR決済','その他'];
+const SEL = {
+  bust:['B','C','D','E','F','G','H以上'],
+  birthplace:['北海道・東北','関東','信越・北陸','東海','関西','中国','四国','九州・沖縄','海外'],
+  style_type:['綺麗','セクシー','ギャル','童顔','ハーフ顔'],
+  alcohol:['強い','飲む','飲めない'],
+  skill:['話し上手','聞き上手','盛り上げ上手','接待上手','ゴルフ'],
+  face:['綺麗系','可愛い系','クール系','癒やし系','ハーフ系'],
+  body_style:['スレンダー','普通','グラマー','モデル体型'],
+  hair:['ショート','ミディアム','ロング']
+};
+const selOpts = arr => Object.fromEntries(arr.map(v=>[v,v]));
+/* tr: 翻訳グループ。trバーは先頭の tr 項目にだけ表示 */
+const F = {
+ stores:[
+  {k:'name_ja',l:'店舗名（日本語）',tr:'name'},{k:'name_en',l:'店舗名（English）'},{k:'name_zh',l:'店舗名（中文）'},
+  {k:'area_id',l:'エリア',type:'area'},
+  {k:'genre',l:'ジャンル',type:'select',opts:{cabaret:'キャバクラ',lounge:'ラウンジ',club:'クラブ'}},
+  {k:'desc_ja',l:'店舗紹介（日本語）',type:'textarea',tr:'desc'},{k:'desc_en',l:'店舗紹介（English）',type:'textarea'},{k:'desc_zh',l:'店舗紹介（中文）',type:'textarea'},
+  {k:'cover_image',l:'店舗メイン写真',type:'image'},
+  {k:'images',l:'追加写真（カルーセル表示・複数可）',type:'images'},
+  {k:'logo',l:'ロゴ',type:'image'},
+  {k:'hue',l:'写真未設定時のテーマ色（0〜360）',type:'number'},
+  {k:'address',l:'住所'},
+  {k:'google_map_url',l:'Googleマップ共有URL（任意）',help:'未入力でも住所から地図を表示します。'},
+  {k:'open_hours',l:'営業時間（例: 20:00 - 01:00）'},{k:'closed_days',l:'定休日（例: 日曜・祝日）'},
+  {k:'phone',l:'電話番号'},
+  {k:'line_url',l:'LINE公式アカウント URL',help:'「友だち追加URL」(https://line.me/...)。店舗ページにLINEボタンが表示されます。'},
+  {k:'instagram',l:'Instagram URL'},{k:'website',l:'公式Webサイト URL'},
+  {k:'budget_min',l:'予算・下限（円）',type:'number'},{k:'budget_max',l:'予算・上限（円）',type:'number'},
+  {k:'charge',l:'チャージ（例: ¥10,000）'},{k:'service_fee',l:'サービス料（例: 20%）'},
+  {k:'payment_methods',l:'支払い方法（複数選択可）',type:'paychecks'},
+  {k:'cast_count',l:'キャスト数',type:'number'},
+  {k:'foreigner_welcome',l:'外国人歓迎',type:'bool'},{k:'english_ok',l:'英語対応',type:'bool'},{k:'chinese_ok',l:'中国語対応',type:'bool'},
+  {k:'credit_card_ok',l:'クレジットカード対応',type:'bool'},{k:'reservation_ok',l:'予約可否',type:'bool'},
+  {k:'is_recommended',l:'おすすめ店舗に表示',type:'bool'},
+  {k:'sort_order',l:'掲載順位（小さいほど先頭）',type:'number'},
+  {k:'status',l:'掲載ステータス',type:'select',opts:ST_OPTS}],
+ casts:[
+  {k:'store_id',l:'在籍店舗',type:'store'},
+  {k:'name',l:'名前（管理用）'},{k:'display_name',l:'表示名'},
+  {k:'photo',l:'メイン写真',type:'image'},
+  {k:'photos',l:'追加写真（カルーセル・複数可）',type:'images'},
+  {k:'hue',l:'写真未設定時のテーマ色',type:'number'},
+  {k:'profile_ja',l:'プロフィール（日本語）',type:'textarea',tr:'profile'},{k:'profile_en',l:'プロフィール（English）',type:'textarea'},{k:'profile_zh',l:'プロフィール（中文）',type:'textarea'},
+  {k:'height',l:'身長（cm）',type:'number'},
+  {k:'bust',l:'バスト',type:'select',opts:selOpts(SEL.bust)},
+  {k:'birthplace',l:'出身地',type:'select',opts:selOpts(SEL.birthplace)},
+  {k:'style_type',l:'系統（検索「系統」と連動）',type:'select',opts:selOpts(SEL.style_type)},
+  {k:'alcohol',l:'お酒',type:'select',opts:selOpts(SEL.alcohol)},
+  {k:'skill',l:'接待スキル',type:'select',opts:selOpts(SEL.skill)},
+  {k:'face',l:'顔立ち',type:'select',opts:selOpts(SEL.face)},
+  {k:'body_style',l:'スタイル（検索「スタイル」と連動）',type:'select',opts:selOpts(SEL.body_style)},
+  {k:'hair',l:'髪型',type:'select',opts:selOpts(SEL.hair)},
+  {k:'hobbies',l:'趣味'},{k:'favorites',l:'好きなもの'},
+  {k:'languages',l:'対応言語（複数選択可）',type:'langchecks'},
+  {k:'english_ok',l:'英語対応',type:'bool'},{k:'chinese_ok',l:'中国語対応',type:'bool'},
+  {k:'recommend_ja',l:'おすすめコメント（日本語）',tr:'recommend'},{k:'recommend_en',l:'おすすめコメント（English）'},{k:'recommend_zh',l:'おすすめコメント（中文）'},
+  {k:'sns_instagram',l:'Instagram URL'},{k:'sns_tiktok',l:'TikTok URL'},{k:'sns_x',l:'X（旧Twitter）URL'},
+  {k:'is_popular',l:'人気キャストに表示',type:'bool'},{k:'sort_order',l:'掲載順',type:'number'},
+  {k:'status',l:'掲載ステータス',type:'select',opts:ST_OPTS}],
+ areas:[{k:'slug',l:'スラッグ（英小文字 例: roppongi）'},{k:'name_ja',l:'名前（日本語）',tr:'name'},{k:'name_en',l:'名前（English）'},{k:'name_zh',l:'名前（中文）'},{k:'sort_order',l:'表示順',type:'number'},{k:'status',l:'ステータス',type:'select',opts:ST_OPTS}],
+ events:[
+  {k:'store_id',l:'開催店舗',type:'store'},
+  {k:'title_ja',l:'イベント名（日本語）',tr:'title'},{k:'title_en',l:'イベント名（English）'},{k:'title_zh',l:'イベント名（中文）'},
+  {k:'desc_ja',l:'説明（日本語）',type:'textarea',tr:'desc'},{k:'desc_en',l:'説明（English）',type:'textarea'},{k:'desc_zh',l:'説明（中文）',type:'textarea'},
+  {k:'event_date',l:'開催開始日',type:'date'},{k:'start_time',l:'開催開始時間',type:'time'},{k:'end_date',l:'開催終了日（1日のみは同日）',type:'date'},{k:'end_time',l:'開催終了時間',type:'time'},
+  {k:'image',l:'イベント画像',type:'image'},{k:'hue',l:'画像未設定時のテーマ色',type:'number'},
+  {k:'status',l:'公開状態',type:'select',opts:ST_OPTS}],
+ coupons:[
+  {k:'store_id',l:'対象店舗',type:'store'},
+  {k:'title_ja',l:'クーポン名（日本語）',tr:'title'},{k:'title_en',l:'クーポン名（English）'},{k:'title_zh',l:'クーポン名（中文）'},
+  {k:'desc_ja',l:'説明（日本語）',type:'textarea',tr:'desc'},{k:'desc_en',l:'説明（English）',type:'textarea'},{k:'desc_zh',l:'説明（中文）',type:'textarea'},
+  {k:'conditions_ja',l:'利用条件（日本語）',tr:'conditions'},{k:'conditions_en',l:'利用条件（English）'},{k:'conditions_zh',l:'利用条件（中文）'},
+  {k:'code',l:'クーポンコード'},{k:'valid_from',l:'利用開始日',type:'date'},{k:'valid_until',l:'有効期限',type:'date'},
+  {k:'image',l:'クーポン画像',type:'image'},{k:'hue',l:'画像未設定時のテーマ色',type:'number'},
+  {k:'status',l:'公開状態',type:'select',opts:ST_OPTS}],
+ blogs:[
+  {k:'slug',l:'スラッグ（URL用・英小文字）'},{k:'category',l:'カテゴリー'},
+  {k:'title_ja',l:'タイトル（日本語）',tr:'title'},{k:'title_en',l:'タイトル（English）'},{k:'title_zh',l:'タイトル（中文）'},
+  {k:'body_ja',l:'本文（日本語）',type:'textarea',tr:'body'},{k:'body_en',l:'本文（English）',type:'textarea'},{k:'body_zh',l:'本文（中文）',type:'textarea'},
+  {k:'seo_title',l:'SEO タイトル'},{k:'seo_description',l:'SEO 説明文'},
+  {k:'image',l:'アイキャッチ画像',type:'image'},{k:'hue',l:'画像未設定時のテーマ色',type:'number'},
+  {k:'status',l:'公開状態',type:'select',opts:ST_OPTS}],
+ reviews:[
+  {k:'store_id',l:'店舗',type:'store'},
+  {k:'cast_id',l:'キャスト（キャスト口コミの場合）',type:'cast'},
+  {k:'author_name',l:'投稿者名'},{k:'rating',l:'星（1〜5）',type:'number'},
+  {k:'title',l:'タイトル'},{k:'body',l:'本文',type:'textarea'},
+  {k:'visit_date',l:'利用日'},{k:'language',l:'投稿言語',type:'select',opts:{ja:'日本語',en:'English',zh:'中文'}},
+  {k:'status',l:'承認状態',type:'select',opts:{pending:'未承認',approved:'承認（公開）',rejected:'非承認',hidden:'非表示'}}],
+ users:[{k:'name',l:'名前'},{k:'email',l:'メールアドレス'},{k:'country',l:'国'},{k:'language',l:'使用言語',type:'select',opts:{ja:'日本語',en:'English',zh:'中文'}},{k:'role',l:'権限',type:'select',opts:{user:'一般ユーザー',store:'店舗管理者（Club Admin）',cast:'キャスト（Cast）',admin:'管理者（Super Admin）'}},{k:'store_id',l:'対象店舗（店舗管理者の場合）',type:'store'},{k:'cast_id',l:'対象キャスト（キャストの場合）',type:'cast'},{k:'password',l:'初期パスワード（8文字以上・空欄で招待リンク発行）'},{k:'is_blocked',l:'アカウント停止',type:'select',opts:{0:'有効',1:'停止中'}}],
+ notifications:[{k:'store_id',l:'店舗',type:'store'},{k:'user_id',l:'送信先ユーザーID（空=全員）',type:'number'},{k:'template_ja',l:'メッセージ（日本語）',type:'textarea',tr:'template'},{k:'template_en',l:'メッセージ（English）',type:'textarea'},{k:'template_zh',l:'メッセージ（中文）',type:'textarea'},{k:'channel',l:'送信チャネル',type:'select',opts:{dm:'DM',email:'メール',line:'LINE'}},{k:'status',l:'状態',type:'select',opts:{draft:'下書き',sent:'送信済み'}}],
+ settings:[{k:'key',l:'キー'},{k:'value',l:'値',type:'textarea'}]
+};
+const MENU = [['dashboard','▦','Dashboard'],['stores','◆','店舗'],['casts','◇','キャスト'],['areas','◎','エリア'],['users','◉','ユーザー'],['reviews','★','口コミ'],['messages','✉','DM'],['blogs','▤','ブログ'],['events','▣','イベント'],['coupons','▢','クーポン'],['notifications','♪','お知らせ・通知'],['settings','⚙','サイト設定']];
+
+async function render(){
+  const root = document.getElementById('root');
+  if (!TOKEN) {
+    root.innerHTML = `<div class="login-wrap"><h1>◆ TNG 管理画面</h1>
+      <div class="field"><label style="font-size:11px;color:var(--sub)">メールアドレス</label><input id="le"></div>
+      <div class="field"><label style="font-size:11px;color:var(--sub)">パスワード</label><div class="pw"><input id="lp" type="password"><button type="button" class="eye" onclick="pwEye('lp')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
+      <button class="btn" style="width:100%" onclick="login()">ログイン</button></div>`;
+    return;
+  }
+  const me = await API('/api/me').catch(()=>null);
+  if (!me || !['admin','store','cast'].includes(me.role)) { TOKEN=''; localStorage.removeItem('tng_admin_token'); root.innerHTML='<div class="login-wrap"><h1>◆ TNG 管理画面</h1><p style="color:#e74c3c;font-size:13px;margin-bottom:12px">管理者・店舗・キャストのアカウントでログインしてください</p><div class="field"><input id="le" placeholder="メールアドレス"></div><div class="field"><div class="pw"><input id="lp" type="password" placeholder="パスワード"><button type="button" class="eye" onclick="pwEye('lp')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div><button class="btn" style="width:100%" onclick="login()">ログイン</button></div>'; return; }
+  ME_ROLE = me.role; ME_STORE = me.store_id; ME_CAST = me.cast_id;
+  STATS = await API('/api/admin/stats').catch(()=>null);
+  if (!STATS) return;
+  AREAS = await API('/api/admin/areas'); STORES = await API('/api/admin/stores'); CASTS = await API('/api/admin/casts');
+  const pend = STATS.pending_reviews || 0, unread = STATS.unread_msgs || 0;
+  const visMenu = MENU.filter(m => ME_ROLE==='admin' ? true : ME_ROLE==='store' ? !['areas','users','blogs','settings'].includes(m[0]) : ['dashboard','casts','reviews','messages'].includes(m[0]));
+  if (!visMenu.find(m=>m[0]===VIEW)) VIEW='dashboard';
+  root.innerHTML = `<div class="layout"><nav class="side"><h1>◆ <span>TNG Admin</span></h1>
+    <div style="padding:0 12px 10px;font-size:10px;color:var(--sub)">${ME_ROLE==='admin'?'Super Admin':ME_ROLE==='store'?'Club Admin':'Cast'}</div>
+    ${visMenu.map(m=>`<a class="${VIEW===m[0]?'on':''}" onclick="go('${m[0]}')">${m[1]} <span>${m[2]}</span>${m[0]==='reviews'&&pend?`<b class="pend">${pend}</b>`:''}${m[0]==='messages'&&unread?`<b class="pend" style="background:#1f5fc0">${unread}</b>`:''}</a>`).join('')}
+    <a onclick="pwChangeModal()">🔒 <span>パスワード変更</span></a>
+    <a onclick="localStorage.removeItem('tng_admin_token');TOKEN='';render()">⏻ <span>ログアウト</span></a>
+    <a href="/" target="_blank">↗ <span>サイトを見る</span></a></nav>
+    <main class="main" id="main"></main></div>`;
+  const main = document.getElementById('main');
+  if (VIEW === 'dashboard') {
+    main.innerHTML = `<div class="top"><h2>Dashboard</h2></div>
+    ${pend?`<div class="notice">★ 未承認の口コミが <b>${pend}件</b> あります。<a href="javascript:go('reviews')">口コミ管理で確認する →</a></div>`:''}
+    <div class="cards">
+      <div class="stat ${pend?'alert':''}"><div style="color:var(--sub);font-size:11px">未承認口コミ</div><b>${pend}</b></div>
+      ${[['店舗',STATS.stores],['キャスト',STATS.casts],['ユーザー',STATS.users],['口コミ(総数)',STATS.reviews],['DM',STATS.messages],['イベント',STATS.events],['クーポン',STATS.coupons],['ブログ',STATS.blogs]]
+        .map(x=>`<div class="stat"><div style="color:var(--sub);font-size:11px">${x[0]}</div><b>${x[1]}</b></div>`).join('')}</div>
+      <p style="margin-top:18px;color:var(--sub);font-size:12px;line-height:2">多言語項目は「日本語」を入力して <b>自動翻訳</b> ボタンを押すと英語・中国語が自動入力されます（後から修正可）。<br>画像は「ファイルを選択」からアップロード（Cloudinary設定で永続保存。README参照）。<br>キャストの追加写真を登録すると、サイト側でカルーセル（写真スライダー）表示になります。</p>`;
+    return;
+  }
+  if (VIEW === 'messages') return renderMessages(main);
+  return renderTable(main, VIEW);
+}
+function go(v){ VIEW = v; render(); }
+async function login(){
+  const r = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ email: document.getElementById('le').value, password: document.getElementById('lp').value }) }).then(r=>r.json());
+  if (r.error || !['admin','store','cast'].includes(r.user.role)) return toast('管理者・店舗・キャストのアカウントでログインしてください');
+  TOKEN = r.token; localStorage.setItem('tng_admin_token', TOKEN); render();
+}
+const badge = s => s ? `<span class="badge ${s==='published'||s==='approved'?'pub':s==='pending'?'pen':s==='rejected'?'rej':'hide'}">${esc(({published:'公開',hidden:'非公開',approved:'承認',pending:'未承認',rejected:'非承認',draft:'下書き',sent:'送信済み'})[s]||s)}</span>` : '';
+const short = v => v == null ? '' : String(v).slice(0, 42);
+
+async function renderTable(main, table){
+  const rows = await API('/api/admin/' + table);
+  document.getElementById('main').innerHTML = tableHtml(table, rows);
+}
+function tableHtml(table, rows){
+  const fields = F[table] || [];
+  const cols = table === 'settings' ? ['key','value']
+    : table === 'reviews' ? ['id','__kind','__target','author_name','rating','body','status']
+    : ['id', ...fields.slice(0,4).map(f=>f.k), 'status'];
+  const pend = table==='reviews' ? rows.filter(r=>r.status==='pending').length : 0;
+  const head = c => c==='__kind'?'種別':c==='__target'?'対象':esc((fields.find(f=>f.k===c)||{}).l||c);
+  const cell = (r,c) => {
+    if (c==='__kind') return r.cast_id?`<span class="badge castbadge">キャスト</span>`:`<span class="badge storebadge">店舗</span>`;
+    if (c==='__target') return r.cast_id?esc((CASTS.find(x=>x.id===r.cast_id)||{}).display_name||'#'+r.cast_id):esc((STORES.find(x=>x.id===r.store_id)||{}).name_ja||'#'+r.store_id);
+    if (c==='status') return badge(r[c]);
+    if (c==='body') return esc(short(r[c])) + (r.reply_body ? '<br><span style="color:var(--gold2);font-size:10px">↩ ' + esc(short(r.reply_body)) + '</span>' : '');
+    if (c==='area_id'||c==='store_id') return esc((c==='area_id'?AREAS:STORES).find(a=>a.id===r[c])?.name_ja||r[c]||'');
+    return esc(short(r[c]));
+  };
+  return `<div class="top"><h2>${esc((MENU.find(m=>m[0]===table)||['','',''])[2])}</h2>
+    <button class="btn" onclick="editRow('${table}',null)">＋ 新規追加</button></div>
+    ${pend?`<div class="notice">未承認の口コミが <b>${pend}件</b> あります。「承認」に変更して保存するとサイトに公開されます。</div>`:''}
+    <div class="searchbar"><input id="q" placeholder="検索..." onkeydown="if(event.key==='Enter')doSearch('${table}')"><button class="btn ghost sm" onclick="doSearch('${table}')">検索</button></div>
+    <div style="overflow:auto"><table><tr>${cols.map(c=>`<th>${head(c)}</th>`).join('')}<th>操作</th></tr>
+    ${rows.map(r=>`<tr>${cols.map(c=>`<td>${cell(r,c)}</td>`).join('')}
+      <td style="white-space:nowrap">
+      ${table==='reviews'?`<button class="btn ghost sm" onclick="rowTranslate(${r.id},this)">翻訳</button><button class="btn ghost sm" onclick="replyReview(${r.id})">返信</button>`:''}
+      <button class="btn ghost sm" onclick="editRow('${table}',${r.id!=null?r.id:`'${r.key}'`})">編集</button>
+      ${table==='reviews'&&r.status==='pending'?`<button class="btn sm" onclick="quickApprove(${r.id})">承認</button>`:''}
+      ${table!=='settings'?`<button class="btn danger sm" onclick="delRow('${table}',${r.id})">削除</button>`:''}</td></tr>`).join('')}</table></div>`;
+}
+async function doSearch(table){
+  const q = document.getElementById('q').value;
+  const rows = await API('/api/admin/' + table + '?q=' + encodeURIComponent(q));
+  document.getElementById('main').innerHTML = tableHtml(table, rows);
+  document.getElementById('q').value = q;
+}
+async function quickApprove(id){
+  await API('/api/admin/reviews/' + id, { method:'PUT', body: JSON.stringify({ status:'approved' }) });
+  toast('口コミを承認しました'); render();
+}
+function replyReview(id){
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = `<div class="box"><h3>口コミへ公式返信</h3>
+    <div class="frm"><div class="full"><textarea id="rr" rows="4" placeholder="ご来店ありがとうございます。またのお越しをお待ちしております。"></textarea></div></div>
+    <div style="margin-top:14px;display:flex;gap:8px"><button class="btn" onclick="doReplyReview(${id},this)">返信を公開</button>
+    <button class="btn ghost" onclick="this.closest('.modal').remove()">閉じる</button></div></div>`;
+  m.onclick = e => { if (e.target === m) m.remove(); };
+  document.body.appendChild(m);
+}
+async function doReplyReview(id, btn){
+  const body = document.getElementById('rr').value.trim(); if (!body) return;
+  const r = await fetch('/api/reviews/' + id + '/reply', { method:'POST', headers:{'Content-Type':'application/json',Authorization:'Bearer '+TOKEN}, body: JSON.stringify({ body }) }).then(r=>r.json());
+  if (r.error) return toast(r.error === 'forbidden' ? 'この口コミへの返信権限がありません' : r.error);
+  btn.closest('.modal').remove(); toast('公式返信を公開しました'); render();
+}
+/* 口コミ一覧の「翻訳」ボタン: 本文を日英中へ翻訳してモーダル表示 */
+async function rowTranslate(id, btn){
+  const rows = await API('/api/admin/reviews');
+  const r = rows.find(x => x.id === id); if (!r) return;
+  btn.disabled = true; btn.textContent = '翻訳中...';
+  const from = r.language || 'ja';
+  const out = {};
+  for (const to of ['ja','en','zh']) {
+    const res = await API('/api/translate', { method:'POST', body: JSON.stringify({ text: r.body, from, to }) });
+    out[to] = res.translated || '';
+  }
+  btn.disabled = false; btn.textContent = '翻訳';
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = `<div class="box"><h3>口コミ翻訳プレビュー（原文: ${esc(from.toUpperCase())}）</h3>
+    <table><tr><th>言語</th><th>内容</th></tr>
+    <tr><td>原文</td><td style="white-space:normal">${esc(r.body)}</td></tr>
+    <tr><td>日本語</td><td style="white-space:normal">${esc(out.ja)}</td></tr>
+    <tr><td>English</td><td style="white-space:normal">${esc(out.en)}</td></tr>
+    <tr><td>中文</td><td style="white-space:normal">${esc(out.zh)}</td></tr></table>
+    <div style="margin-top:14px"><button class="btn ghost" onclick="this.closest('.modal').remove()">閉じる</button></div></div>`;
+  m.onclick = e => { if (e.target === m) m.remove(); };
+  document.body.appendChild(m);
+}
+
+/* ---------- 編集フォーム ---------- */
+async function editRow(table, id){
+  const rows = await API('/api/admin/' + table);
+  const row = id == null ? null : rows.find(r => String(r.id ?? r.key) === String(id));
+  const fields = F[table] || [];
+  const isSettings = table === 'settings';
+  const seenTr = new Set();
+  const html = `<div class="box"><h3>${row ? '編集' : '新規追加'} — ${esc((MENU.find(m=>m[0]===table)||['','',table])[2]||table)}</h3><div class="frm">
+    ${fields.map(f => {
+      const val = row ? (row[f.k] ?? '') : (f.type==='bool' ? 1 : (f.k==='status' ? (table==='reviews'?'pending':'published') : ''));
+      let inp = '';
+      if (f.type === 'textarea') inp = `<textarea data-k="${f.k}" rows="4">${esc(val)}</textarea>`;
+      else if (f.type === 'number') inp = `<input data-k="${f.k}" type="number" value="${esc(val)}" ${isSettings&&row&&f.k==='key'?'disabled':''}>`;
+      else if (f.type === 'date') inp = `<input data-k="${f.k}" type="date" value="${esc(val)}">`;
+      else if (f.type === 'time') inp = `<input data-k="${f.k}" type="time" value="${esc(val)}">`;
+      else if (f.type === 'bool') inp = `<select data-k="${f.k}" data-num="1">${Object.entries(BOOL_OPTS).map(([v,l])=>`<option value="${v}" ${String(val)===v?'selected':''}>${l}</option>`).join('')}</select>`;
+      else if (f.type === 'select') inp = `<select data-k="${f.k}"><option value="">— 未選択 —</option>${Object.entries(f.opts).map(([v,l])=>`<option value="${v}" ${String(val)===String(v)?'selected':''}>${l}</option>`).join('')}</select>`;
+      else if (f.type === 'area') inp = `<select data-k="${f.k}" data-num="1"><option value="">— 選択 —</option>${AREAS.map(a=>`<option value="${a.id}" ${row&&row[f.k]===a.id?'selected':''}>${esc(a.name_ja)}</option>`).join('')}</select>`;
+      else if (f.type === 'store') inp = `<select data-k="${f.k}" data-num="1"><option value="">— 選択 —</option>${STORES.map(s=>`<option value="${s.id}" ${row&&row[f.k]===s.id?'selected':''}>#${s.id} ${esc(s.name_ja)}</option>`).join('')}</select>`;
+      else if (f.type === 'cast') inp = `<select data-k="${f.k}" data-num="1"><option value="">— 店舗口コミ（キャスト指定なし）—</option>${CASTS.map(c=>`<option value="${c.id}" ${row&&row[f.k]===c.id?'selected':''}>${esc(c.display_name||c.name)}（${esc((STORES.find(s=>s.id===c.store_id)||{}).name_ja||'')}）</option>`).join('')}</select>`;
+      else if (f.type === 'langchecks') { const cur = String(val||'').split(',').map(x=>x.trim()).filter(Boolean);
+        const LMAP = [['ja','日本語'],['en','英語'],['zh','中国語']];
+        inp = `<div class="cbg" data-k="${f.k}" data-cbg="1">${LMAP.map(p=>`<label><input type="checkbox" value="${p[0]}" ${cur.includes(p[0])?'checked':''}>${p[1]}</label>`).join('')}</div>`; }
+      else if (f.type === 'paychecks') { const cur = String(val||'').split(',').map(x=>x.trim()).filter(Boolean);
+        inp = `<div class="cbg" data-k="${f.k}" data-cbg="1">${PAY_OPTS.map(p=>`<label><input type="checkbox" value="${p}" ${cur.includes(p)?'checked':''}>${p}</label>`).join('')}</div>`; }
+      else if (f.type === 'image') inp = `<div class="upzone">
+        <img id="pv-${f.k}" src="${esc(val)||''}" style="${val?'':'display:none'}" onerror="this.style.display='none'">
+        <input data-k="${f.k}" type="hidden" value="${esc(val)}">
+        <label class="uplabel">⇪ ファイルを選択<input type="file" accept="image/*" onchange="uploadImg(this,'${f.k}')"></label>
+        <div class="help" id="upmsg-${f.k}">アップロードすると自動でURLが設定されます</div></div>`;
+      else if (f.type === 'images') inp = multiImagesHtml(f.k, val);
+      else inp = `<input data-k="${f.k}" type="text" value="${esc(val)}" ${isSettings&&row&&f.k==='key'?'disabled':''}>`;
+      let bar = '';
+      if (f.tr && !seenTr.has(f.tr)) { seenTr.add(f.tr); bar = `<div class="trbar"><button type="button" class="btn tr sm" onclick="autoTr('${f.tr}',this)">⇄ 日本語 → 英語・中文 に自動翻訳</button><span>${esc(f.tr)} の英語・中文欄へ自動入力します（後から修正できます）</span></div>`; }
+      return bar + `<div class="${f.type==='textarea'||f.type==='image'||f.type==='images'||f.type==='paychecks'?'full':''}"><label>${esc(f.l)}</label>${inp}${f.help?`<div class="help">${esc(f.help)}</div>`:''}</div>`;
+    }).join('')}</div>
+    <div style="margin-top:18px;display:flex;gap:8px">
+      <button class="btn" onclick="saveRow('${table}', ${row ? (isSettings ? `'${esc(row.key)}'` : row.id) : 'null'}, this)">保存する</button>
+      <button class="btn ghost" onclick="this.closest('.modal').remove()">キャンセル</button></div></div>`;
+  const m = document.createElement('div'); m.className = 'modal'; m.innerHTML = html;
+  m.onclick = e => { if (e.target === m) m.remove(); };
+  document.body.appendChild(m);
+}
+/* 複数画像フィールド (JSON配列で保存) */
+function multiImagesHtml(key, val){
+  let arr = []; try { arr = JSON.parse(val || '[]'); } catch(e){}
+  return `<div data-k="${key}" data-imgs="1" data-val='${esc(JSON.stringify(arr))}'>
+    <div class="multi-imgs" id="mi-${key}">${arr.map((u,i)=>miImg(key,u,i)).join('')}</div>
+    <label class="uplabel" style="margin-top:8px">⇪ 写真を追加<input type="file" accept="image/*" onchange="uploadImgMulti(this,'${key}')"></label>
+    <div class="help" id="upmsg-${key}">複数枚登録するとサイト側でカルーセル（写真スライダー）表示になります</div></div>`;
+}
+const miImg = (key, u, i) => `<div class="mi"><img src="${esc(u)}"><b onclick="miDel('${key}',${i})">×</b></div>`;
+function miGet(key){ const el = document.querySelector(`[data-imgs="1"][data-k="${key}"]`); try { return JSON.parse(el.dataset.val||'[]'); } catch(e){ return []; } }
+function miSet(key, arr){ const el = document.querySelector(`[data-imgs="1"][data-k="${key}"]`); el.dataset.val = JSON.stringify(arr); document.getElementById('mi-'+key).innerHTML = arr.map((u,i)=>miImg(key,u,i)).join(''); }
+function miDel(key, i){ const a = miGet(key); a.splice(i,1); miSet(key, a); }
+async function uploadImgMulti(input, key){
+  const file = input.files && input.files[0]; if (!file) return;
+  if (file.size > 5*1024*1024) return toast('画像は5MB以下にしてください');
+  const msg = document.getElementById('upmsg-' + key); msg.textContent = 'アップロード中...';
+  const reader = new FileReader();
+  reader.onload = async () => {
+    const r = await API('/api/upload', { method:'POST', body: JSON.stringify({ filename: file.name, data: reader.result }) });
+    if (r.error) { msg.textContent = r.error; return toast(r.error); }
+    const a = miGet(key); a.push(r.url); miSet(key, a);
+    msg.textContent = r.storage === 'cloudinary' ? 'Cloudinaryに保存しました' : '保存しました（本番はCloudinary設定推奨）';
+    toast('写真を追加しました');
+  };
+  reader.readAsDataURL(file);
+}
+async function uploadImg(input, key){
+  const file = input.files && input.files[0]; if (!file) return;
+  if (file.size > 5*1024*1024) return toast('画像は5MB以下にしてください');
+  const msg = document.getElementById('upmsg-' + key); msg.textContent = 'アップロード中...';
+  const reader = new FileReader();
+  reader.onload = async () => {
+    const r = await API('/api/upload', { method:'POST', body: JSON.stringify({ filename: file.name, data: reader.result }) });
+    if (r.error) { msg.textContent = r.error; return toast(r.error); }
+    document.querySelector(`input[data-k="${key}"]`).value = r.url;
+    const pv = document.getElementById('pv-' + key); pv.src = r.url; pv.style.display = '';
+    msg.textContent = r.storage === 'cloudinary' ? 'Cloudinaryに保存しました（永続）' : '保存しました（ローカル保存: 本番はCloudinaryを設定してください）';
+    toast('画像をアップロードしました');
+  };
+  reader.readAsDataURL(file);
+}
+async function autoTr(group, btn){
+  const ja = document.querySelector(`[data-k="${group}_ja"]`);
+  if (!ja || !ja.value.trim()) return toast('先に日本語を入力してください');
+  const hasExisting = ['en','zh'].some(to => (document.querySelector(`[data-k="${group}_${to}"]`)||{}).value?.trim());
+  if (hasExisting && !confirm('英語・中国語の既存の翻訳を上書きしますか?（手動で修正済みの内容は失われます）')) return;
+  btn.disabled = true; btn.textContent = '翻訳中...';
+  for (const to of ['en','zh']) {
+    const r = await API('/api/translate', { method:'POST', body: JSON.stringify({ text: ja.value, from:'ja', to }) });
+    const el = document.querySelector(`[data-k="${group}_${to}"]`);
+    if (el && r.translated) el.value = r.translated;
+  }
+  btn.disabled = false; btn.textContent = '⇄ 日本語 → 英語・中文 に自動翻訳';
+  toast('自動翻訳しました（内容を確認・修正してから保存してください）');
+}
+async function saveRow(table, id, btn){
+  const data = {};
+  btn.closest('.box').querySelectorAll('[data-k]').forEach(el => {
+    if (el.dataset.imgs) { data[el.dataset.k] = el.dataset.val || '[]'; return; }
+    if (el.dataset.cbg) { data[el.dataset.k] = [...el.querySelectorAll('input:checked')].map(c=>c.value).join(', ');
+      if (el.dataset.k === 'languages') { data.english_ok = [...el.querySelectorAll('input:checked')].some(c=>c.value==='en') ? 1 : 0; data.chinese_ok = [...el.querySelectorAll('input:checked')].some(c=>c.value==='zh') ? 1 : 0; }
+      return; }
+    if (el.type === 'hidden' || el.tagName === 'SELECT' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA')
+      data[el.dataset.k] = (el.dataset.num || el.type === 'number') ? (el.value === '' ? null : (parseInt(el.value, 10) || 0)) : el.value;
+  });
+  const r = await API(id == null ? '/api/admin/' + table : `/api/admin/${table}/${id}`,
+    { method: id == null ? 'POST' : 'PUT', body: JSON.stringify(data) });
+  if (r.error) return toast(r.error);
+  if (table === 'users' && id == null && r.invite) {
+    btn.closest('.modal').remove();
+    const m = document.createElement('div'); m.className = 'modal';
+    m.innerHTML = `<div class="box"><h3>ユーザーを作成しました（招待リンク）</h3>
+      <p style="font-size:13px;color:var(--sub);margin:10px 0">本人に以下のリンクを共有してください。リンクからパスワードを設定できます（7日間有効）。</p>
+      <input readonly value="${location.origin}${r.invite}" onclick="this.select()" style="font-size:12px">
+      <div style="margin-top:14px"><button class="btn ghost" onclick="this.closest('.modal').remove()">閉じる</button></div></div>`;
+    document.body.appendChild(m); toast('ユーザーを作成しました'); render(); return;
+  }
+  btn.closest('.modal').remove(); toast('保存しました'); render();
+}
+async function delRow(table, id){
+  if (!confirm('本当に削除しますか? この操作は元に戻せません。')) return;
+  await API(`/api/admin/${table}/${id}`, { method:'DELETE' }); toast('削除しました'); render();
+}
+
+function pwEye(id){ const el = document.getElementById(id); el.type = el.type === 'password' ? 'text' : 'password'; }
+function pwChangeModal(){
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = `<div class="box"><h3>パスワード変更</h3>
+    <div class="frm"><div class="full"><label>現在のパスワード</label><input id="pw-c" type="password"></div>
+    <div class="full"><label>新しいパスワード（8文字以上）</label><div class="pw"><input id="pw-n" type="password"><button type="button" class="eye" onclick="pwEye('pw-n')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div></div>
+    <div style="margin-top:14px;display:flex;gap:8px"><button class="btn" onclick="pwChange(this)">変更する</button>
+    <button class="btn ghost" onclick="this.closest('.modal').remove()">閉じる</button></div></div>`;
+  m.onclick = e => { if (e.target === m) m.remove(); };
+  document.body.appendChild(m);
+}
+async function pwChange(btn){
+  const r = await API('/api/auth/password', { method:'POST', body: JSON.stringify({ current: document.getElementById('pw-c').value, next: document.getElementById('pw-n').value }) });
+  if (r.error) return toast(r.error === 'current password incorrect' ? '現在のパスワードが違います' : '8文字以上にしてください');
+  btn.closest('.modal').remove(); toast('パスワードを変更しました');
+}
+/* DM管理 */
+async function renderMessages(main){
+  const rows = await API('/api/admin/messages');
+  const KIND = { store_chat:'店舗チャット', cast_chat:'キャストチャット', inquiry:'問い合わせ', reservation:'予約希望' };
+  main.innerHTML = `<div class="top"><h2>✉ DM管理</h2></div>
+  <div style="overflow:auto"><table><tr><th>ID</th><th>種類</th><th>方向</th><th>店舗</th><th>キャスト</th><th>ユーザー</th><th>原文</th><th>予約</th><th>既読</th><th>日時(JST)</th><th>操作</th></tr>
+  ${rows.map(m=>`<tr><td>${m.id}</td><td><span class="badge ${m.kind==='reservation'?'pen':m.kind==='cast_chat'?'castbadge':'storebadge'}">${KIND[m.kind]||'問い合わせ'}</span></td><td>${m.direction==='user_to_store'?'受信':'送信'}</td><td>${esc((STORES.find(s=>s.id===m.store_id)||{}).name_ja||m.store_id)}</td><td>${m.cast_id?esc((CASTS.find(c=>c.id===m.cast_id)||{}).display_name||m.cast_id):'—'}</td><td>${m.user_id}</td>
+    <td style="white-space:normal">${esc(short(m.body))}</td>
+    <td>${m.kind==='reservation'?`${esc(m.resv_date||'-')} ${esc(m.resv_time||'')} ${m.resv_people?m.resv_people+'名':''}`:'—'}</td>
+    <td>${m.is_read?'<span class="badge pub">既読</span>':'<span class="badge pen">未読</span>'}</td>
+    <td>${esc((m.created_at||'').slice(0,16))}</td>
+    <td><button class="btn ghost sm" onclick="replyMsg(${m.id})">返信</button></td></tr>`).join('')||'<tr><td colspan="11" style="text-align:center;color:var(--sub)">メッセージはまだありません</td></tr>'}</table></div>`;
+}
+function replyMsg(id){
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = `<div class="box"><h3>返信（日本語で入力 → 自動で3言語に翻訳されます）</h3>
+    <div class="frm"><div class="full"><textarea id="rp" rows="4" placeholder="ご来店ありがとうございます。今夜お待ちしています。"></textarea></div></div>
+    <div style="margin-top:14px;display:flex;gap:8px">
+    <button class="btn" onclick="doReply(${id},this)">送信</button>
+    <button class="btn ghost" onclick="this.closest('.modal').remove()">閉じる</button></div></div>`;
+  m.onclick = e => { if (e.target === m) m.remove(); };
+  document.body.appendChild(m);
+}
+async function doReply(id, btn){
+  const body = document.getElementById('rp').value.trim(); if (!body) return;
+  await API(`/api/admin/messages/${id}/reply`, { method:'POST', body: JSON.stringify({ body, lang: 'ja' }) });
+  btn.closest('.modal').remove(); toast('返信しました'); render();
+}
+render();
+</script>
+</body>
+</html>
