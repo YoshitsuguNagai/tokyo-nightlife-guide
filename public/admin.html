@@ -66,6 +66,8 @@ input:focus,textarea:focus,select:focus{outline:1px solid var(--gold)}
 .login-wrap h1{color:var(--gold);font-size:18px;margin-bottom:18px}
 .login-wrap .field{margin-bottom:11px}
 .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--gold);color:#141414;padding:11px 24px;border-radius:24px;font-weight:700;z-index:99}
+.pw{position:relative}.pw input{padding-right:42px}
+.eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--sub);cursor:pointer;padding:6px}
 @media(max-width:820px){.side{width:60px;padding:12px 6px}.side a span,.side h1 span{display:none}.side a{justify-content:center}.pend{right:4px;top:4px}.frm{grid-template-columns:1fr}.main{padding:14px}}
 </style>
 </head>
@@ -185,13 +187,13 @@ async function render(){
   const root = document.getElementById('root');
   if (!TOKEN) {
     root.innerHTML = `<div class="login-wrap"><h1>◆ TNG 管理画面</h1>
-      <div class="field"><label style="font-size:11px;color:var(--sub)">メールアドレス</label><input id="le" value="admin@tng.jp"></div>
-      <div class="field"><label style="font-size:11px;color:var(--sub)">パスワード</label><input id="lp" type="password"></div>
+      <div class="field"><label style="font-size:11px;color:var(--sub)">メールアドレス</label><input id="le"></div>
+      <div class="field"><label style="font-size:11px;color:var(--sub)">パスワード</label><div class="pw"><input id="lp" type="password"><button type="button" class="eye" onclick="pwEye('lp')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
       <button class="btn" style="width:100%" onclick="login()">ログイン</button></div>`;
     return;
   }
   const me = await API('/api/me').catch(()=>null);
-  if (!me || !['admin','store','cast'].includes(me.role)) { TOKEN=''; localStorage.removeItem('tng_admin_token'); root.innerHTML='<div class="login-wrap"><h1>◆ TNG 管理画面</h1><p style="color:#e74c3c;font-size:13px;margin-bottom:12px">管理者・店舗・キャストのアカウントでログインしてください</p><div class="field"><input id="le" placeholder="メールアドレス"></div><div class="field"><input id="lp" type="password" placeholder="パスワード"></div><button class="btn" style="width:100%" onclick="login()">ログイン</button></div>'; return; }
+  if (!me || !['admin','store','cast'].includes(me.role)) { TOKEN=''; localStorage.removeItem('tng_admin_token'); root.innerHTML='<div class="login-wrap"><h1>◆ TNG 管理画面</h1><p style="color:#e74c3c;font-size:13px;margin-bottom:12px">管理者・店舗・キャストのアカウントでログインしてください</p><div class="field"><input id="le" placeholder="メールアドレス"></div><div class="field"><div class="pw"><input id="lp" type="password" placeholder="パスワード"><button type="button" class="eye" onclick="pwEye('lp')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div><button class="btn" style="width:100%" onclick="login()">ログイン</button></div>'; return; }
   ME_ROLE = me.role; ME_STORE = me.store_id; ME_CAST = me.cast_id;
   STATS = await API('/api/admin/stats').catch(()=>null);
   if (!STATS) return;
@@ -437,11 +439,12 @@ async function delRow(table, id){
   await API(`/api/admin/${table}/${id}`, { method:'DELETE' }); toast('削除しました'); render();
 }
 
+function pwEye(id){ const el = document.getElementById(id); el.type = el.type === 'password' ? 'text' : 'password'; }
 function pwChangeModal(){
   const m = document.createElement('div'); m.className = 'modal';
   m.innerHTML = `<div class="box"><h3>パスワード変更</h3>
     <div class="frm"><div class="full"><label>現在のパスワード</label><input id="pw-c" type="password"></div>
-    <div class="full"><label>新しいパスワード（8文字以上）</label><input id="pw-n" type="password"></div></div>
+    <div class="full"><label>新しいパスワード（8文字以上）</label><div class="pw"><input id="pw-n" type="password"><button type="button" class="eye" onclick="pwEye('pw-n')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div></div>
     <div style="margin-top:14px;display:flex;gap:8px"><button class="btn" onclick="pwChange(this)">変更する</button>
     <button class="btn ghost" onclick="this.closest('.modal').remove()">閉じる</button></div></div>`;
   m.onclick = e => { if (e.target === m) m.remove(); };

@@ -63,7 +63,7 @@ h1,h2,h3{line-height:1.35}
 .stars{color:var(--gold);font-size:12px;letter-spacing:2.5px}
 .tag{display:inline-flex;align-items:center;gap:4px;background:var(--bg3);border-radius:6px;padding:3px 8px;font-size:10.5px;color:var(--sub);margin:3px 3px 0 0;letter-spacing:.03em}
 .tag.g{color:var(--gold2);border:1px solid #3a3220;background:rgba(201,162,39,.07)}
-.fav-on{background:rgba(201,162,39,.14)!important}
+.fav-on{background:rgba(201,162,39,.14)!important;border-color:var(--gold)!important;color:var(--gold)!important}.fav-on svg{fill:var(--gold)}
 .row{display:flex;gap:8px;margin-top:11px}
 .row .btn{flex:1}
 .detail-hero{min-height:230px;display:flex;align-items:flex-end;padding:20px;position:relative;background-size:cover;background-position:center}
@@ -173,6 +173,11 @@ const ICONS = {
  chevL:'<path d="m15 18-6-6 6-6"/>',
  chevR:'<path d="m9 18 6-6-6-6"/>'
 };
+const BRAND_IC = {
+ tiktok:'M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z',
+ x:'M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z'
+};
+const bic = (n,s)=>`<svg class="ic" width="${s||15}" height="${s||15}" viewBox="0 0 24 24" fill="currentColor"><path d="${BRAND_IC[n]||''}"/></svg>`;
 const ic = (n, s) => `<svg class="ic" width="${s||17}" height="${s||17}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]||''}</svg>`;
 
 /* ================= i18n ================= */
@@ -199,8 +204,8 @@ const I = {
   f_h1:'Up to 155cm',f_h2:'156 – 160cm',f_h3:'161 – 165cm',f_h4:'166cm+',
   more_filters:'＋ More Filters',close_filters:'− Close Filters',clear:'Clear',apply:'Search with these filters',
   rv_store:'Club Review',rv_cast:'Cast Review',
-  chat_club:'Chat with Club',reservation:'Reservation',inquiry:'Inquiry',fav_add:'Added to favorites',fav_del:'Removed from favorites',fav_stores:'Favorite Clubs',fav_casts:'Favorite Cast',coupon_expired:'Expired',resv_date:'Preferred date',resv_time:'Preferred time',resv_people:'Guests',view_coupon:'View Coupon',chat_cast:'Chat with Cast',rv_min:'Please write at least 200 characters.',rv_ph:'Please describe the atmosphere, service, pricing and highlights in 200+ characters.',forgot:'Forgot password?',reset_sent:'Reset link issued. (Email sending requires SMTP setup - see README)',reset_done:'Password updated. Please log in.',new_pw:'New password (8+ chars)',set_pw:'Set Password',reply_from_store:'Reply from the Club',reply_from_cast:'Reply from the Cast',reply_from_site:'Reply from Tokyo Nightlife Guide',reply_ph:'Write a reply...',
-  h1:'Under 150cm',h2:'150 – 159cm',h3:'160 – 169cm',h4:'170cm+',f_lang:'Languages'},
+  chat_club:'Chat with Club',reservation:'Reservation',need_login_chat:'Please log in to use chat.',resv_sent:'Reservation request sent',inquiry:'Inquiry',fav_add:'Added to favorites',fav_del:'Removed from favorites',fav_stores:'Favorite Clubs',fav_casts:'Favorite Cast',coupon_expired:'Expired',resv_date:'Preferred date',resv_time:'Preferred time',resv_people:'Guests',view_coupon:'View Coupon',chat_cast:'Chat with Cast',rv_min:'Please write at least 200 characters.',rv_ph:'Please describe the atmosphere, service, pricing and highlights in 200+ characters.',forgot:'Forgot password?',reset_sent:'Reset link issued. (Email sending requires SMTP setup - see README)',reset_done:'Password updated. Please log in.',new_pw:'New password (8+ chars)',set_pw:'Set Password',reply_from_store:'Reply from the Club',reply_from_cast:'Reply from the Cast',reply_from_site:'Reply from Tokyo Nightlife Guide',reply_ph:'Write a reply...',
+  h1:'Under 150cm',h2:'150 – 159cm',h3:'160 – 169cm',h4:'170cm+',f_lang:'Languages',f_style_type:'Type',f_body_style:'Style'},
  ja:{find_club:'お店を探す',find_girl:'キャストを探す',reviews:'口コミ',events:'イベント',coupons:'クーポン',blog:'ブログ',home:'ホーム',back:'戻る',
   hero1:'東京の<em>夜</em>を、発見する',hero2:'東京のベストクラブ・キャバクラ・ナイトライフ体験を見つけよう',
   where:'どこへ行きますか?',search:'検索',area:'エリア',genre:'ジャンル',budget:'予算',all:'すべて',
@@ -223,8 +228,8 @@ const I = {
   f_h1:'〜155cm',f_h2:'156〜160cm',f_h3:'161〜165cm',f_h4:'166cm〜',
   more_filters:'＋ さらに条件を追加',close_filters:'− 条件を閉じる',clear:'クリア',apply:'この条件で検索',
   rv_store:'店舗口コミ',rv_cast:'キャスト口コミ',
-  chat_club:'お店とチャット',reservation:'予約希望',inquiry:'問い合わせ',fav_add:'お気に入りに追加しました',fav_del:'お気に入りから削除しました',fav_stores:'お気に入り店舗',fav_casts:'お気に入りキャスト',coupon_expired:'期限切れ',resv_date:'希望日',resv_time:'希望時間',resv_people:'人数',view_coupon:'クーポン詳細',chat_cast:'キャストとチャット',rv_min:'口コミは200文字以上で入力してください。',rv_ph:'お店の雰囲気、接客、料金、良かった点などを200文字以上で詳しくご記入ください。',forgot:'パスワードを忘れた方',reset_sent:'再設定リンクを発行しました。(メール送信はSMTP設定が必要です。README参照)',reset_done:'パスワードを更新しました。ログインしてください。',new_pw:'新しいパスワード（8文字以上）',set_pw:'設定する',reply_from_store:'店舗からの返信',reply_from_cast:'キャストからの返信',reply_from_site:'Tokyo Nightlife Guideからの返信',reply_ph:'返信を入力...',
-  h1:'150cm未満',h2:'150〜159cm',h3:'160〜169cm',h4:'170cm以上',f_lang:'言語'},
+  chat_club:'お店とチャット',reservation:'予約希望',need_login_chat:'チャットを利用するにはログインしてください',resv_sent:'予約希望を送信しました',inquiry:'問い合わせ',fav_add:'お気に入りに追加しました',fav_del:'お気に入りから削除しました',fav_stores:'お気に入り店舗',fav_casts:'お気に入りキャスト',coupon_expired:'期限切れ',resv_date:'希望日',resv_time:'希望時間',resv_people:'人数',view_coupon:'クーポン詳細',chat_cast:'キャストとチャット',rv_min:'口コミは200文字以上で入力してください。',rv_ph:'お店の雰囲気、接客、料金、良かった点などを200文字以上で詳しくご記入ください。',forgot:'パスワードを忘れた方',reset_sent:'再設定リンクを発行しました。(メール送信はSMTP設定が必要です。README参照)',reset_done:'パスワードを更新しました。ログインしてください。',new_pw:'新しいパスワード（8文字以上）',set_pw:'設定する',reply_from_store:'店舗からの返信',reply_from_cast:'キャストからの返信',reply_from_site:'Tokyo Nightlife Guideからの返信',reply_ph:'返信を入力...',
+  h1:'150cm未満',h2:'150〜159cm',h3:'160〜169cm',h4:'170cm以上',f_lang:'言語',f_style_type:'系統',f_body_style:'スタイル'},
  zh:{find_club:'查找店铺',find_girl:'查找公关',reviews:'评价',events:'活动',coupons:'优惠券',blog:'博客',home:'首页',back:'返回',
   hero1:'探索<em>东京</em>夜生活',hero2:'寻找东京最好的俱乐部、夜总会和夜生活体验',
   where:'您想去哪里?',search:'搜索',area:'区域',genre:'类型',budget:'预算',all:'全部',
@@ -247,8 +252,8 @@ const I = {
   f_h1:'〜155cm',f_h2:'156〜160cm',f_h3:'161〜165cm',f_h4:'166cm〜',
   more_filters:'＋ 添加更多条件',close_filters:'− 收起条件',clear:'清除',apply:'按条件搜索',
   rv_store:'店铺评价',rv_cast:'公关评价',
-  chat_club:'与店铺聊天',reservation:'预约',inquiry:'咨询',fav_add:'已添加到收藏',fav_del:'已从收藏删除',fav_stores:'收藏的店铺',fav_casts:'收藏的公关',coupon_expired:'已过期',resv_date:'希望日期',resv_time:'希望时间',resv_people:'人数',view_coupon:'优惠券详情',chat_cast:'与公关聊天',rv_min:'请填写200字以上的评价。',rv_ph:'请用200字以上详细描述店铺氛围、服务、价格和亮点。',forgot:'忘记密码',reset_sent:'已发送重置链接。（发送邮件需配置SMTP，见README）',reset_done:'密码已更新，请登录。',new_pw:'新密码（8位以上）',set_pw:'设置',reply_from_store:'店铺的回复',reply_from_cast:'公关的回复',reply_from_site:'Tokyo Nightlife Guide的回复',reply_ph:'输入回复...',
-  h1:'150cm以下',h2:'150〜159cm',h3:'160〜169cm',h4:'170cm以上',f_lang:'语言'},
+  chat_club:'与店铺聊天',reservation:'预约',need_login_chat:'请登录后使用聊天',resv_sent:'预约请求已发送',inquiry:'咨询',fav_add:'已添加到收藏',fav_del:'已从收藏删除',fav_stores:'收藏的店铺',fav_casts:'收藏的公关',coupon_expired:'已过期',resv_date:'希望日期',resv_time:'希望时间',resv_people:'人数',view_coupon:'优惠券详情',chat_cast:'与公关聊天',rv_min:'请填写200字以上的评价。',rv_ph:'请用200字以上详细描述店铺氛围、服务、价格和亮点。',forgot:'忘记密码',reset_sent:'已发送重置链接。（发送邮件需配置SMTP，见README）',reset_done:'密码已更新，请登录。',new_pw:'新密码（8位以上）',set_pw:'设置',reply_from_store:'店铺的回复',reply_from_cast:'公关的回复',reply_from_site:'Tokyo Nightlife Guide的回复',reply_ph:'输入回复...',
+  h1:'150cm以下',h2:'150〜159cm',h3:'160〜169cm',h4:'170cm以上',f_lang:'语言',f_style_type:'类型',f_body_style:'身材'},
 };
 let LANG = localStorage.getItem('tng_lang') || 'en';
 const t = k => (I[LANG] && I[LANG][k]) || I.en[k] || k;
@@ -264,7 +269,11 @@ function setLang(l){
 function markLang(){ document.querySelectorAll('.langs button').forEach(b => b.classList.toggle('on', b.dataset.lang === LANG)); }
 
 /* ================= helpers ================= */
-const API = (p, opt) => fetch(p, { ...opt, headers: { 'Content-Type':'application/json', ...(opt&&opt.headers), ...(TOKEN ? { Authorization:'Bearer '+TOKEN } : {}) } }).then(r => r.json());
+const API = (p, opt) => fetch(p, { ...opt, headers: { 'Content-Type':'application/json', ...(opt&&opt.headers), ...(TOKEN ? { Authorization:'Bearer '+TOKEN } : {}) } }).then(async r => {
+  const d = await r.json().catch(() => ({}));
+  if (r.status === 401 && TOKEN) { TOKEN = ''; ME = null; try { localStorage.removeItem('tng_token'); } catch(e){} }
+  return d;
+});
 let TOKEN = localStorage.getItem('tng_token') || '';
 let ME = null, SETTINGS = {};
 if (TOKEN) API('/api/me').then(u => { if (!u.error) ME = u; render(); });
@@ -457,6 +466,42 @@ async function pageStores(qs){
 /* ---- Google Maps: 埋め込みは /maps?output=embed、外部リンクは google.com/maps/search/?api=1&query= ---- */
 function mapBlock(s){
   if (!s.address && !s.google_map_url) return '';
+  const raw = String(s.google_map_url || '').trim();
+  const bad = /embed|output=embed|<iframe/i.test(raw);  // 埋め込み用は外部URLに使わない
+  let embedQ = s.address ? encodeURIComponent(s.address) : null;
+  let openUrl = null;
+  if (raw && !bad) {
+    const mq = /[?&]q=([^&]+)/.exec(raw);
+    const mp = /maps\/place\/([^/?]+)/.exec(raw);
+    const query = mq ? mq[1] : (mp ? mp[1] : null);
+    openUrl = query ? ('https://www.google.com/maps/search/?api=1&query=' + query) : raw;
+    if (!embedQ && query) embedQ = query;
+  }
+  if (!openUrl && s.address) openUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(s.address);
+  if (!openUrl) return '';
+  return `${embedQ?`<iframe class="map-frame" loading="lazy" src="https://maps.google.com/maps?q=${embedQ}&output=embed"></iframe>`:''}
+    <div class="sns-row"><a class="btn sm ghost notranslate" href="${esc(openUrl)}" target="_blank" rel="noopener" translate="no">${ic('pin',14)} Google Maps</a></div>`;
+}
+async function pageStores(qs){
+  const [stores, areas] = await Promise.all([API('/api/stores?' + (qs || '')), API('/api/areas')]);
+  const cur = new URLSearchParams(qs || '');
+  return `<div class="wrap">${backBtn()}
+  <section class="sec"><h2><em>◆</em>${t('find_club')}</h2>
+  <div class="searchbox" style="margin:14px 0 0;max-width:none">
+    <input type="text" id="sq2" value="${esc(cur.get('q')||'')}" placeholder="${t('where')}" onkeydown="if(event.key==='Enter')doSearch('sq2','sa2','sg2','sb2')">
+    <div class="filters">
+      <select id="sa2"><option value="">${t('area')} — ${t('all')}</option>${areas.map(a=>`<option value="${a.id}" ${cur.get('area')==String(a.id)?'selected':''}>${esc(L(a,'name'))}</option>`).join('')}</select>
+      <select id="sg2"><option value="">${t('genre')} — ${t('all')}</option>${['cabaret','lounge','club'].map(g=>`<option value="${g}" ${cur.get('genre')===g?'selected':''}>${t('g_'+g)}</option>`).join('')}</select>
+      <select id="sb2"><option value="">${t('budget')} — ${t('all')}</option>${[['0-50000','b1'],['50000-100000','b2'],['100000-','b3']].map(b=>`<option value="${b[0]}" ${cur.get('budget')===b[0]?'selected':''}>${t(b[1])}</option>`).join('')}</select>
+      <button type="button" class="btn" onclick="doSearch('sq2','sa2','sg2','sb2')">${ic('search',15)} ${t('search')}</button>
+    </div>
+    <div class="filters"><span class="chip ${cur.get('lang')==='en'?'on':''}" id="ce" onclick="this.classList.toggle('on')">${t('eng_ok')}</span><span class="chip ${cur.get('lang')==='zh'?'on':''}" id="cz" onclick="this.classList.toggle('on')">${t('zh_ok')}</span><span class="chip ${cur.get('foreigner')==='1'?'on':''}" id="cf" onclick="this.classList.toggle('on')">${t('fw')}</span><span class="chip ${cur.get('card')==='1'?'on':''}" id="cc" onclick="this.classList.toggle('on')">${ic('card',12)} ${t('card_ok')}</span><span class="chip" onclick="goLatestReviews()">★ ${t('reviews_of')}</span></div>
+  </div>
+  <div class="grid" style="margin-top:16px">${stores.map(storeCard).join('')||`<div class="empty">—</div>`}</div></section></div>`;
+}
+/* ---- Google Maps: 埋め込みは /maps?output=embed、外部リンクは google.com/maps/search/?api=1&query= ---- */
+function mapBlock(s){
+  if (!s.address && !s.google_map_url) return '';
   let embedQ = s.address ? encodeURIComponent(s.address) : null;
   let openUrl = null;
   if (s.google_map_url) {
@@ -474,6 +519,7 @@ async function pageStore(id){
   const s = await API('/api/stores/' + id);
   if (s.error) return `<div class="wrap">${backBtn()}<div class="empty">—</div></div>`;
   const photos = photoArr(s.images, s.cover_image);
+  const isFavS = !!(ME && (ME.favorites||[]).some(f => f.target_type==='store' && f.target_id===s.id));
   const hero = photos.length > 1
     ? carousel(photos.map(u => ({ url: u, label: L(s,'name').charAt(0) })), s.hue)
     : `<div class="detail-hero" style="${imgStyle(s.cover_image, s.hue)}"><div style="display:flex;align-items:center;gap:12px">${s.logo?`<img src="${esc(s.logo)}" alt="" style="width:52px;height:52px;object-fit:contain;border-radius:10px;background:rgba(20,20,22,.75);border:1px solid var(--line);padding:4px">`:''}<div><h1>${esc(L(s,'name'))}</h1>
@@ -513,7 +559,7 @@ async function pageStore(id){
   </div>
   <div class="fixed-cta">
     ${s.line_url?`<a class="btn ghost notranslate" href="${esc(s.line_url)}" target="_blank" rel="noopener" translate="no">LINE</a>`:''}
-    <button type="button" class="btn ghost" onclick="fav('store',${s.id},this)">${ic('heart',15)}</button>
+    <button type="button" class="btn ghost ${isFavS?'fav-on':''}" onclick="fav('store',${s.id},this)">${ic('heart',15)}</button>
     <button type="button" class="btn" onclick="contactStore(${s.id},'${esc(L(s,'name')).replace(/'/g,'')}')">${ic('message',14)} ${t('chat_club')}</button>
     ${s.reservation_ok?`<button type="button" class="btn" onclick="contactStore(${s.id},'${esc(L(s,'name')).replace(/'/g,'')}',null,'reservation')">${t('reserve')}</button>`:''}
   </div>`;
@@ -527,6 +573,7 @@ async function pageCast(id){
   const c = await API('/api/casts/' + id);
   if (c.error) return `<div class="wrap">${backBtn()}<div class="empty">—</div></div>`;
   const photos = photoArr(c.photos, c.photo);
+  const isFavC = !!(ME && (ME.favorites||[]).some(f => f.target_type==='cast' && f.target_id===c.id));
   const hero = carousel(photos.length ? photos.map(u => ({ url: u, label: (c.display_name||c.name).charAt(0) })) : [{ url: null, label: (c.display_name||c.name).charAt(0) }], c.hue);
   return `<div class="wrap" style="max-width:820px">${backBtn()}
   <div style="margin-top:14px;text-align:center"><h1 style="font-family:var(--serif);font-size:30px;font-weight:600">${esc(c.display_name||c.name)}</h1>
@@ -551,13 +598,15 @@ async function pageCast(id){
     </dl>
     <div class="sns-row">
       ${c.sns_instagram?`<a class="btn sm ghost notranslate" href="${esc(c.sns_instagram)}" target="_blank" rel="noopener" translate="no">${ic('instagram',13)} Instagram</a>`:''}
+      ${c.sns_tiktok?`<a class="btn sm ghost notranslate" href="${esc(c.sns_tiktok)}" target="_blank" rel="noopener" translate="no">${bic('tiktok',13)} TikTok</a>`:''}
+      ${c.sns_x?`<a class="btn sm ghost notranslate" href="${esc(c.sns_x)}" target="_blank" rel="noopener" translate="no">${bic('x',13)} X</a>`:''}
       <button type="button" class="btn sm ghost" onclick="reviewModal(${c.store_id},${c.id},'${esc(c.display_name||c.name).replace(/'/g,'')}')">${ic('pen',13)} ${t('write_review_cast')}</button>
     </div>
   </div>
   ${c.reviews && c.reviews.length ? `<section class="sec"><h2><em>◆</em>${t('rv_cast')} (${c.reviews.length})</h2>${c.reviews.map(reviewCard).join('')}</section>` : ''}
   ${c.others && c.others.length ? `<section class="sec"><h2><em>◆</em>${t('other_cast')}</h2><div class="grid">${c.others.map(castCard).join('')}</div></section>` : ''}
   </div>
-  <div class="fixed-cta"><button type="button" class="btn ghost" onclick="fav('cast',${c.id},this)">${ic('heart',15)}</button>
+  <div class="fixed-cta"><button type="button" class="btn ghost ${isFavC?'fav-on':''}" onclick="fav('cast',${c.id},this)">${ic('heart',15)}</button>
   <button type="button" class="btn" onclick="contactStore(${c.store_id},'${esc(c.display_name||c.name).replace(/'/g,'')}',${c.id})">${ic('message',14)} ${t('chat_cast')}</button>
   <button type="button" class="btn ghost" onclick="go('store',${c.store_id})">${t('visit_club')}</button></div>`;
 }
@@ -619,18 +668,18 @@ async function pageCasts(){
     <div class="flt-group"><div class="flt-title">${t('f_area')}</div>
       <select style="max-width:100%" onchange="castSel('area',this.value)"><option value="">${t('all')}</option>${areas.map(a=>`<option value="${a.id}">${esc(L(a,'name'))}</option>`).join('')}</select></div>
     <div class="flt-group"><div class="flt-title">${t('f_height')}</div><div class="flt-chips">
-      ${[['0-149','h1'],['150-159','h2'],['160-169','h3'],['170-999','h4']].map(h=>`<span class="chip" onclick="castHeight('${h[0]}',this)">${t(h[1])}</span>`).join('')}</div></div>
+      ${[['0-149','h1'],['150-159','h2'],['160-169','h3'],['170-999','h4']].map(h=>`<span class="chip ${CAST_F._hr===h[0]?'on':''}" onclick="castHeight('${h[0]}',this)">${t(h[1])}</span>`).join('')}</div></div>
     ${chipGroup('bust', CAST_OPTS.bust)}${chipGroup('style_type', CAST_OPTS.style_type)}${chipGroup('face', CAST_OPTS.face)}
     <div id="more-filters" style="display:none">
       ${chipGroup('birthplace', CAST_OPTS.birthplace)}${chipGroup('alcohol', CAST_OPTS.alcohol)}${chipGroup('skill', CAST_OPTS.skill)}${chipGroup('body_style', CAST_OPTS.body_style)}${chipGroup('hair', CAST_OPTS.hair)}${chipGroup('langs', CAST_OPTS.langs)}
     </div>
     <button type="button" class="more-toggle" id="more-btn" onclick="toggleMore()">${t('more_filters')}</button>
-    <div class="row" style="margin-top:14px"><button type="button" class="btn ghost" onclick="CAST_F={};renderCastList();document.querySelectorAll('#more-filters .chip,.flt-chips .chip').forEach(c=>c.classList.remove('on'))">${t('clear')}</button>
-    <button type="button" class="btn" onclick="renderCastList()">${ic('search',15)} ${t('apply')}</button></div>
+    <div class="row" style="margin-top:14px"><button type="button" class="btn ghost" style="width:100%" onclick="clearCastFilters()">${t('clear')}</button></div>
   </div>
   <div class="grid" id="cast-results" style="margin-top:16px"><div class="empty">…</div></div></section></div>
 `;
 }
+function clearCastFilters(){ CAST_F = {}; render(); }
 function castHeight(range, el){
   el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
   const [lo, hi] = range.split('-');
@@ -715,8 +764,13 @@ async function couponDetail(id){
 function fav(type, id, btn){
   if (needLogin()) return;
   API('/api/favorites', { method:'POST', body: JSON.stringify({ target_type: type, target_id: id }) }).then(r => {
+    if (r.error === 'unauthorized') { toast(t('need_login')); loginModal(); return; }
     toast(r.favorited ? t('fav_add') : t('fav_del'));
-    if (btn) { btn.classList.toggle('fav-on', !!r.favorited); btn.innerHTML = ic('heart', 15); btn.style.color = r.favorited ? 'var(--gold)' : ''; btn.style.borderColor = r.favorited ? 'var(--gold)' : ''; }
+    if (btn) btn.classList.toggle('fav-on', !!r.favorited);
+    if (ME && ME.favorites) {
+      if (r.favorited) ME.favorites.push({ target_type: type, target_id: id });
+      else ME.favorites = ME.favorites.filter(f => !(f.target_type === type && f.target_id === id));
+    }
   });
 }
 function getCoupon(id){ if (needLogin()) return; API(`/api/coupons/${id}/get`, { method:'POST' }).then(() => toast(t('coupon_saved'))); }
@@ -729,7 +783,7 @@ function contactStore(storeId, name, castId, kind){
     <div style="font-size:12px;color:var(--gold2);margin-bottom:10px">${title}</div>
     ${isResv?`<div class="filters" style="margin-top:0">
       <input type="date" id="rsv-d" style="flex:1" min="${new Date().toISOString().slice(0,10)}">
-      <select id="rsv-t" style="flex:1">${Array.from({length:13},(_,i)=>{const h=18+Math.floor(i/2),m=i%2?'30':'00';return `<option>${h}:${m}</option>`}).join('')}</select>
+      <select id="rsv-t" style="flex:1">${Array.from({length:11},(_,i)=>{const h=20+Math.floor(i/2),m=i%2?'30':'00';return `<option>${h}:${m}</option>`}).join('')}</select>
       <select id="rsv-p" style="flex:0 0 90px">${[1,2,3,4,5,6,7,8].map(n=>`<option>${n}</option>`).join('')}</select></div>`:''}
     <div class="field" style="margin-top:10px"><label>${t('message')} (${LANG.toUpperCase()})</label><textarea id="msgbody" rows="4" placeholder="Hello! I'd like to visit tonight."></textarea></div>
     <button type="button" class="btn" style="width:100%" onclick="sendMsg(${storeId},${castId||null},this,'${kind||''}')">${ic('send',14)} ${t('send')}</button>
@@ -746,7 +800,15 @@ function sendMsg(storeId, castId, btn, kind){
   }
   btn.disabled = true;
   API('/api/messages', { method:'POST', body: JSON.stringify(payload) })
-    .then(r => { if (r.error) { btn.disabled = false; return toast(r.error); } btn.closest('.modal').remove(); toast(t('msg_sent')); });
+    .then(r => {
+      if (r.error) {
+        btn.disabled = false;
+        if (r.error === 'unauthorized') { btn.closest('.modal').remove(); toast(t('need_login_chat')); loginModal(); return; }
+        return toast(r.error);
+      }
+      btn.closest('.modal').remove();
+      toast(kind === 'reservation' ? t('resv_sent') : t('msg_sent'));
+    });
 }
 /* 口コミ: 店舗選択ピッカー → 投稿モーダル (店舗/キャスト両対応) */
 async function reviewPicker(){
@@ -763,7 +825,7 @@ function reviewModal(storeId, castId, targetName){
     <div class="field"><label>★</label><select id="rv-r">${[5,4,3,2,1].map(n=>`<option>${n}</option>`).join('')}</select></div>
     <div class="field"><label>Name</label><input id="rv-n" value="${esc(ME?ME.name:'')}"></div>
     <div class="field"><label>Title</label><input id="rv-t"></div>
-    <div class="field"><label>Review</label><textarea id="rv-b" rows="5" placeholder="${t('rv_ph')}" oninput="rvCount()"></textarea>
+    <div class="field"><label>Review</label><textarea id="rv-b" rows="5" placeholder="${t('rv_ph')}" oninput="rvCount()" onblur="if(this.value.trim().length>0&&this.value.trim().length<200)document.getElementById('rv-err').style.display='block'"></textarea>
     <div id="rv-c" style="font-size:11px;color:var(--sub);text-align:right;margin-top:4px">0 / 200</div></div>
     <div id="rv-err" style="font-size:12px;color:#e08080;display:none;margin-bottom:8px">${t('rv_min')}</div>
     <button type="button" class="btn" id="rv-btn" style="width:100%;opacity:.45" disabled onclick="submitReview(${storeId},${castId||null},this)">${t('submit')}</button>`);
@@ -822,7 +884,8 @@ async function authDo(mode){
   if (r.error) return toast(r.error);
   TOKEN = r.token; localStorage.setItem('tng_token', TOKEN); ME = r.user;
   document.querySelector('.modal') && document.querySelector('.modal').remove();
-  toast(ME.name || ME.email); render();
+  toast(ME.name || ME.email);
+  API('/api/me').then(u => { if (!u.error) { ME = u; render(); } else render(); });
 }
 
 /* ================= router ================= */

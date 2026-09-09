@@ -180,8 +180,8 @@ app.get('/api/casts/:id', (req, res) => {
 
 app.get('/api/events', (req, res) => {
   let sql = `SELECT e.*, s.name_en store_name_en, s.name_ja store_name_ja, s.name_zh store_name_zh FROM events e JOIN stores s ON s.id=e.store_id WHERE e.status='published' AND s.status='published'`;
-  if (req.query.when === 'today') sql += ` AND e.event_date=date('now','localtime')`;
-  else if (req.query.when === 'week') sql += ` AND e.event_date BETWEEN date('now','localtime') AND date('now','localtime','+7 day')`;
+  if (req.query.when === 'today') sql += ` AND e.event_date=date('now','+9 hours')`;
+  else if (req.query.when === 'week') sql += ` AND e.event_date BETWEEN date('now','+9 hours') AND date('now','localtime','+7 day')`;
   res.json(db.prepare(sql + ' ORDER BY e.event_date').all());
 });
 app.get('/api/events/:id', (req, res) => {
@@ -309,7 +309,7 @@ app.post('/api/reviews/:id/reply', auth, staffOnly, (req, res) => {
 const TABLES = {
   areas:   ['slug','name_ja','name_en','name_zh','sort_order','status'],
   stores:  ['area_id','name_ja','name_en','name_zh','desc_ja','desc_en','desc_zh','logo','cover_image','images','hue','genre','address','google_map_url','open_hours','closed_days','phone','line_url','instagram','website','budget_min','budget_max','charge','service_fee','payment_methods','foreigner_welcome','english_ok','chinese_ok','credit_card_ok','reservation_ok','cast_count','is_recommended','sort_order','status'],
-  casts:   ['store_id','name','display_name','photo','photos','hue','profile_ja','profile_en','profile_zh','height','hobbies','favorites','languages','english_ok','chinese_ok','recommend_ja','recommend_en','recommend_zh','sns_instagram','is_popular','sort_order','status','bust','birthplace','style_type','alcohol','skill','face','body_style','hair'],
+  casts:   ['store_id','name','display_name','photo','photos','hue','profile_ja','profile_en','profile_zh','height','hobbies','favorites','languages','english_ok','chinese_ok','recommend_ja','recommend_en','recommend_zh','sns_instagram','sns_tiktok','sns_x','is_popular','sort_order','status','bust','birthplace','style_type','alcohol','skill','face','body_style','hair'],
   reviews: ['store_id','cast_id','author_name','rating','rating_service','rating_atmosphere','rating_price','rating_cast','rating_foreigner','title','body','visit_date','language','status'],
   events:  ['store_id','title_ja','title_en','title_zh','desc_ja','desc_en','desc_zh','event_date','start_time','end_date','end_time','image','hue','status'],
   coupons: ['store_id','title_ja','title_en','title_zh','desc_ja','desc_en','desc_zh','conditions_ja','conditions_en','conditions_zh','code','valid_from','valid_until','image','hue','status'],
