@@ -322,12 +322,32 @@ const TABLES = {
 
 app.get('/api/admin/stats', auth, staffOnly, (req, res) => {
   const c = t => db.prepare(`SELECT COUNT(*) n FROM ${t}`).get().n;
-  res.json({ stores: c('stores'), casts: c('casts'), users: c('users'), reviews: c('reviews'),
-    pending_reviews: db.prepare(`SELECT COUNT(*) n FROM reviews WHERE status='pending'`).get().n,
-    messages: c('messages'), events: c('events'), coupons: c('coupons'), blogs: c('blogs'),
-    unread_msgs: req.user.role==='admin' ? db.prepare(`SELECT COUNT(*) n FROM messages WHERE is_read=0 AND direction='user_to_store'`).get().n
-      : req.user.role==='store' ? db.prepare(`SELECT COUNT(*) n FROM messages WHERE is_read=0 AND direction='user_to_store' AND store_id=?`).get(req.user.store_id).n
-      : db.prepare(`SELECT COUNT(*) n FROM messages WHERE is_read=0 AND direction='user_to_store' AND cast_id=?`).get(req.user.cast_id).n });
+  const u = req.user;
+  const base = { pending_reviews: 0, unread_msgs: 0 };
+  if (u.role === 'admin') {
+    return res.json({ scope:'admin', stores: c('stores'), casts: c('casts'), users: c('users'), reviews: c('reviews'),
+      pending_reviews: db.prepare(`SELECT COUNT(*) n FROM reviews WHERE status='pending'`).get().n,
+      messages: c('messages'), events: c('events'), coupons: c('coupons'), blogs: c('blogs'),
+      unread_msgs: db.prepare(`SELECT COUNT(*) n FROM messages WHERE is_read=0 AND direction='user_to_store'`).get().n });
+  }
+  if (u.role === 'store') {
+    const sid = u.store_id;
+    return res.json({ scope:'store',
+      my_casts: db.prepare('SELECT COUNT(*) n FROM casts WHERE store_id=?').get(sid).n,
+      my_reviews: db.prepare('SELECT COUNT(*) n FROM reviews WHERE store_id=?').get(sid).n,
+      pending_reviews: db.prepare(`SELECT COUNT(*) n FROM reviews WHERE status='pending' AND store_id=?`).get(sid).n,
+      my_messages: db.prepare('SELECT COUNT(*) n FROM messages WHERE store_id=?').get(sid).n,
+      unread_msgs: db.prepare(`SELECT COUNT(*) n FROM messages WHERE is_read=0 AND direction='user_to_store' AND store_id=?`).get(sid).n,
+      my_events: db.prepare('SELECT COUNT(*) n FROM events WHERE store_id=?').get(sid).n,
+      my_coupons: db.prepare('SELECT COUNT(*) n FROM coupons WHERE store_id=?').get(sid).n,
+      my_reservations: db.prepare(`SELECT COUNT(*) n FROM messages WHERE store_id=? AND kind='reservation'`).get(sid).n });
+  }
+  const cid = u.cast_id;
+  return res.json({ scope:'cast',
+    my_reviews: db.prepare('SELECT COUNT(*) n FROM reviews WHERE cast_id=?').get(cid).n,
+    pending_reviews: 0,
+    my_messages: db.prepare('SELECT COUNT(*) n FROM messages WHERE cast_id=?').get(cid).n,
+    unread_msgs: db.prepare(`SELECT COUNT(*) n FROM messages WHERE is_read=0 AND direction='user_to_store' AND cast_id=?`).get(cid).n });
 });
 app.get('/api/admin/:table', auth, staffOnly, (req, res) => {
   const tbl = req.params.table;
