@@ -464,24 +464,6 @@ async function pageStores(qs){
   <div class="grid" style="margin-top:16px">${stores.map(storeCard).join('')||`<div class="empty">—</div>`}</div></section></div>`;
 }
 /* ---- Google Maps: 埋め込みは /maps?output=embed、外部リンクは google.com/maps/search/?api=1&query= ---- */
-function mapBlock(s){
-  if (!s.address && !s.google_map_url) return '';
-  const raw = String(s.google_map_url || '').trim();
-  const bad = /embed|output=embed|<iframe/i.test(raw);  // 埋め込み用は外部URLに使わない
-  let embedQ = s.address ? encodeURIComponent(s.address) : null;
-  let openUrl = null;
-  if (raw && !bad) {
-    const mq = /[?&]q=([^&]+)/.exec(raw);
-    const mp = /maps\/place\/([^/?]+)/.exec(raw);
-    const query = mq ? mq[1] : (mp ? mp[1] : null);
-    openUrl = query ? ('https://www.google.com/maps/search/?api=1&query=' + query) : raw;
-    if (!embedQ && query) embedQ = query;
-  }
-  if (!openUrl && s.address) openUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(s.address);
-  if (!openUrl) return '';
-  return `${embedQ?`<iframe class="map-frame" loading="lazy" src="https://maps.google.com/maps?q=${embedQ}&output=embed"></iframe>`:''}
-    <div class="sns-row"><a class="btn sm ghost notranslate" href="${esc(openUrl)}" target="_blank" rel="noopener" translate="no">${ic('pin',14)} Google Maps</a></div>`;
-}
 async function pageStores(qs){
   const [stores, areas] = await Promise.all([API('/api/stores?' + (qs || '')), API('/api/areas')]);
   const cur = new URLSearchParams(qs || '');
@@ -502,16 +484,19 @@ async function pageStores(qs){
 /* ---- Google Maps: 埋め込みは /maps?output=embed、外部リンクは google.com/maps/search/?api=1&query= ---- */
 function mapBlock(s){
   if (!s.address && !s.google_map_url) return '';
+  const raw = String(s.google_map_url || '').trim();
+  const bad = /embed|output=embed|<iframe/i.test(raw);  // 埋め込み用URLは外部リンクに使わない
   let embedQ = s.address ? encodeURIComponent(s.address) : null;
   let openUrl = null;
-  if (s.google_map_url) {
-    const mq = /[?&]q=([^&]+)/.exec(s.google_map_url);
-    const mp = /maps\/place\/([^/?]+)/.exec(s.google_map_url);
+  if (raw && !bad) {
+    const mq = /[?&]q=([^&]+)/.exec(raw);
+    const mp = /maps\/place\/([^/?]+)/.exec(raw);
     const query = mq ? mq[1] : (mp ? mp[1] : null);
-    openUrl = query ? ('https://www.google.com/maps/search/?api=1&query=' + query) : s.google_map_url;
+    openUrl = query ? ('https://www.google.com/maps/search/?api=1&query=' + query) : raw;
     if (!embedQ && query) embedQ = query;
   }
   if (!openUrl && s.address) openUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(s.address);
+  if (!openUrl) return '';
   return `${embedQ?`<iframe class="map-frame" loading="lazy" src="https://maps.google.com/maps?q=${embedQ}&output=embed"></iframe>`:''}
     <div class="sns-row"><a class="btn sm ghost notranslate" href="${esc(openUrl)}" target="_blank" rel="noopener" translate="no">${ic('pin',14)} Google Maps</a></div>`;
 }
@@ -555,7 +540,7 @@ async function pageStore(id){
     ${s.reviews.map(reviewCard).join('')||`<div class="empty">—</div>`}</div>
   <div class="panel" id="p-events" style="display:none"><div class="grid">${s.events.map(eventCard).join('')||`<div class="empty">—</div>`}</div></div>
   <div class="panel" id="p-coupons" style="display:none"><div class="grid">${s.coupons.map(couponCard).join('')||`<div class="empty">—</div>`}</div></div>
-  <div class="panel" id="p-access" style="display:none"><p>${esc(s.address||'')}</p>${mapBlock(s)}</div>
+  <div class="panel" id="p-access" style="display:none"><p style="margin-bottom:4px">${esc(s.address||'—')}</p>${mapBlock(s)}</div>
   </div>
   <div class="fixed-cta">
     ${s.line_url?`<a class="btn ghost notranslate" href="${esc(s.line_url)}" target="_blank" rel="noopener" translate="no">LINE</a>`:''}
@@ -906,7 +891,11 @@ function setSiteName(){
   if (n) { document.getElementById('sitename').textContent = n; document.getElementById('f_sitename').textContent = n; }
 }
 (async () => {
-  const rs = new URLSearchParams(location.search).get('reset');
+  const qs = new URLSearchParams(location.search);
+  const rs = qs.get('reset');
+  const qStore = qs.get('store'), qCast = qs.get('cast');
+  if (qStore) PAGE = { name:'store', arg: parseInt(qStore,10) };
+  else if (qCast) PAGE = { name:'cast', arg: parseInt(qCast,10) };
   if (rs) { setTimeout(() => resetModal(rs), 600); }
   SETTINGS = await API('/api/settings');
   document.documentElement.lang = LANG;
@@ -914,5 +903,6 @@ function setSiteName(){
   render();
 })();
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
