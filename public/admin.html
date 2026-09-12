@@ -80,7 +80,7 @@ let STATS = null, AREAS = [], STORES = [], CASTS = [], ME_ROLE = 'admin', ME_STO
 const API = (p, o) => fetch(p, { ...o, headers: { 'Content-Type':'application/json', Authorization:'Bearer '+TOKEN } }).then(async r => {
   if (r.status === 401) { TOKEN=''; localStorage.removeItem('tng_admin_token'); render(); throw new Error('auth'); }
   return r.json();
-});
+}).catch(e => { if (e.message !== 'auth') { /* 一時的な通信失敗ではログイン状態を消さない */ throw e; } throw e; });
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function toast(m){ const d = document.createElement('div'); d.className='toast'; d.textContent=m; document.body.appendChild(d); setTimeout(()=>d.remove(),2200); }
 
@@ -199,23 +199,33 @@ async function render(){
   if (!STATS) return;
   AREAS = await API('/api/admin/areas'); STORES = await API('/api/admin/stores'); CASTS = await API('/api/admin/casts');
   const pend = STATS.pending_reviews || 0, unread = STATS.unread_msgs || 0;
-  const visMenu = MENU.filter(m => ME_ROLE==='admin' ? true : ME_ROLE==='store' ? !['areas','users','blogs','settings'].includes(m[0]) : ['dashboard','casts','reviews','messages'].includes(m[0]));
+  const visMenu = MENU.filter(m => ME_ROLE==='admin' ? true
+    : ME_ROLE==='store' ? ['dashboard','stores','casts','reviews','messages','events','coupons','notifications'].includes(m[0])
+    : ['dashboard','casts','reviews','messages'].includes(m[0]));
   if (!visMenu.find(m=>m[0]===VIEW)) VIEW='dashboard';
   root.innerHTML = `<div class="layout"><nav class="side"><h1>◆ <span>TNG Admin</span></h1>
     <div style="padding:0 12px 10px;font-size:10px;color:var(--sub)">${ME_ROLE==='admin'?'Super Admin':ME_ROLE==='store'?'Club Admin':'Cast'}</div>
     ${visMenu.map(m=>`<a class="${VIEW===m[0]?'on':''}" onclick="go('${m[0]}')">${m[1]} <span>${m[2]}</span>${m[0]==='reviews'&&pend?`<b class="pend">${pend}</b>`:''}${m[0]==='messages'&&unread?`<b class="pend" style="background:#1f5fc0">${unread}</b>`:''}</a>`).join('')}
     <a onclick="pwChangeModal()">🔒 <span>パスワード変更</span></a>
     <a onclick="localStorage.removeItem('tng_admin_token');TOKEN='';render()">⏻ <span>ログアウト</span></a>
-    <a href="/" target="_blank">↗ <span>サイトを見る</span></a></nav>
+    ${ME_ROLE==='store' ? `<a href="/?store=${ME_STORE}" target="_blank">↗ <span>店舗ページを見る</span></a>`
+      : ME_ROLE==='cast' ? `<a href="/?cast=${ME_CAST}" target="_blank">↗ <span>キャストページを見る</span></a>`
+      : `<a href="/" target="_blank">↗ <span>サイトを見る</span></a>`}</nav>
     <main class="main" id="main"></main></div>`;
   const main = document.getElementById('main');
   if (VIEW === 'dashboard') {
+    let dashCards = [];
+    if (STATS.scope === 'store') {
+      dashCards = [['未承認口コミ',pend,'alert'],['自店舗のキャスト',STATS.my_casts],['自店舗への口コミ',STATS.my_reviews],['自店舗宛DM',STATS.my_messages],['未読DM',STATS.unread_msgs,'alert2'],['予約希望',STATS.my_reservations],['イベント',STATS.my_events],['クーポン',STATS.my_coupons]];
+    } else if (STATS.scope === 'cast') {
+      dashCards = [['自分への口コミ',STATS.my_reviews],['自分宛DM',STATS.my_messages],['未読DM',STATS.unread_msgs,'alert2']];
+    } else {
+      dashCards = [['未承認口コミ',pend,'alert'],['店舗',STATS.stores],['キャスト',STATS.casts],['ユーザー',STATS.users],['口コミ(総数)',STATS.reviews],['DM',STATS.messages],['イベント',STATS.events],['クーポン',STATS.coupons],['ブログ',STATS.blogs]];
+    }
     main.innerHTML = `<div class="top"><h2>Dashboard</h2></div>
     ${pend?`<div class="notice">★ 未承認の口コミが <b>${pend}件</b> あります。<a href="javascript:go('reviews')">口コミ管理で確認する →</a></div>`:''}
     <div class="cards">
-      <div class="stat ${pend?'alert':''}"><div style="color:var(--sub);font-size:11px">未承認口コミ</div><b>${pend}</b></div>
-      ${[['店舗',STATS.stores],['キャスト',STATS.casts],['ユーザー',STATS.users],['口コミ(総数)',STATS.reviews],['DM',STATS.messages],['イベント',STATS.events],['クーポン',STATS.coupons],['ブログ',STATS.blogs]]
-        .map(x=>`<div class="stat"><div style="color:var(--sub);font-size:11px">${x[0]}</div><b>${x[1]}</b></div>`).join('')}</div>
+      ${dashCards.map(x=>`<div class="stat ${x[2]==='alert'&&x[1]?'alert':''}"><div style="color:var(--sub);font-size:11px">${x[0]}</div><b>${x[1]??0}</b></div>`).join('')}</div>
       <p style="margin-top:18px;color:var(--sub);font-size:12px;line-height:2">多言語項目は「日本語」を入力して <b>自動翻訳</b> ボタンを押すと英語・中国語が自動入力されます（後から修正可）。<br>画像は「ファイルを選択」からアップロード（Cloudinary設定で永続保存。README参照）。<br>キャストの追加写真を登録すると、サイト側でカルーセル（写真スライダー）表示になります。</p>`;
     return;
   }
