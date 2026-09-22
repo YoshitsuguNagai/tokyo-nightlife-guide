@@ -69,6 +69,14 @@ input:focus,textarea:focus,select:focus{outline:1px solid var(--gold)}
 .pw{position:relative}.pw input{padding-right:42px}
 .eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--sub);cursor:pointer;padding:6px}
 @media(max-width:820px){.side{width:60px;padding:12px 6px}.side a span,.side h1 span{display:none}.side a{justify-content:center}.pend{right:4px;top:4px}.frm{grid-template-columns:1fr}.main{padding:14px}}
+
+.imp-row{display:grid;grid-template-columns:150px 1fr 100px;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}
+.imp-row input,.imp-row textarea,.imp-row select{width:100%}
+.imp-img{display:inline-block;vertical-align:top;margin:5px;text-align:center;width:118px}
+.imp-img img{width:116px;height:84px;object-fit:cover;border-radius:6px;border:2px solid transparent;display:block;cursor:pointer;background:#111}
+.imp-img.on img{border-color:var(--gold)}
+.imp-cast{border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0}
+@media(max-width:700px){.imp-row{grid-template-columns:1fr}.imp-row>div:nth-child(3){order:-1}}
 </style>
 </head>
 <body>
@@ -181,7 +189,7 @@ const F = {
  notifications:[{k:'store_id',l:'店舗',type:'store'},{k:'user_id',l:'送信先ユーザーID（空=全員）',type:'number'},{k:'template_ja',l:'メッセージ（日本語）',type:'textarea',tr:'template'},{k:'template_en',l:'メッセージ（English）',type:'textarea'},{k:'template_zh',l:'メッセージ（中文）',type:'textarea'},{k:'channel',l:'送信チャネル',type:'select',opts:{dm:'DM',email:'メール',line:'LINE'}},{k:'status',l:'状態',type:'select',opts:{draft:'下書き',sent:'送信済み'}}],
  settings:[{k:'key',l:'キー'},{k:'value',l:'値',type:'textarea'}]
 };
-const MENU = [['dashboard','▦','Dashboard'],['stores','◆','店舗'],['casts','◇','キャスト'],['areas','◎','エリア'],['users','◉','ユーザー'],['reviews','★','口コミ'],['messages','✉','DM'],['blogs','▤','ブログ'],['events','▣','イベント'],['coupons','▢','クーポン'],['notifications','♪','お知らせ・通知'],['settings','⚙','サイト設定']];
+const MENU = [['dashboard','▦','Dashboard'],['import','⇩','インポート'],['stores','◆','店舗'],['casts','◇','キャスト'],['areas','◎','エリア'],['users','◉','ユーザー'],['reviews','★','口コミ'],['messages','✉','DM'],['blogs','▤','ブログ'],['events','▣','イベント'],['coupons','▢','クーポン'],['notifications','♪','お知らせ・通知'],['settings','⚙','サイト設定']];
 
 async function render(){
   const root = document.getElementById('root');
@@ -229,6 +237,7 @@ async function render(){
       <p style="margin-top:18px;color:var(--sub);font-size:12px;line-height:2">多言語項目は「日本語」を入力して <b>自動翻訳</b> ボタンを押すと英語・中国語が自動入力されます（後から修正可）。<br>画像は「ファイルを選択」からアップロード（Cloudinary設定で永続保存。README参照）。<br>キャストの追加写真を登録すると、サイト側でカルーセル（写真スライダー）表示になります。</p>`;
     return;
   }
+  if (VIEW === 'import') return renderImport(main);
   if (VIEW === 'messages') return renderMessages(main);
   return renderTable(main, VIEW);
 }
@@ -244,7 +253,8 @@ const short = v => v == null ? '' : String(v).slice(0, 42);
 
 async function renderTable(main, table){
   const rows = await API('/api/admin/' + table);
-  document.getElementById('main').innerHTML = tableHtml(table, rows);
+  const impBtn = (table==='stores' && ME_ROLE==='admin') ? `<div style="margin-bottom:10px"><button class="btn ghost" onclick="go('import')">⇩ 公式サイトから店舗をインポート</button></div>` : '';
+  document.getElementById('main').innerHTML = impBtn + tableHtml(table, rows);
 }
 function tableHtml(table, rows){
   const fields = F[table] || [];
@@ -495,6 +505,202 @@ async function doReply(id, btn){
 }
 render();
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
+/* ===== 公式サイトインポート (Super Admin) ===== */
+let IMP = null;
+const IMP_SF = [
+ ['name_ja','店舗名（日本語）'],['desc_ja','店舗紹介（日本語）','ta'],['area_id','エリア','area'],['genre','ジャンル','genre'],
+ ['address','住所'],['google_map_url','Googleマップ共有URL'],['open_hours','営業時間'],['closed_days','定休日'],
+ ['phone','電話番号'],['website','公式サイトURL'],['instagram','Instagram URL'],['line_url','LINE URL'],
+ ['budget_min','予算 下限（円）','num'],['budget_max','予算 上限（円）','num'],['charge','チャージ'],['service_fee','サービス料'],
+ ['payment_methods','決済方法'],['english_ok','英語対応','bool'],['chinese_ok','中国語対応','bool']];
+const IMP_CF = [['name','キャスト名'],['height','身長','num'],['bust','バスト'],['birthplace','出身地'],['hobbies','趣味・好きなこと'],['profile_ja','プロフィール','ta'],['sns_instagram','Instagram URL'],['sns_x','X URL'],['sns_tiktok','TikTok URL']];
+const IMP_LABELS = {open_hours:'営業時間',closed_days:'定休日',address:'住所',phone:'電話番号',instagram:'Instagram'};
+const impPost = (p, body) => fetch(p,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+TOKEN},body:JSON.stringify(body)}).then(r=>r.json());
+const impPut  = (p, body) => fetch(p,{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+TOKEN},body:JSON.stringify(body)}).then(r=>r.json());
+function impIcon(st){ return st==='ok' ? '<span style="color:#2ecc71">✓ 取得成功</span>' : st==='check' ? '<span style="color:#f39c12">△ 要確認</span>' : '<span style="color:#777">－ 情報なし</span>'; }
+
+function renderImport(main){
+  main.innerHTML = `<div class="top"><h2>⇩ 公式サイトからインポート</h2></div>
+  <div class="notice">公式サイトの情報を自動取得します。取得結果は<b>下書き</b>としてのみ登録され、<b>公開は管理者が各項目を確認してから</b>行います。店舗・キャストのログインアカウントはここでは発行されません。</div>
+  <div class="field" style="max-width:600px"><label style="font-size:11px;color:var(--sub)">公式サイトURL</label>
+  <input id="imp-url" placeholder="https://unjour-tokyo.jp/" value="${esc(IMP && IMP.url || '')}"></div>
+  <button class="btn" onclick="impFetch(this)">情報を取得</button>
+  <div id="imp-body" style="margin-top:16px"></div>`;
+  if (IMP && IMP.data) impRenderReview();
+}
+
+async function impFetch(btn){
+  const url = document.getElementById('imp-url').value.trim();
+  if (!url) return toast('公式サイトURLを入力してください');
+  btn.disabled = true; btn.textContent = '取得中...（最大30秒）';
+  IMP = { url };
+  document.getElementById('imp-body').innerHTML = '';
+  try {
+    const r = await impPost('/api/admin/import/fetch', { url });
+    if (r.error) { toast(r.error); IMP = null; }
+    else { IMP.data = r; impRenderReview(); }
+  } catch(e){ toast('取得に失敗しました'); IMP = null; }
+  btn.disabled = false; btn.textContent = '情報を取得';
+}
+
+function impRenderReview(){
+  const d = IMP.data, F0 = d.store.fields, el = document.getElementById('imp-body');
+  const fv = k => (F0[k] ? F0[k].value : '');
+  const fs = k => (F0[k] ? F0[k].status : 'none');
+  const rows = IMP_SF.map(([k,l,t]) => {
+    let inp;
+    if (t==='ta') inp = `<textarea data-imp-f="${k}" rows="3">${esc(fv(k))}</textarea>`;
+    else if (t==='area') inp = `<select data-imp-f="${k}"><option value="">— 選択 —</option>${AREAS.map(a=>`<option value="${a.id}" ${String(fv(k))===String(a.id)?'selected':''}>${esc(a.name_ja)}</option>`).join('')}</select>`;
+    else if (t==='genre') inp = `<select data-imp-f="${k}">${['cabaret','lounge','club'].map(g=>`<option value="${g}" ${fv(k)===g?'selected':''}>${({cabaret:'キャバクラ',lounge:'ラウンジ',club:'クラブ'})[g]}</option>`).join('')}</select>`;
+    else if (t==='bool') inp = `<label style="font-size:12px"><input type="checkbox" data-imp-f="${k}" ${fv(k)==1?'checked':''}> 対応する</label>`;
+    else if (t==='num') inp = `<input type="number" data-imp-f="${k}" value="${esc(fv(k))}">`;
+    else inp = `<input data-imp-f="${k}" value="${esc(fv(k))}">`;
+    return `<div class="imp-row"><div style="font-size:12px;color:var(--sub)">${l}</div><div>${inp}</div><div style="font-size:11px">${impIcon(fs(k))}</div></div>`;
+  }).join('');
+  const imgs = d.store.images || [];
+  const imgHtml = imgs.length ? imgs.map((u,i)=>`<div class="imp-img" data-box><input type="checkbox" data-img="${esc(u)}" style="display:none" onchange="this.closest('[data-box]').classList.toggle('on',this.checked)"><img src="${esc(u)}" loading="lazy" onclick="this.previousElementSibling.click()" onerror="this.closest('[data-box]').style.display='none'"><div style="font-size:10px;color:var(--sub)">写真${i+1}</div><label style="font-size:10px"><input type="radio" name="imp-main" value="${esc(u)}"> メイン画像に設定</label></div>`).join('') : '<p style="color:#777;font-size:12px">候補画像が見つかりませんでした</p>';
+  const logos = d.store.logo || [];
+  const logoHtml = logos.length ? logos.map(u=>`<label style="display:inline-block;margin:5px;font-size:11px"><input type="radio" name="imp-logo" value="${esc(u)}"><img src="${esc(u)}" style="width:90px;max-height:48px;object-fit:contain;display:block;background:#222;border-radius:6px" onerror="this.parentNode.style.display='none'">ロゴ候補</label>`).join('') + '<label style="font-size:11px;margin:5px"><input type="radio" name="imp-logo" value="" checked> ロゴなし</label>' : '<p style="color:#777;font-size:12px">ロゴ候補なし</p>';
+  let existHtml = '';
+  if (d.existing) {
+    const diffs = (d.existing.diffs||[]).map(x=>`<div class="imp-row"><div style="font-size:12px;color:var(--sub)">${IMP_LABELS[x.field]||x.field}</div><div style="font-size:12px">旧：${esc(x.old||'—')}<br>新：${esc(x.next)}</div><div><button type="button" class="btn sm ghost" data-diff="${x.field}">変更する</button></div></div>`).join('');
+    const missing = (d.existing.missing_casts||[]).map(c=>`<div style="font-size:12px;color:#e67e22">▲ ${esc(c.name)}：公式サイトで確認できません（退店・移籍の可能性。TNG側は自動削除されません）</div>`).join('');
+    existHtml = `<div class="notice" style="border-color:#e67e22">⚠ 既存店舗 #${d.existing.store_id}「${esc(d.existing.name_ja)}」と一致しました。<label style="display:block;margin-top:6px;font-size:12px"><input type="checkbox" id="imp-update-existing"> この既存店舗の情報を更新する（チェックしない場合は新規店舗として下書き登録）</label>${diffs?'<h3 style="margin:10px 0 4px;font-size:13px">公式サイトの変更検出</h3>'+diffs:''}${missing}</div>`;
+  }
+  const casts = d.casts || [];
+  const castRows = casts.map(c=>`<tr><td><input type="checkbox" data-cast="${c.id}" ${c.exist==='existing'?'':'checked'}></td><td>${c.thumb?`<img src="${esc(c.thumb)}" style="width:40px;height:40px;object-fit:cover;border-radius:6px" onerror="this.style.display='none'">`:''}</td><td>${esc(c.name||'（名称未取得）')}</td><td>${c.exist==='existing'?'<span class="badge pub">登録済み</span>':'<span class="badge pen">新規</span>'}</td></tr>`).join('');
+  el.innerHTML = `
+  <h3 style="margin:16px 0 6px;font-size:14px">インポート内容確認（店舗）</h3>${rows}
+  <h3 style="margin:16px 0 6px;font-size:14px">店舗ロゴ</h3>${logoHtml}
+  <h3 style="margin:16px 0 6px;font-size:14px">店舗写真（使用する画像だけ選択・画像はTNG側に再保存されます）</h3><div>${imgHtml}</div>
+  ${existHtml}
+  <h3 style="margin:18px 0 6px;font-size:14px">CAST一括取得 ${casts.length?`（検出 ${casts.length}名）`:'（一覧が見つかりませんでした）'}</h3>
+  ${casts.length?`<div style="overflow:auto;max-height:280px;border:1px solid var(--line);border-radius:8px"><table><tr><th></th><th>写真</th><th>名前</th><th>状態</th></tr>${castRows}</table></div>
+  <div style="margin-top:10px"><button class="btn ghost" onclick="impFetchCasts(this)">選択したキャストの詳細を取得</button> <span id="imp-progress" style="font-size:12px;color:var(--sub)"></span></div>
+  <div id="imp-cast-details"></div>`:''}
+  <div style="margin:18px 0"><button class="btn" onclick="impSave(this)">店舗＋キャストを下書き登録</button>
+  <p style="font-size:11px;color:var(--sub);margin-top:6px">※ 下書きは公開サイトに表示されません。確認・修正後に各編集画面で「公開」に変更してください。</p></div>`;
+  el.querySelectorAll('[data-diff]').forEach(b => b.onclick = () => {
+    const k = b.dataset.diff, nx = (d.existing.diffs||[]).find(x=>x.field===k);
+    const inp = el.querySelector(`[data-imp-f="${k}"]`);
+    if (inp && nx) { inp.value = nx.next; toast('新しい値を反映しました'); }
+  });
+}
+
+async function impFetchCasts(btn){
+  const ids = [...document.querySelectorAll('[data-cast]:checked')].map(c=>c.dataset.cast);
+  if (!ids.length) return toast('取得するキャストを選択してください');
+  btn.disabled = true;
+  IMP.castDetails = IMP.castDetails || {};
+  const prog = document.getElementById('imp-progress');
+  let done = 0;
+  for (const id of ids) {
+    const c = (IMP.data.casts||[]).find(x=>x.id===id);
+    if (!c || IMP.castDetails[id]) { done++; continue; }
+    prog.textContent = `取得中... ${done+1}/${ids.length} ${c.name||''}`;
+    try { const r = await impPost('/api/admin/import/cast', { url: c.url }); IMP.castDetails[id] = r.ok ? r : { error: r.error }; }
+    catch(e){ IMP.castDetails[id] = { error: 'fetch failed' }; }
+    done++;
+  }
+  prog.textContent = `取得完了 ${done}/${ids.length}`;
+  btn.disabled = false;
+  impRenderCastDetails();
+}
+
+function impRenderCastDetails(){
+  const box = document.getElementById('imp-cast-details');
+  if (!box) return;
+  box.innerHTML = Object.entries(IMP.castDetails||{}).map(([id, det]) => {
+    const c = (IMP.data.casts||[]).find(x=>x.id===id) || {};
+    if (det.error) return `<div class="imp-cast"><b>${esc(c.name||id)}</b> <span style="color:#e74c3c;font-size:12px">詳細取得に失敗：${esc(det.error)}（名前のみ下書き登録されます）</span></div>`;
+    const F0 = det.fields || {};
+    const frows = IMP_CF.map(([k,l,t]) => {
+      const f = F0[k] || { value:'', status:'none' };
+      const inp = t==='ta' ? `<textarea data-cf="${id}:${k}" rows="2">${esc(f.value)}</textarea>` : t==='num' ? `<input type="number" data-cf="${id}:${k}" value="${esc(f.value)}">` : `<input data-cf="${id}:${k}" value="${esc(f.value)}">`;
+      return `<div class="imp-row"><div style="font-size:12px;color:var(--sub)">${l}</div><div>${inp}</div><div style="font-size:11px">${impIcon(f.status)}</div></div>`;
+    }).join('');
+    const photos = (det.photos||[]).map((u,i)=>`<div class="imp-img" data-box><input type="checkbox" data-cp="${id}" value="${esc(u)}" style="display:none" ${i===0?'checked':''} onchange="this.closest('[data-box]').classList.toggle('on',this.checked)"><img src="${esc(u)}" loading="lazy" onclick="this.previousElementSibling.click()" onerror="this.closest('[data-box]').style.display='none'"><div style="font-size:10px;color:var(--sub)">${i===0?'メイン写真':'写真'+(i+1)}</div></div>`).join('');
+    const un = (det.unmapped&&det.unmapped.length) ? `<details style="font-size:11px;color:var(--sub);margin-top:6px"><summary>未マッピング情報（TNG項目なし・参考表示）</summary>${det.unmapped.map(x=>esc(x)).join('<br>')}</details>` : '';
+    return `<div class="imp-cast"><b style="color:var(--gold)">${esc(c.name||'')}</b> のプロフィール確認${frows}<div style="margin-top:6px">${photos||'<span style="font-size:11px;color:#777">写真候補なし</span>'}</div>${un}</div>`;
+  }).join('');
+}
+
+async function impSave(btn){
+  if (!IMP || !IMP.data) return toast('先に情報を取得してください');
+  if (!confirm('下書きとして登録します（公開はされません）。よろしいですか？')) return;
+  btn.disabled = true; btn.textContent = '登録中...（画像保存を含みます）';
+  try {
+    const srcs = new Set();
+    document.querySelectorAll('[data-img]:checked').forEach(c=>srcs.add(c.dataset.img));
+    const logoR = document.querySelector('[name=imp-logo]:checked');
+    if (logoR && logoR.value) srcs.add(logoR.value);
+    document.querySelectorAll('[data-cp]:checked').forEach(c=>srcs.add(c.value));
+    const map = {};
+    const arr = [...srcs];
+    for (let i=0; i<arr.length; i+=10) {
+      const r = await impPost('/api/admin/import/rehost', { urls: arr.slice(i, i+10) });
+      (r.results||[]).forEach(x=>{ if (x.url) map[x.src] = x.url; });
+    }
+    const body = { status: 'draft' };
+    document.querySelectorAll('[data-imp-f]').forEach(el => {
+      const k = el.dataset.impF;
+      if (el.type==='checkbox') body[k] = el.checked ? 1 : 0;
+      else if (el.type==='number') body[k] = el.value ? parseInt(el.value,10) : 0;
+      else body[k] = el.value;
+    });
+    if (!body.name_ja) throw new Error('店舗名を入力してください');
+    body.area_id = body.area_id ? parseInt(body.area_id,10) : null;
+    const mainR = document.querySelector('[name=imp-main]:checked');
+    const selImgs = [...document.querySelectorAll('[data-img]:checked')].map(c=>map[c.dataset.img]).filter(Boolean);
+    if (mainR && map[mainR.value]) body.cover_image = map[mainR.value];
+    else if (selImgs.length) body.cover_image = selImgs[0];
+    body.images = JSON.stringify(selImgs.filter(u=>u!==body.cover_image));
+    if (logoR && logoR.value && map[logoR.value]) body.logo = map[logoR.value];
+    const upd = document.getElementById('imp-update-existing');
+    let storeId;
+    if (upd && upd.checked && IMP.data.existing) {
+      delete body.status;
+      const r = await impPut('/api/admin/stores/' + IMP.data.existing.store_id, body);
+      if (r.error) throw new Error(r.error);
+      storeId = IMP.data.existing.store_id;
+    } else {
+      const r = await impPost('/api/admin/stores', body);
+      if (r.error) throw new Error(r.error);
+      storeId = r.id;
+    }
+    let n = 0;
+    const ids = [...document.querySelectorAll('[data-cast]:checked')].map(c=>c.dataset.cast);
+    for (const id of ids) {
+      const c = (IMP.data.casts||[]).find(x=>x.id===id); if (!c) continue;
+      const det = IMP.castDetails && IMP.castDetails[id];
+      const cb = { store_id: storeId, status: 'draft' };
+      if (det && !det.error) {
+        IMP_CF.forEach(([k,,t]) => {
+          const el = document.querySelector(`[data-cf="${id}:${k}"]`);
+          if (!el) return;
+          cb[k] = t==='num' ? (el.value ? parseInt(el.value,10) : null) : el.value;
+        });
+        const photos = [...document.querySelectorAll(`[data-cp="${id}"]:checked`)].map(x=>map[x.value]).filter(Boolean);
+        cb.photo = photos[0] || '';
+        cb.photos = JSON.stringify(photos.slice(1));
+      } else {
+        cb.name = c.name || ''; cb.display_name = c.name || '';
+      }
+      cb.display_name = cb.display_name || cb.name;
+      if (!cb.name) continue;
+      const rr = await impPost('/api/admin/casts', cb);
+      if (!rr.error) n++;
+    }
+    toast(`店舗＋キャスト${n}件を下書き登録しました`);
+    IMP = null;
+    go('stores');
+  } catch(e) {
+    toast('登録失敗: ' + e.message);
+    btn.disabled = false; btn.textContent = '店舗＋キャストを下書き登録';
+  }
+}
+
+</script>
 </body>
 </html>
