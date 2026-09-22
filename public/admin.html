@@ -631,6 +631,9 @@ function impRenderCastDetails(){
 async function impSave(btn){
   if (!IMP || !IMP.data) return toast('先に情報を取得してください');
   if (!confirm('下書きとして登録します（公開はされません）。よろしいですか？')) return;
+  const selCastIds = [...document.querySelectorAll('[data-cast]:checked')].map(c=>c.dataset.cast);
+  const noDetail = selCastIds.filter(id => !(IMP.castDetails && IMP.castDetails[id] && !IMP.castDetails[id].error));
+  if (noDetail.length && !confirm('⚠ 詳細未取得のキャストが ' + noDetail.length + ' 件います。\n名前のみで登録されます（写真・身長・SNSは入りません）。\n\n先に「選択したキャストの詳細を取得」を押すと写真・プロフィールも登録できます。\nこのまま名前のみで登録しますか？')) return;
   btn.disabled = true; btn.textContent = '登録中...（画像保存を含みます）';
   try {
     const srcs = new Set();
@@ -663,6 +666,14 @@ async function impSave(btn){
     let storeId;
     if (upd && upd.checked && IMP.data.existing) {
       delete body.status;
+      Object.keys(body).forEach(k => { const v = body[k]; if (v === '' || v == null) delete body[k]; });
+      if (!body.cover_image) delete body.cover_image;
+      if (body.images === '[]') delete body.images;
+      if (!body.logo) delete body.logo;
+      if (!body.budget_min) delete body.budget_min;
+      if (!body.budget_max) delete body.budget_max;
+      if (!body.english_ok) delete body.english_ok;
+      if (!body.chinese_ok) delete body.chinese_ok;
       const r = await impPut('/api/admin/stores/' + IMP.data.existing.store_id, body);
       if (r.error) throw new Error(r.error);
       storeId = IMP.data.existing.store_id;
