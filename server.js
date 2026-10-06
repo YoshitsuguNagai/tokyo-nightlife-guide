@@ -32,7 +32,7 @@ async function translateText(text, from, to) {
     try {
       const host = key.endsWith(':fx') ? 'https://api-free.deepl.com' : 'https://api.deepl.com';
       const body = new URLSearchParams({ auth_key: key, text, source_lang: from === 'zh' ? 'ZH' : from.toUpperCase(), target_lang: to === 'zh' ? 'ZH' : to.toUpperCase() });
-      const r = await fetch(host + '/v2/translate', { method: 'POST', body }).then(r => r.json());
+      const r = await fetch(host + '/v2/translate', { method: 'POST', body, signal: AbortSignal.timeout(10000) }).then(r => r.json());
       const out = r && r.translations && r.translations[0] && r.translations[0].text;
       if (out) return out;
     } catch (e) {}
@@ -41,7 +41,7 @@ async function translateText(text, from, to) {
   try {
     const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=' + encodeURIComponent(from)
       + '&tl=' + encodeURIComponent(to === 'zh' ? 'zh-CN' : to) + '&dt=t&q=' + encodeURIComponent(text.slice(0, 4000));
-    const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }).then(r => r.json());
+    const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(10000) }).then(r => r.json());
     if (Array.isArray(r) && Array.isArray(r[0])) {
       const out = r[0].map(seg => (seg && seg[0]) || '').join('').trim();
       if (out && out !== text) return out;
@@ -221,9 +221,13 @@ app.post('/api/reviews', (req, res) => {
 
 /* 翻訳 */
 app.post('/api/translate', async (req, res) => {
-  const { text, from, to } = req.body;
-  const translated = await translateText(clean(text), clean(from || 'ja'), clean(to || 'en'));
-  res.json({ translated });
+  try {
+    const { text, from, to } = req.body;
+    const translated = await translateText(clean(text), clean(from || 'ja'), clean(to || 'en'));
+    res.json({ translated });
+  } catch (e) {
+    res.json({ translated: '', error: 'translate_failed' });
+  }
 });
 
 /* ---------- AUTH ---------- */
