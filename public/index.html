@@ -207,7 +207,7 @@ const I = {
   visit_club:'Visit this Club',map:'Open in Google Maps',
   review_saved:'Thank you! Your review will appear after approval.',coupon_saved:'Coupon saved to My Page',msg_sent:'Message sent',need_login:'Please log in first',
   tonight_only:'Tonight Only',this_week:'This Week',send:'Send',original:'Original',translated:'Auto-translation (JA / EN / 中文)',
-  height:'Height',hobbies:'Hobbies',favorites:'Favorites',cast:'Cast',admin:'Admin',
+  height:'Height',hobbies:'Hobbies',favorites:'Favorites',birth_month:'Birth month',cast:'Cast',admin:'Admin',
   official:'Official Website',call:'Call',photos:'Photos',
   ev_date:'Date & Time',ev_venue:'Venue',ev_about:'About this Event',ev_fee:'Estimated Budget',
   select_store:'Select a club to review',other_cast:'Other Cast',
@@ -231,7 +231,7 @@ const I = {
   visit_club:'この店舗を見る',map:'Google Mapsで開く',
   review_saved:'ありがとうございます。承認後に掲載されます。',coupon_saved:'クーポンをマイページに保存しました',msg_sent:'送信しました',need_login:'先にログインしてください',
   tonight_only:'今夜限定',this_week:'今週',send:'送信',original:'原文',translated:'自動翻訳 (JA / EN / 中文)',
-  height:'身長',hobbies:'趣味',favorites:'好きなもの',cast:'キャスト',admin:'管理',
+  height:'身長',hobbies:'趣味',favorites:'好きなもの',birth_month:'誕生月',cast:'キャスト',admin:'管理',
   official:'公式Webサイト',call:'電話する',photos:'フォト',
   ev_date:'開催日時',ev_venue:'開催店舗',ev_about:'イベント内容',ev_fee:'目安予算',
   select_store:'口コミを書く店舗を選択',other_cast:'その他のキャスト',
@@ -255,7 +255,7 @@ const I = {
   visit_club:'查看该店',map:'在Google Maps打开',
   review_saved:'谢谢!评价经审核后公开。',coupon_saved:'优惠券已保存到我的页面',msg_sent:'已发送',need_login:'请先登录',
   tonight_only:'今晚限定',this_week:'本周',send:'发送',original:'原文',translated:'自动翻译 (JA / EN / 中文)',
-  height:'身高',hobbies:'爱好',favorites:'喜欢的东西',cast:'公关',admin:'管理',
+  height:'身高',hobbies:'爱好',favorites:'喜欢的东西',birth_month:'出生月份',cast:'公关',admin:'管理',
   official:'官方网站',call:'拨打电话',photos:'照片',
   ev_date:'举办时间',ev_venue:'举办店铺',ev_about:'活动内容',ev_fee:'参考预算',
   select_store:'选择要评价的店铺',other_cast:'其他公关',
@@ -614,7 +614,7 @@ async function pageCast(id){
       ${c.face?`<dt>${t('f_face')}</dt><dd>${esc(c.face)}</dd>`:''}
       ${c.body_style?`<dt>${t('f_body')}</dt><dd>${esc(c.body_style)}</dd>`:''}
       ${c.hair?`<dt>${t('f_hair')}</dt><dd>${esc(c.hair)}</dd>`:''}
-      <dt>${t('hobbies')}</dt><dd>${esc(c.hobbies||'—')}</dd><dt>${t('favorites')}</dt><dd>${esc(c.favorites||'—')}</dd>
+      <dt>${t('hobbies')}</dt><dd>${esc(c.hobbies||'—')}</dd>${(c.birth_month>=1&&c.birth_month<=12)?`<dt>${t('birth_month')}</dt><dd>${c.birth_month}${LANG==='ja'?'月':LANG==='zh'?'月':''}</dd>`:''}
     </dl>
     <div class="sns-row">
       ${c.sns_instagram?`<a class="btn sm ghost notranslate" href="${esc(c.sns_instagram)}" target="_blank" rel="noopener" translate="no">${ic('instagram',13)} Instagram</a>`:''}
@@ -802,7 +802,7 @@ function contactStore(storeId, name, castId, kind){
   modal(`<h3>${esc(name)}</h3>
     <div style="font-size:12px;color:var(--gold2);margin-bottom:10px">${title}</div>
     ${isResv?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">
-      <label style="flex:1;min-width:120px;font-size:11px;color:var(--sub)">${t('select_date')}<input type="date" id="rsv-d" style="width:100%;margin-top:3px" min="${new Date().toISOString().slice(0,10)}"></label>
+      <label style="flex:1;min-width:120px;font-size:11px;color:var(--sub)"><b style="color:var(--gold)">${t('select_date')}</b><input type="date" id="rsv-d" placeholder="${t('select_date')}" style="width:100%;margin-top:3px" min="${new Date().toISOString().slice(0,10)}" onfocus="this.showPicker&&this.showPicker()"></label>
       <label style="flex:1;min-width:110px;font-size:11px;color:var(--sub)">${t('select_time')}<select id="rsv-t" style="width:100%;margin-top:3px"><option value="">— ${t('select_time')} —</option>${(()=>{const a=[];for(let i=0;i<9;i++){const h=20+Math.floor(i/2),m=i%2?'30':'00';a.push(h+':'+m);}return a;})().map(x=>`<option value="${x}">${x}</option>`).join('')}</select></label>
       <label style="flex:0 0 100px;font-size:11px;color:var(--sub)">${t('select_people')}<select id="rsv-p" style="width:100%;margin-top:3px"><option value="">— ${t('select_people')} —</option>${[1,2,3,4,5,6,7,8,9,10].map(n=>`<option value="${n}">${n}${t('people_unit')}</option>`).join('')}</select></label></div>`:''}
     <div class="field" style="margin-top:10px"><label>${t('message')} (${LANG.toUpperCase()})</label><textarea id="msgbody" rows="4" placeholder="Hello! I'd like to visit tonight."></textarea></div>
@@ -940,6 +940,7 @@ function setSiteName(){
   render();
 })();
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>

@@ -23,29 +23,32 @@ if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 /* ---------- 翻訳 (DeepL優先・未設定時はキー不要のGoogle翻訳endpointにフォールバック) ---------- */
 const TR_CACHE = new Map();
 async function translateText(text, from, to) {
-  text = String(text || '').slice(0, 4000);
-  if (!text.trim() || from === to) return text;
-  const ck = from + '|' + to + '|' + text;
-  if (TR_CACHE.has(ck)) return TR_CACHE.get(ck);
-  let out = null;
+  text = String(text || '').trim();
+  if (!text) return '';
+  if (from === to) return text;
+  const key = process.env.DEEPL_API_KEY;
+  // 1) DeepL（キー設定時）
+  if (key) {
+    try {
+      const host = key.endsWith(':fx') ? 'https://api-free.deepl.com' : 'https://api.deepl.com';
+      const body = new URLSearchParams({ auth_key: key, text, source_lang: from === 'zh' ? 'ZH' : from.toUpperCase(), target_lang: to === 'zh' ? 'ZH' : to.toUpperCase() });
+      const r = await fetch(host + '/v2/translate', { method: 'POST', body }).then(r => r.json());
+      const out = r && r.translations && r.translations[0] && r.translations[0].text;
+      if (out) return out;
+    } catch (e) {}
+  }
+  // 2) Google 翻訳の無料公開エンドポイント（キー不要・best effort）
   try {
-    const key = process.env.DEEPL_API_KEY;
-    if (key) {
-      const r = await fetch('https://api-free.deepl.com/v2/translate', {
-        method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ auth_key: key, text, source_lang: from.toUpperCase(), target_lang: to === 'zh' ? 'ZH' : to.toUpperCase() })
-      }).then(r => r.json());
-      out = r.translations && r.translations[0] && r.translations[0].text;
+    const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=' + encodeURIComponent(from)
+      + '&tl=' + encodeURIComponent(to === 'zh' ? 'zh-CN' : to) + '&dt=t&q=' + encodeURIComponent(text.slice(0, 4000));
+    const r = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }).then(r => r.json());
+    if (Array.isArray(r) && Array.isArray(r[0])) {
+      const out = r[0].map(seg => (seg && seg[0]) || '').join('').trim();
+      if (out && out !== text) return out;
     }
-    if (!out) {
-      const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&sl=' + from + '&tl=' + (to === 'zh' ? 'zh-CN' : to) + '&q=' + encodeURIComponent(text);
-      const r = await fetch(url).then(r => r.json());
-      out = ((r && r[0]) || []).map(x => x[0]).join('');
-    }
-  } catch (e) { out = null; }
-  if (!out) out = text; // ネットワーク不通時は原文を返す(壊れた[EN]表記は出さない)
-  TR_CACHE.set(ck, out);
-  return out;
+  } catch (e) {}
+  // 3) 最終フォールバック（従来の簡易辞書。失敗時も日本語のまま返さず [EN]/[中文] 印を付ける）
+  return naiveTranslate(text, to);
 }
 
 /* ---------- auth ---------- */
@@ -309,7 +312,7 @@ app.post('/api/reviews/:id/reply', auth, staffOnly, (req, res) => {
 const TABLES = {
   areas:   ['slug','name_ja','name_en','name_zh','sort_order','status'],
   stores:  ['area_id','name_ja','name_en','name_zh','desc_ja','desc_en','desc_zh','logo','cover_image','images','hue','genre','address','google_map_url','open_hours','closed_days','phone','line_url','instagram','website','budget_min','budget_max','charge','service_fee','payment_methods','foreigner_welcome','english_ok','chinese_ok','credit_card_ok','reservation_ok','cast_count','is_recommended','sort_order','status'],
-  casts:   ['store_id','name','display_name','photo','photos','hue','profile_ja','profile_en','profile_zh','height','hobbies','favorites','languages','english_ok','chinese_ok','recommend_ja','recommend_en','recommend_zh','sns_instagram','sns_tiktok','sns_x','is_popular','sort_order','status','bust','birthplace','style_type','alcohol','skill','face','body_style','hair'],
+  casts:   ['store_id','name','display_name','photo','photos','hue','profile_ja','profile_en','profile_zh','height','hobbies','favorites','languages','english_ok','chinese_ok','recommend_ja','recommend_en','recommend_zh','sns_instagram','sns_tiktok','sns_x','is_popular','sort_order','status','bust','birthplace','style_type','alcohol','skill','face','body_style','hair','birth_month'],
   reviews: ['store_id','cast_id','author_name','rating','rating_service','rating_atmosphere','rating_price','rating_cast','rating_foreigner','title','body','visit_date','language','status'],
   events:  ['store_id','title_ja','title_en','title_zh','desc_ja','desc_en','desc_zh','event_date','start_time','end_date','end_time','image','hue','status'],
   coupons: ['store_id','title_ja','title_en','title_zh','desc_ja','desc_en','desc_zh','conditions_ja','conditions_en','conditions_zh','code','valid_from','valid_until','image','hue','status'],
