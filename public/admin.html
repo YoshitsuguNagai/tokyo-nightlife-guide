@@ -422,6 +422,7 @@ async function autoTr(group, btn){
   const hasExisting = ['en','zh'].some(to => (document.querySelector(`[data-k="${group}_${to}"]`)||{}).value?.trim());
   if (hasExisting && !confirm('英語・中国語の既存の翻訳を上書きしますか?（手動で修正済みの内容は失われます）')) return;
   btn.disabled = true; btn.textContent = '翻訳中...';
+  const restore = ()=>{ btn.disabled=false; btn.textContent='⇄ 日本語 → 英語・中文 に自動翻訳'; };
   for (const to of ['en','zh']) {
     const r = await API('/api/translate', { method:'POST', body: JSON.stringify({ text: ja.value, from:'ja', to }) });
     const el = document.querySelector(`[data-k="${group}_${to}"]`);
@@ -429,6 +430,7 @@ async function autoTr(group, btn){
   }
   btn.disabled = false; btn.textContent = '⇄ 日本語 → 英語・中文 に自動翻訳';
   toast('自動翻訳しました（内容を確認・修正してから保存してください）');
+  restore();
 }
 async function saveRow(table, id, btn){
   const data = {};
@@ -714,6 +716,7 @@ async function impSave(btn){
   }
 }
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
