@@ -143,6 +143,14 @@ footer .logo{font-size:15px}
 .card.ovl .ovl-top-badge{position:absolute;top:10px;left:10px;z-index:2}
 @media(max-width:640px){.card.ovl .ph{height:225px}}
 .fixed-cta.cta-store{bottom:57px;z-index:62}
+
+input[type="date"].dt-ph{position:relative;color:transparent}
+input[type="date"].dt-ph::-webkit-calendar-picker-indicator{opacity:1}
+input[type="date"].dt-ph::before{content:attr(data-ph);position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:14px;pointer-events:none}
+input[type="date"]:focus{color:inherit}
+input[type="date"]:focus::before{content:none}
+input[type="date"].dt-ph.has-val{color:inherit}
+input[type="date"].dt-ph.has-val::before{content:none}
 </style>
 </head>
 <body>
@@ -802,7 +810,7 @@ function contactStore(storeId, name, castId, kind){
   modal(`<h3>${esc(name)}</h3>
     <div style="font-size:12px;color:var(--gold2);margin-bottom:10px">${title}</div>
     ${isResv?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">
-      <label style="flex:1;min-width:120px;font-size:11px;color:var(--sub)"><b style="color:var(--gold)">${t('select_date')}</b><input type="date" id="rsv-d" placeholder="${t('select_date')}" style="width:100%;margin-top:3px" min="${new Date().toISOString().slice(0,10)}" onfocus="this.showPicker&&this.showPicker()"></label>
+      <label style="flex:1;min-width:120px;font-size:11px;color:var(--sub)"><b style="color:var(--gold)">${t('select_date')}</b><input type="date" id="rsv-d" class="dt-ph" data-ph="${t('select_date')}" placeholder="${t('select_date')}" style="width:100%;margin-top:3px" min="${new Date().toISOString().slice(0,10)}" onclick="this.showPicker&&this.showPicker()" onchange="this.classList.toggle('has-val',!!this.value)" oninput="this.classList.toggle('has-val',!!this.value)"></label>
       <label style="flex:1;min-width:110px;font-size:11px;color:var(--sub)">${t('select_time')}<select id="rsv-t" style="width:100%;margin-top:3px"><option value="">— ${t('select_time')} —</option>${(()=>{const a=[];for(let i=0;i<9;i++){const h=20+Math.floor(i/2),m=i%2?'30':'00';a.push(h+':'+m);}return a;})().map(x=>`<option value="${x}">${x}</option>`).join('')}</select></label>
       <label style="flex:0 0 100px;font-size:11px;color:var(--sub)">${t('select_people')}<select id="rsv-p" style="width:100%;margin-top:3px"><option value="">— ${t('select_people')} —</option>${[1,2,3,4,5,6,7,8,9,10].map(n=>`<option value="${n}">${n}${t('people_unit')}</option>`).join('')}</select></label></div>`:''}
     <div class="field" style="margin-top:10px"><label>${t('message')} (${LANG.toUpperCase()})</label><textarea id="msgbody" rows="4" placeholder="Hello! I'd like to visit tonight."></textarea></div>
@@ -940,6 +948,7 @@ function setSiteName(){
   render();
 })();
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
