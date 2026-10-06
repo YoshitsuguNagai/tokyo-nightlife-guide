@@ -312,6 +312,11 @@ if (areaCount === 0) {
 db.exec("UPDATE stores SET genre='cabaret' WHERE genre IN ('cabaret','cabaret')");
 db.exec("UPDATE stores SET genre='club' WHERE genre='casual'");
 
+/* V6 migrations: アカウント(cast_id/must_change_pw) + キャスト誕生月 */
+addCol('users','cast_id','INTEGER');
+addCol('users','must_change_pw','INTEGER DEFAULT 0');
+addCol('casts','birth_month','INTEGER');
+
 /* V4 migrations (冪等・既存データ保持) */
 db.exec("UPDATE casts SET birthplace='関東' WHERE birthplace IN ('東京','神奈川','埼玉','千葉')");
 db.exec("UPDATE casts SET birthplace='関西' WHERE birthplace IN ('大阪','京都','兵庫')");

@@ -369,9 +369,21 @@ app.get('/api/admin/:table', auth, staffOnly, (req, res) => {
   }
   const q = req.query.q;
   if (q) { const needle = String(q).toLowerCase(); rows = rows.filter(r => JSON.stringify(r).toLowerCase().includes(needle)); }
+  if (tbl === 'users') rows = rows.map(r => { const { password_hash, ...safe } = r; return safe; });
   res.json(rows);
 });
 app.post('/api/admin/:table', auth, staffOnly, (req, res) => {
+  const _tbl = req.params.table;
+  if (_tbl === 'users' && req.user.role === 'store') {
+    const b = req.body || {};
+    if (b.role !== 'cast') return res.status(403).json({ error: 'forbidden' });
+    const c = db.prepare('SELECT store_id FROM casts WHERE id=?').get(parseInt(b.cast_id,10)||0);
+    if (!c || c.store_id !== req.user.store_id) return res.status(403).json({ error: 'forbidden' });
+    b.store_id = req.user.store_id;
+    req.body = b;
+  } else if (_tbl === 'users' && req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'forbidden' });
+  }
   const cols = TABLES[req.params.table];
   if (!cols) return res.status(404).json({ error: 'unknown table' });
   const tbl = req.params.table, u = req.user;

@@ -148,7 +148,7 @@ const F = {
   {k:'face',l:'顔立ち',type:'select',opts:selOpts(SEL.face)},
   {k:'body_style',l:'スタイル（検索「スタイル」と連動）',type:'select',opts:selOpts(SEL.body_style)},
   {k:'hair',l:'髪型',type:'select',opts:selOpts(SEL.hair)},
-  {k:'hobbies',l:'趣味'},{k:'favorites',l:'好きなもの'},
+  {k:'hobbies',l:'趣味'},{k:'birth_month',l:'誕生月',type:'select',opts:{1:'1月',2:'2月',3:'3月',4:'4月',5:'5月',6:'6月',7:'7月',8:'8月',9:'9月',10:'10月',11:'11月',12:'12月'}},
   {k:'languages',l:'対応言語（複数選択可）',type:'langchecks'},
   {k:'english_ok',l:'英語対応',type:'bool'},{k:'chinese_ok',l:'中国語対応',type:'bool'},
   {k:'recommend_ja',l:'おすすめコメント（日本語）',tr:'recommend'},{k:'recommend_en',l:'おすすめコメント（English）'},{k:'recommend_zh',l:'おすすめコメント（中文）'},
@@ -185,7 +185,7 @@ const F = {
   {k:'title',l:'タイトル'},{k:'body',l:'本文',type:'textarea'},
   {k:'visit_date',l:'利用日'},{k:'language',l:'投稿言語',type:'select',opts:{ja:'日本語',en:'English',zh:'中文'}},
   {k:'status',l:'承認状態',type:'select',opts:{pending:'未承認',approved:'承認（公開）',rejected:'非承認',hidden:'非表示'}}],
- users:[{k:'name',l:'名前'},{k:'email',l:'メールアドレス'},{k:'country',l:'国'},{k:'language',l:'使用言語',type:'select',opts:{ja:'日本語',en:'English',zh:'中文'}},{k:'role',l:'権限',type:'select',opts:{user:'一般ユーザー',store:'店舗管理者（Club Admin）',cast:'キャスト（Cast）',admin:'管理者（Super Admin）'}},{k:'store_id',l:'対象店舗（店舗管理者の場合）',type:'store'},{k:'cast_id',l:'対象キャスト（キャストの場合）',type:'cast'},{k:'password',l:'初期パスワード（8文字以上・空欄で招待リンク発行）'},{k:'is_blocked',l:'アカウント停止',type:'select',opts:{0:'有効',1:'停止中'}}],
+ users:[{k:'name',l:'名前'},{k:'email',l:'メールアドレス'},{k:'country',l:'国'},{k:'language',l:'使用言語',type:'select',opts:{ja:'日本語',en:'English',zh:'中文'}},{k:'role',l:'権限',type:'select',opts:{user:'一般ユーザー',store:'店舗管理者（Club Admin）',cast:'キャスト（Cast）',admin:'管理者（Super Admin）'}},{k:'store_id',l:'対象店舗（店舗管理者の場合）',type:'store'},{k:'cast_id',l:'対象キャスト（キャストの場合）',type:'cast'},{k:'password',l:'初期パスワード（8文字以上・空欄で招待リンク発行）'},{k:'is_blocked',l:'アカウント停止',type:'select',opts:{0:'有効',1:'停止中'}},{k:'must_change_pw',l:'初回ログイン時にパスワード変更を要求',type:'bool'}],
  notifications:[{k:'store_id',l:'店舗',type:'store'},{k:'user_id',l:'送信先ユーザーID（空=全員）',type:'number'},{k:'template_ja',l:'メッセージ（日本語）',type:'textarea',tr:'template'},{k:'template_en',l:'メッセージ（English）',type:'textarea'},{k:'template_zh',l:'メッセージ（中文）',type:'textarea'},{k:'channel',l:'送信チャネル',type:'select',opts:{dm:'DM',email:'メール',line:'LINE'}},{k:'status',l:'状態',type:'select',opts:{draft:'下書き',sent:'送信済み'}}],
  settings:[{k:'key',l:'キー'},{k:'value',l:'値',type:'textarea'}]
 };
@@ -208,7 +208,7 @@ async function render(){
   AREAS = await API('/api/admin/areas'); STORES = await API('/api/admin/stores'); CASTS = await API('/api/admin/casts');
   const pend = STATS.pending_reviews || 0, unread = STATS.unread_msgs || 0;
   const visMenu = MENU.filter(m => ME_ROLE==='admin' ? true
-    : ME_ROLE==='store' ? ['dashboard','stores','casts','reviews','messages','events','coupons','notifications'].includes(m[0])
+    : ME_ROLE==='store' ? ['dashboard','stores','casts','users','reviews','messages','events','coupons','notifications'].includes(m[0])
     : ['dashboard','casts','reviews','messages'].includes(m[0]));
   if (!visMenu.find(m=>m[0]===VIEW)) VIEW='dashboard';
   root.innerHTML = `<div class="layout"><nav class="side"><h1>◆ <span>TNG Admin</span></h1>
@@ -714,6 +714,7 @@ async function impSave(btn){
   }
 }
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
