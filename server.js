@@ -471,5 +471,8 @@ app.post('/api/auth/password', auth, (req, res) => {
   res.json({ ok: true });
 });
 
+/* ---------- 公式サイトインポート (Super Admin専用) ---------- */
+require('./importer')(app, { db, auth, adminOnly, UPLOAD_DIR });
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Tokyo Nightlife Guide running: http://localhost:${PORT}`));
