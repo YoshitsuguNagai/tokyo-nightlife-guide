@@ -535,7 +535,7 @@ async function pageHome(){
     </div>
     <div class="filters"><span class="chip" id="ce" onclick="this.classList.toggle('on')">${t('eng_ok')}</span><span class="chip" id="cz" onclick="this.classList.toggle('on')">${t('zh_ok')}</span><span class="chip" id="cf" onclick="this.classList.toggle('on')">${t('fw')}</span><span class="chip" id="cc" onclick="this.classList.toggle('on')">${ic('card',12)} ${t('card_ok')}</span></div>
   </div>
-  <section class="sec"><h2><em>◆</em>${t('rec_clubs')}</h2><div class="store-rail">${stores.slice(0,8).map(storeCardRail).join('')||`<div class="empty">—</div>`}</div><div class="rail-more"><a class="backlink" onclick="go('stores')">${t('view_list')} →</a></div></section>
+  <section class="sec"><h2><em>◆</em>${t('rec_clubs')}</h2><div class="store-rail">${stores.slice(0,8).map(storeCardRail).join('')||`<div class="empty">—</div>`}</div><div class="rail-more"><a class="backlink" onclick="go('stores')">${t('view_list')}</a></div></section>
   <section class="sec"><h2><em>◆</em>${t('pop_girls')}</h2><div class="cast-rail">${casts.slice(0,8).map(castCardRail).join('')||`<div class="empty">—</div>`}</div><div class="rail-more"><a class="backlink" onclick="go('casts')">${t('view_list_casts')}</a></div></section>
   <section class="sec"><h2><em>◆</em>${t('tonight')}</h2><span class="more" onclick="go('events')">${t('view')} →</span><div class="grid">${events.slice(0,4).map(eventCard).join('')||`<div class="empty">—</div>`}</div></section>
   <section class="sec"><h2><em>◆</em>${t('sp_coupons')}</h2><span class="more" onclick="go('coupons')">${t('view')} →</span><div class="grid">${coupons.slice(0,4).map(couponCard).join('')||`<div class="empty">—</div>`}</div></section>
@@ -703,7 +703,7 @@ async function pageCast(id){
     </div>
   </div>
   ${c.reviews && c.reviews.length ? `<section class="sec"><h2><em>◆</em>${t('rv_cast')} (${c.reviews.length})</h2>${c.reviews.map(reviewCard).join('')}</section>` : ''}
-  ${c.others && c.others.length ? `<section class="sec"><h2><em>◆</em>${t('other_cast')}</h2><div class="grid">${c.others.map(castCard).join('')}</div></section>` : ''}
+  ${c.others && c.others.length ? `<section class="sec"><h2><em>◆</em>${t('other_cast')}</h2><div class="list-grid">${c.others.map(castCardRail).join('')}</div></section>` : ''}
   </div>
   <div class="fixed-cta"><button type="button" class="btn ghost ${isFavC?'fav-on':''}" onclick="fav('cast',${c.id},this)">${ic('heart',15)}</button>
   <button type="button" class="btn" onclick="contactStore(${c.store_id},'${esc(c.display_name||c.name).replace(/'/g,'')}',${c.id})">${ic('message',14)} ${t('chat_cast')}</button>
