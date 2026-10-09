@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="google" content="notranslate">
+<title>Tokyo Nightlife Guide</title>
+<meta name="description" content="Discover the best clubs & nightlife in Tokyo. English & Chinese support.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#c9a227;--gold2:#e0c069;--bg:#0b0b0c;--bg2:#141416;--bg3:#1e1e21;--line:#2b2b2f;
+  --txt:#efece4;--sub:#9a968c;
+  --serif:'Cormorant Garamond','Noto Sans JP','Noto Sans SC',serif;
+  --sans:'Noto Sans JP','Noto Sans SC','Helvetica Neue',Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html[lang="zh"] body{--sans:'Noto Sans SC','Noto Sans JP','Helvetica Neue',Arial,sans-serif}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15px;line-height:1.75;letter-spacing:.02em;padding-bottom:76px;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+img{max-width:100%}
+h1,h2,h3{line-height:1.35}
+.ic{display:inline-block;vertical-align:-3px;flex:none}
+.notranslate{translate:no}
+.hdr{position:sticky;top:0;z-index:50;background:rgba(11,11,12,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:var(--serif);font-size:19px;font-weight:600;letter-spacing:.14em;cursor:pointer;color:var(--txt)}
+.logo span{color:var(--gold)}
+.langs{display:flex;gap:2px;background:var(--bg3);border:1px solid var(--line);border-radius:24px;padding:3px}
+.langs button{background:none;border:0;color:var(--sub);padding:7px 13px;border-radius:18px;font-size:12px;font-weight:500;letter-spacing:.05em;cursor:pointer;font-family:var(--sans);min-height:34px;-webkit-appearance:none;appearance:none}
+.langs button.on{background:var(--gold);color:#111;font-weight:700}
+.hero{position:relative;padding:76px 22px 52px;text-align:center;background:linear-gradient(180deg,#171410,#0b0b0c)}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(201,162,39,.16),transparent 62%)}
+.hero h1{position:relative;font-family:var(--serif);font-size:38px;font-weight:600;letter-spacing:.06em;color:#f3ead2}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.hero p{position:relative;color:var(--sub);margin-top:14px;font-size:13px;letter-spacing:.08em}
+.hero .rule{position:relative;width:56px;height:1px;background:var(--gold);margin:20px auto 0;opacity:.7}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+.searchbox{position:relative;margin:-26px auto 0;max-width:660px;background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 10px 34px rgba(0,0,0,.55)}
+.searchbox input[type=text]{width:100%;background:var(--bg3);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:13px 15px;font-size:15px;font-family:var(--sans)}
+.searchbox input:focus,.filters select:focus{outline:1px solid var(--gold)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.filters select{flex:1;min-width:110px;background:var(--bg3);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:11px;font-size:13px;font-family:var(--sans);min-height:42px}
+.chip{display:inline-flex;align-items:center;gap:5px;background:var(--bg3);border:1px solid var(--line);color:var(--sub);border-radius:22px;padding:9px 14px;font-size:12px;cursor:pointer;min-height:38px}
+.chip.on{border-color:var(--gold);color:var(--gold2)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;background:linear-gradient(120deg,#d4af37,#b08d1e);color:#141414;font-weight:700;border:0;border-radius:10px;padding:13px 22px;font-size:14px;letter-spacing:.06em;cursor:pointer;text-align:center;font-family:var(--sans);-webkit-appearance:none}
+.btn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:var(--gold)}
+.btn.sm{padding:9px 15px;font-size:12px;min-height:40px}
+.sec{margin:42px 0}
+.sec h2{font-family:var(--serif);font-size:23px;font-weight:600;letter-spacing:.08em}
+.sec h2 em{color:var(--gold);font-style:normal;margin-right:8px}
+.sec .more{color:var(--sub);font-size:12px;float:right;margin-top:10px;cursor:pointer;letter-spacing:.05em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:16px}
+@media(max-width:640px){.grid{grid-template-columns:1fr 1fr;gap:10px}.hero h1{font-size:29px}}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .2s,border-color .2s}
+.card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.ph{height:158px;position:relative;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:44px;font-weight:600;color:rgba(255,255,255,.88);background-size:cover;background-position:center}
+.ph .badge{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.62);border:1px solid var(--gold);color:var(--gold2);font-size:10px;font-family:var(--sans);padding:3px 9px;border-radius:12px;letter-spacing:.08em}
+.card .bd{padding:13px 14px 14px}
+.card h3{font-size:15px;font-weight:700;letter-spacing:.03em}
+.meta{color:var(--sub);font-size:11.5px;margin-top:5px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.stars{color:var(--gold);font-size:12px;letter-spacing:2.5px}
+.tag{display:inline-flex;align-items:center;gap:4px;background:var(--bg3);border-radius:6px;padding:3px 8px;font-size:10.5px;color:var(--sub);margin:3px 3px 0 0;letter-spacing:.03em}
+.tag.g{color:var(--gold2);border:1px solid #3a3220;background:rgba(201,162,39,.07)}
+.fav-on{background:rgba(201,162,39,.14)!important;border-color:var(--gold)!important;color:var(--gold)!important}.fav-on svg{fill:var(--gold)}
+.row{display:flex;gap:8px;margin-top:11px}
+.row .btn{flex:1}
+.detail-hero{min-height:230px;display:flex;align-items:flex-end;padding:20px;position:relative;background-size:cover;background-position:center}
+.detail-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(11,11,12,.9))}
+.detail-hero>div{position:relative;z-index:1}
+.detail-hero h1{font-family:var(--serif);font-size:30px;font-weight:600;letter-spacing:.05em}
+/* ---- center-mode carousel ---- */
+.car{position:relative;margin-top:14px;user-select:none}
+.car-view{overflow:hidden;padding:6px 0}
+.car-track{display:flex;gap:10px;transition:transform .45s cubic-bezier(.22,.8,.3,1);will-change:transform}
+.car-slide{flex:none;width:64%;border-radius:14px;overflow:hidden;position:relative;background:var(--bg3);border:1px solid var(--line);transform:scale(.86);opacity:.5;transition:transform .45s cubic-bezier(.22,.8,.3,1),opacity .45s,border-color .3s;cursor:pointer}
+.car-slide.on{transform:scale(1);opacity:1;border-color:var(--gold);cursor:default}
+.car-slide .im{height:300px;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:52px;font-weight:600;color:rgba(255,255,255,.85)}
+.car-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:5;width:42px;height:42px;border-radius:50%;background:rgba(10,10,12,.72);border:1px solid var(--line);color:var(--gold2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s,background .2s;-webkit-appearance:none}
+.car-arrow:hover{border-color:var(--gold);background:rgba(201,162,39,.15)}
+.car-arrow.l{left:8px}.car-arrow.r{right:8px}
+.car-dots{display:flex;gap:6px;justify-content:center;margin-top:10px}
+.car-dots i{width:6px;height:6px;border-radius:50%;background:var(--line);cursor:pointer;transition:background .2s,width .2s}
+.car-dots i.on{background:var(--gold);width:16px;border-radius:3px}
+@media(min-width:720px){.car-slide{width:44%}.car-slide .im{height:340px}}
+@media(max-width:640px){.car-slide{width:74%}.car-slide .im{height:250px}}
+.tabs{display:flex;overflow-x:auto;border-bottom:1px solid var(--line);margin-top:18px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:1 0 auto;background:none;border:0;color:var(--sub);padding:12px 14px;font-size:12.5px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;font-family:var(--sans);letter-spacing:.03em;min-height:44px;-webkit-appearance:none}
+.tabs button.on{color:var(--gold);border-bottom-color:var(--gold)}
+.panel{padding:18px 0;font-size:14px;line-height:1.9;color:#d9d4c7}
+.kv{display:grid;grid-template-columns:118px 1fr;gap:8px 14px;font-size:13px}
+.kv dt{color:var(--sub)}
+.review{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:15px;margin-top:10px}
+.review .h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.review .who{font-size:11.5px;color:var(--sub)}
+.fixed-cta{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(12,12,13,.96);border-top:1px solid var(--line);backdrop-filter:blur(10px)}
+.fixed-cta .btn{flex:1;padding:13px 8px;font-size:13px}
+.footer-nav{position:fixed;left:0;right:0;bottom:0;z-index:55;display:flex;background:#0e0e10;border-top:1px solid var(--line)}
+.footer-nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0 calc(9px + env(safe-area-inset-bottom));font-size:9.5px;letter-spacing:.05em;color:var(--sub)}
+.footer-nav a.on{color:var(--gold)}
+.backlink{display:inline-flex;align-items:center;gap:7px;background:var(--bg2);border:1px solid var(--line);color:var(--txt);border-radius:24px;padding:10px 18px;font-size:13px;cursor:pointer;margin:14px 0 0;min-height:44px;font-family:var(--sans);-webkit-appearance:none}
+.backlink:hover{border-color:var(--gold);color:var(--gold2)}
+.modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:20px}
+.modal .box{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:24px;width:100%;max-width:430px;max-height:85vh;overflow:auto}
+.modal h3{font-family:var(--serif);font-size:19px;font-weight:600;margin-bottom:14px;letter-spacing:.05em}
+.field{margin-bottom:11px}
+.field label{display:block;font-size:11px;color:var(--sub);margin-bottom:5px;letter-spacing:.05em}
+.field input,.field textarea,.field select{width:100%;background:var(--bg3);border:1px solid var(--line);color:var(--txt);border-radius:9px;padding:11px;font-size:14px;font-family:var(--sans);min-height:42px}
+.toast{position:fixed;top:72px;left:50%;transform:translateX(-50%);background:var(--gold);color:#141414;padding:11px 24px;border-radius:26px;font-size:13px;font-weight:700;z-index:200;letter-spacing:.04em}
+.msg-bubble{background:var(--bg3);border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin:9px 0;font-size:13px}
+.msg-bubble .tr{color:var(--sub);font-size:11px;border-top:1px dashed var(--line);margin-top:7px;padding-top:7px}
+.big-rating{font-family:var(--serif);font-size:46px;font-weight:600;color:var(--gold)}
+.empty{color:var(--sub);text-align:center;padding:34px;font-size:13px}
+.sns-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.map-frame{width:100%;height:240px;border:0;border-radius:12px;margin-top:12px;border:1px solid var(--line)}
+.flt-group{margin-top:10px}
+.flt-title{font-size:11px;color:var(--sub);letter-spacing:.08em;margin-bottom:6px}
+.flt-chips{display:flex;gap:6px;flex-wrap:wrap}
+.flt-chips .chip{padding:7px 12px;min-height:34px;font-size:11.5px}
+.more-toggle{margin-top:12px;width:100%;background:none;border:1px dashed var(--line);color:var(--sub);border-radius:10px;padding:11px;font-size:12.5px;cursor:pointer;letter-spacing:.05em}
+.more-toggle:hover{border-color:var(--gold);color:var(--gold2)}
+/* V4: lightbox / password eye */
+.lbox{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.93);display:flex;align-items:center;justify-content:center}
+.lbox img{max-width:92vw;max-height:82vh;object-fit:contain;border-radius:8px}
+.lbox .lb-x{position:absolute;top:18px;right:18px;background:rgba(255,255,255,.1);border:1px solid var(--line);color:#fff;border-radius:50%;width:42px;height:42px;font-size:18px;cursor:pointer}
+.lbox .lb-a{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.08);border:1px solid var(--line);color:var(--gold2);border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.lbox .lb-a.l{left:10px}.lbox .lb-a.r{right:10px}
+.eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--sub);cursor:pointer;padding:6px}
+.pw{position:relative}
+.pw input{padding-right:42px}
+footer{border-top:1px solid var(--line);margin-top:56px;padding:34px 16px;color:var(--sub);font-size:11.5px;text-align:center;letter-spacing:.08em}
+footer .logo{font-size:15px}
+
+.card.ovl{position:relative;overflow:hidden}
+.card.ovl .ph{height:250px;position:relative}
+.card.ovl .ovl-grad{position:absolute;left:0;right:0;top:0;bottom:0;background:linear-gradient(to top,rgba(0,0,0,.88) 0%,rgba(0,0,0,.5) 45%,rgba(0,0,0,0) 75%);pointer-events:none}
+.card.ovl .ovl-txt{position:absolute;left:12px;right:12px;bottom:10px;z-index:2}
+.card.ovl .ovl-txt h3{color:#fff;font-size:16px;margin:0 0 4px;text-shadow:0 2px 6px rgba(0,0,0,.65)}
+.card.ovl .ovl-txt .meta,.card.ovl .ovl-txt .meta span{color:#e8e2d0}
+.card.ovl .ovl-txt .stars{color:#f0c96a}
+.card.ovl .ovl-top-badge{position:absolute;top:10px;left:10px;z-index:2}
+@media(max-width:640px){.card.ovl .ph{height:225px}}
+.fixed-cta.cta-store{bottom:57px;z-index:62}
+
+input[type="date"].dt-ph{position:relative;color:transparent}
+input[type="date"].dt-ph::-webkit-calendar-picker-indicator{opacity:1}
+input[type="date"].dt-ph::before{content:attr(data-ph);position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:14px;pointer-events:none}
+input[type="date"]:focus{color:inherit}
+input[type="date"]:focus::before{content:none}
+input[type="date"].dt-ph.has-val{color:inherit}
+input[type="date"].dt-ph.has-val::before{content:none}
+
+/* --- store rail (SNKRS風 縦長カード横スクロール) --- */
+.store-rail{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:16px 18px 4px;margin:16px -18px 0;scrollbar-width:none}
+.store-rail::-webkit-scrollbar{display:none}
+.store-rail .card{flex:0 0 78%;scroll-snap-align:start;max-width:420px}
+.store-rail .card.ovl .ph{height:auto;aspect-ratio:4/5}
+.store-rail .card .bd{display:none}
+.rail-more{display:flex;justify-content:center;margin-top:16px}
+.rail-more .backlink{text-decoration:none}
+@media(max-width:640px){.store-rail{gap:10px;padding:16px 14px 4px;margin:16px -14px 0}.store-rail .card{flex:0 0 82%}}
+@media(min-width:960px){.store-rail .card{flex:0 0 30%;max-width:none}}
+
+/* --- cast rail (人気キャスト横スクロール) --- */
+.cast-rail{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding:16px 18px 4px;margin:16px -18px 0;scrollbar-width:none}
+.cast-rail::-webkit-scrollbar{display:none}
+.cast-rail .card{flex:0 0 78%;scroll-snap-align:start;max-width:420px}
+.cast-rail .card.ovl .ph{height:auto;aspect-ratio:4/5}
+.cast-rail .card .bd{display:none}
+@media(max-width:640px){.cast-rail{gap:10px;padding:16px 14px 4px;margin:16px -14px 0}.cast-rail .card{flex:0 0 82%}}
+@media(min-width:960px){.cast-rail .card{flex:0 0 30%;max-width:none}}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="logo notranslate" onclick="go('home')" translate="no"><span>◆</span> <span id="sitename">Tokyo Nightlife Guide</span></div>
+  <div class="langs notranslate" role="group" aria-label="Language" translate="no">
+    <button type="button" data-lang="ja" onclick="setLang('ja')">JP</button>
+    <button type="button" data-lang="en" onclick="setLang('en')">EN</button>
+    <button type="button" data-lang="zh" onclick="setLang('zh')">中文</button>
+  </div>
+</header>
+<main id="app"></main>
+<footer>◆ <span class="logo notranslate" id="f_sitename" translate="no">Tokyo Nightlife Guide</span><br><br>Discover the best clubs &amp; nightlife experiences in Tokyo.</footer>
+<nav class="footer-nav" id="fnav"></nav>
+<script>
+/* ================= inline SVG icons (統一デザイン) ================= */
+const ICONS = {
+ home:'<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+ search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+ user:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+ users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+ calendar:'<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>',
+ ticket:'<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/>',
+ pin:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+ clock:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+ back:'<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+ heart:'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+ message:'<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+ instagram:'<rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>',
+ globe:'<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+ card:'<rect width="22" height="16" x="1" y="4" rx="2"/><line x1="1" x2="23" y1="10" y2="10"/>',
+ banknote:'<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>',
+ book:'<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+ phone:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
+ send:'<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+ eye:'<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+ eyeOff:'<path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M6.61 6.61A13.5 13.5 0 0 0 2 12s3 8 10 8a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/>',
+ pen:'<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+ chevL:'<path d="m15 18-6-6 6-6"/>',
+ chevR:'<path d="m9 18 6-6-6-6"/>'
+};
+const BRAND_IC = {
+ tiktok:'M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z',
+ x:'M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z'
+};
+const bic = (n,s)=>`<svg class="ic" width="${s||15}" height="${s||15}" viewBox="0 0 24 24" fill="currentColor"><path d="${BRAND_IC[n]||''}"/></svg>`;
+const ic = (n, s) => `<svg class="ic" width="${s||17}" height="${s||17}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]||''}</svg>`;
+
+/* ================= i18n ================= */
+const I = {
+ en:{people_unit:'',select_date:'Date',select_time:'Time',select_people:'Guests',find_club:'Find a Club',find_girl:'Find a Cast',reviews:'Reviews',events:'Events',coupons:'Coupons',blog:'Blog',home:'Home',back:'Back',
+  hero1:'Discover <em>Tokyo</em> Nightlife',hero2:'Find the Best Clubs, Hostess Clubs & Nightlife Experiences in Tokyo',
+  where:'Where do you want to go?',search:'Search',area:'Area',genre:'Genre',budget:'Budget',all:'All',
+  g_cabaret:'Cabaret Club',g_lounge:'Lounge',g_club:'Club',
+  b1:'Up to ¥50,000',b2:'¥50,000 – ¥100,000',b3:'¥100,000+',
+  rec_clubs:'Recommended Clubs',pop_girls:'Popular Cast',tonight:"Tonight's Events",sp_coupons:'Special Coupons',latest_rev:'Latest Reviews',guide:'Tokyo Nightlife Guide',
+  find_perfect:'Find Your Perfect Night',view:'View Details',view_list:'View all',view_list_casts:'View all cast',contact:'Contact',reserve:'Reserve',message:'Message',
+  about:'About',girls:'Cast',access:'Access',hours:'Hours',closed:'Closed',price:'Budget',charge:'Table charge',fee:'Service fee',pay:'Payment',
+  eng_ok:'English OK',zh_ok:'Chinese OK',card_ok:'Credit Card OK',fw:'Foreigners Welcome',reserve_ok:'Reservation OK',
+  reviews_of:'Reviews',write_review:'Write a Review',write_review_cast:'Review this Cast',submit:'Submit',login:'Log in',register:'Sign Up',mypage:'My Page',logout:'Log out',
+  favs:'Favorites',my_coupons:'My Coupons',messages:'Messages',get_coupon:'Get Coupon',valid:'Valid until',code:'Code',
+  visit_club:'Visit this Club',map:'Open in Google Maps',
+  review_saved:'Thank you! Your review will appear after approval.',coupon_saved:'Coupon saved to My Page',msg_sent:'Message sent',need_login:'Please log in first',
+  tonight_only:'Tonight Only',this_week:'This Week',send:'Send',original:'Original',translated:'Auto-translation (JA / EN / 中文)',
+  height:'Height',hobbies:'Hobbies',favorites:'Favorites',birth_month:'Birth month',cast:'Cast',admin:'Admin',
+  official:'Official Website',call:'Call',photos:'Photos',
+  ev_date:'Date & Time',ev_venue:'Venue',ev_about:'About this Event',ev_fee:'Estimated Budget',
+  select_store:'Select a club to review',other_cast:'Other Cast',
+  f_area:'Club Area',f_height:'Height',f_bust:'Bust',f_birthplace:'Birthplace',f_style:'Style',f_alcohol:'Alcohol',f_skill:'Hospitality',f_face:'Looks',f_body:'Figure',f_hair:'Hair',
+  f_h1:'Up to 155cm',f_h2:'156 – 160cm',f_h3:'161 – 165cm',f_h4:'166cm+',
+  more_filters:'＋ More Filters',close_filters:'− Close Filters',clear:'Clear',apply:'Search with these filters',
+  rv_store:'Club Review',rv_cast:'Cast Review',
+  chat_club:'Chat with Club',reservation:'Reservation',need_login_chat:'Please log in to use chat.',resv_sent:'Reservation request sent',inquiry:'Inquiry',fav_add:'Added to favorites',fav_del:'Removed from favorites',fav_stores:'Favorite Clubs',fav_casts:'Favorite Cast',coupon_expired:'Expired',resv_date:'Preferred date',resv_time:'Preferred time',resv_people:'Guests',view_coupon:'View Coupon',chat_cast:'Chat with Cast',rv_min:'Please write at least 200 characters.',rv_ph:'Please describe the atmosphere, service, pricing and highlights in 200+ characters.',forgot:'Forgot password?',reset_sent:'Reset link issued. (Email sending requires SMTP setup - see README)',reset_done:'Password updated. Please log in.',new_pw:'New password (8+ chars)',set_pw:'Set Password',reply_from_store:'Reply from the Club',reply_from_cast:'Reply from the Cast',reply_from_site:'Reply from Tokyo Nightlife Guide',reply_ph:'Write a reply...',
+  h1:'Under 150cm',h2:'150 – 159cm',h3:'160 – 169cm',h4:'170cm+',f_lang:'Languages',f_style_type:'Type',f_body_style:'Style'},
+ ja:{people_unit:'名',select_date:'日にち',select_time:'時間',select_people:'人数',find_club:'お店を探す',find_girl:'キャストを探す',reviews:'口コミ',events:'イベント',coupons:'クーポン',blog:'ブログ',home:'ホーム',back:'戻る',
+  hero1:'東京の<em>夜</em>を、発見する',hero2:'東京のベストクラブ・キャバクラ・ナイトライフ体験を見つけよう',
+  where:'どこへ行きますか?',search:'検索',area:'エリア',genre:'ジャンル',budget:'予算',all:'すべて',
+  g_cabaret:'キャバクラ',g_lounge:'ラウンジ',g_club:'クラブ',
+  b1:'〜50,000円',b2:'50,000円〜100,000円',b3:'100,000円以上',
+  rec_clubs:'おすすめ店舗',pop_girls:'人気キャスト',tonight:'今夜のイベント',sp_coupons:'スペシャルクーポン',latest_rev:'最新の口コミ',guide:'東京ナイトライフガイド',
+  find_perfect:'最高の夜を見つける',view:'詳細を見る',view_list:'一覧はこちら',view_list_casts:'キャスト一覧を見る',contact:'問い合わせ',reserve:'予約する',message:'メッセージ',
+  about:'店舗情報',girls:'キャスト',access:'アクセス',hours:'営業時間',closed:'定休日',price:'予算',charge:'チャージ',fee:'サービス料',pay:'支払い方法',
+  eng_ok:'英語OK',zh_ok:'中国語OK',card_ok:'カード利用可',fw:'外国人歓迎',reserve_ok:'予約可',
+  reviews_of:'口コミ',write_review:'口コミを書く',write_review_cast:'このキャストの口コミを書く',submit:'投稿する',login:'ログイン',register:'新規登録',mypage:'マイページ',logout:'ログアウト',
+  favs:'お気に入り',my_coupons:'マイクーポン',messages:'メッセージ',get_coupon:'クーポンを取得',valid:'有効期限',code:'コード',
+  visit_club:'この店舗を見る',map:'Google Mapsで開く',
+  review_saved:'ありがとうございます。承認後に掲載されます。',coupon_saved:'クーポンをマイページに保存しました',msg_sent:'送信しました',need_login:'先にログインしてください',
+  tonight_only:'今夜限定',this_week:'今週',send:'送信',original:'原文',translated:'自動翻訳 (JA / EN / 中文)',
+  height:'身長',hobbies:'趣味',favorites:'好きなもの',birth_month:'誕生月',cast:'キャスト',admin:'管理',
+  official:'公式Webサイト',call:'電話する',photos:'フォト',
+  ev_date:'開催日時',ev_venue:'開催店舗',ev_about:'イベント内容',ev_fee:'目安予算',
+  select_store:'口コミを書く店舗を選択',other_cast:'その他のキャスト',
+  f_area:'店舗エリア',f_height:'身長',f_bust:'バスト',f_birthplace:'出身地',f_style:'系統',f_alcohol:'お酒',f_skill:'接待スキル',f_face:'顔立ち',f_body:'スタイル',f_hair:'髪型',
+  f_h1:'〜155cm',f_h2:'156〜160cm',f_h3:'161〜165cm',f_h4:'166cm〜',
+  more_filters:'＋ さらに条件を追加',close_filters:'− 条件を閉じる',clear:'クリア',apply:'この条件で検索',
+  rv_store:'店舗口コミ',rv_cast:'キャスト口コミ',
+  chat_club:'お店とチャット',reservation:'予約希望',need_login_chat:'チャットを利用するにはログインしてください',resv_sent:'予約希望を送信しました',inquiry:'問い合わせ',fav_add:'お気に入りに追加しました',fav_del:'お気に入りから削除しました',fav_stores:'お気に入り店舗',fav_casts:'お気に入りキャスト',coupon_expired:'期限切れ',resv_date:'希望日',resv_time:'希望時間',resv_people:'人数',view_coupon:'クーポン詳細',chat_cast:'キャストとチャット',rv_min:'口コミは200文字以上で入力してください。',rv_ph:'お店の雰囲気、接客、料金、良かった点などを200文字以上で詳しくご記入ください。',forgot:'パスワードを忘れた方',reset_sent:'再設定リンクを発行しました。(メール送信はSMTP設定が必要です。README参照)',reset_done:'パスワードを更新しました。ログインしてください。',new_pw:'新しいパスワード（8文字以上）',set_pw:'設定する',reply_from_store:'店舗からの返信',reply_from_cast:'キャストからの返信',reply_from_site:'Tokyo Nightlife Guideからの返信',reply_ph:'返信を入力...',
+  h1:'150cm未満',h2:'150〜159cm',h3:'160〜169cm',h4:'170cm以上',f_lang:'言語',f_style_type:'系統',f_body_style:'スタイル'},
+ zh:{people_unit:'位',select_date:'日期',select_time:'时间',select_people:'人数',find_club:'查找店铺',find_girl:'查找公关',reviews:'评价',events:'活动',coupons:'优惠券',blog:'博客',home:'首页',back:'返回',
+  hero1:'探索<em>东京</em>夜生活',hero2:'寻找东京最好的俱乐部、夜总会和夜生活体验',
+  where:'您想去哪里?',search:'搜索',area:'区域',genre:'类型',budget:'预算',all:'全部',
+  g_cabaret:'夜总会',g_lounge:'酒廊',g_club:'俱乐部',
+  b1:'〜50,000日元',b2:'50,000〜100,000日元',b3:'100,000日元以上',
+  rec_clubs:'推荐店铺',pop_girls:'人气公关',tonight:'今晚活动',sp_coupons:'特别优惠券',latest_rev:'最新评价',guide:'东京夜生活指南',
+  find_perfect:'找到您的完美之夜',view:'查看详情',view_list:'查看全部',view_list_casts:'查看全部公关',contact:'咨询',reserve:'预约',message:'发消息',
+  about:'店铺信息',girls:'公关',access:'交通',hours:'营业时间',closed:'休息日',price:'预算',charge:'台费',fee:'服务费',pay:'支付方式',
+  eng_ok:'会英语',zh_ok:'会中文',card_ok:'可刷卡',fw:'欢迎外国客人',reserve_ok:'可预约',
+  reviews_of:'评价',write_review:'写评价',write_review_cast:'评价这位公关',submit:'提交',login:'登录',register:'注册',mypage:'我的页面',logout:'退出',
+  favs:'收藏',my_coupons:'我的优惠券',messages:'消息',get_coupon:'领取优惠券',valid:'有效期至',code:'优惠码',
+  visit_club:'查看该店',map:'在Google Maps打开',
+  review_saved:'谢谢!评价经审核后公开。',coupon_saved:'优惠券已保存到我的页面',msg_sent:'已发送',need_login:'请先登录',
+  tonight_only:'今晚限定',this_week:'本周',send:'发送',original:'原文',translated:'自动翻译 (JA / EN / 中文)',
+  height:'身高',hobbies:'爱好',favorites:'喜欢的东西',birth_month:'出生月份',cast:'公关',admin:'管理',
+  official:'官方网站',call:'拨打电话',photos:'照片',
+  ev_date:'举办时间',ev_venue:'举办店铺',ev_about:'活动内容',ev_fee:'参考预算',
+  select_store:'选择要评价的店铺',other_cast:'其他公关',
+  f_area:'店铺区域',f_height:'身高',f_bust:'胸围',f_birthplace:'出身地',f_style:'类型',f_alcohol:'酒量',f_skill:'待客技巧',f_face:'长相',f_body:'身材',f_hair:'发型',
+  f_h1:'〜155cm',f_h2:'156〜160cm',f_h3:'161〜165cm',f_h4:'166cm〜',
+  more_filters:'＋ 添加更多条件',close_filters:'− 收起条件',clear:'清除',apply:'按条件搜索',
+  rv_store:'店铺评价',rv_cast:'公关评价',
+  chat_club:'与店铺聊天',reservation:'预约',need_login_chat:'请登录后使用聊天',resv_sent:'预约请求已发送',inquiry:'咨询',fav_add:'已添加到收藏',fav_del:'已从收藏删除',fav_stores:'收藏的店铺',fav_casts:'收藏的公关',coupon_expired:'已过期',resv_date:'希望日期',resv_time:'希望时间',resv_people:'人数',view_coupon:'优惠券详情',chat_cast:'与公关聊天',rv_min:'请填写200字以上的评价。',rv_ph:'请用200字以上详细描述店铺氛围、服务、价格和亮点。',forgot:'忘记密码',reset_sent:'已发送重置链接。（发送邮件需配置SMTP，见README）',reset_done:'密码已更新，请登录。',new_pw:'新密码（8位以上）',set_pw:'设置',reply_from_store:'店铺的回复',reply_from_cast:'公关的回复',reply_from_site:'Tokyo Nightlife Guide的回复',reply_ph:'输入回复...',
+  h1:'150cm以下',h2:'150〜159cm',h3:'160〜169cm',h4:'170cm以上',f_lang:'语言',f_style_type:'类型',f_body_style:'身材'},
+};
+let LANG = localStorage.getItem('tng_lang') || 'en';
+const t = k => (I[LANG] && I[LANG][k]) || I.en[k] || k;
+const L = (o, f) => o[f + '_' + LANG] || o[f + '_en'] || o[f + '_ja'] || '';
+/* 言語一元管理: localStorage + <html lang> + ボタン状態。Chrome の自動翻訳は translate="no" で無効化済み */
+function setLang(l){
+  if (!I[l]) l = 'en';
+  LANG = l;
+  try { localStorage.setItem('tng_lang', l); } catch(e){}
+  document.documentElement.lang = l;
+  setSiteName(); markLang(); render();
+}
+function markLang(){ document.querySelectorAll('.langs button').forEach(b => b.classList.toggle('on', b.dataset.lang === LANG)); }
+
+/* ================= helpers ================= */
+const API = (p, opt) => fetch(p, { ...opt, headers: { 'Content-Type':'application/json', ...(opt&&opt.headers), ...(TOKEN ? { Authorization:'Bearer '+TOKEN } : {}) } }).then(async r => {
+  const d = await r.json().catch(() => ({}));
+  if (r.status === 401 && TOKEN) { TOKEN = ''; ME = null; try { localStorage.removeItem('tng_token'); } catch(e){} }
+  return d;
+});
+let TOKEN = localStorage.getItem('tng_token') || '';
+let ME = null, SETTINGS = {};
+if (TOKEN) API('/api/me').then(u => { if (!u.error) ME = u; render(); });
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const grad = h => `linear-gradient(135deg, hsl(${h||45},42%,20%), hsl(${(h||45)+38},50%,11%))`;
+const stars = n => '★★★★★'.slice(0, Math.round(n)) + '☆☆☆☆☆'.slice(0, 5 - Math.round(n));
+function toast(msg){ const d = document.createElement('div'); d.className = 'toast'; d.innerHTML = esc(msg); document.body.appendChild(d); setTimeout(() => d.remove(), 2500); }
+function modal(html){ const m = document.createElement('div'); m.className = 'modal'; m.onclick = e => { if (e.target === m) m.remove(); }; m.innerHTML = `<div class="box" style="position:relative"><button type="button" onclick="this.closest('.modal').remove()" style="position:absolute;top:12px;right:12px;background:none;border:1px solid var(--line);color:var(--sub);border-radius:50%;width:32px;height:32px;cursor:pointer">✕</button>${html}</div>`; document.body.appendChild(m); return m; }
+function needLogin(){ if (ME) return false; toast(t('need_login')); loginModal(); return true; }
+const imgStyle = (url, h) => url ? `background-image:url('${esc(url)}')` : `background:${grad(h)}`;
+const photoArr = (json, main) => { let a = []; try { a = JSON.parse(json || '[]'); } catch(e){} if (main) a.unshift(main); return a; };
+
+/* ================= center-mode carousel ================= */
+let CAR_N = 0;
+function carousel(items, hue){ /* items: [{url,label}] */
+  if (!items.length) items = [{ url: null, label: '◆' }];
+  const id = 'car' + (++CAR_N);
+  const slides = items.concat(items.length === 1 ? [] : []);
+  const _urls = items.map(s=>s.url);
+  return `<div class="car" id="${id}" onclick="void(0)">
+    <div class="car-view"><div class="car-track" id="${id}-t">
+      ${slides.map((s, i) => `<div class="car-slide${i===0?' on':''}" data-i="${i}" onclick="carClick('${id}',${i})"><div class="im" style="${s.url?`background-image:url('${esc(s.url)}')`:`background:${grad(hue)}`}">${s.url?'':esc(s.label||'◆')}</div></div>`).join('')}
+    </div></div>
+    ${slides.length>1?`<button type="button" class="car-arrow l" onclick="carMove('${id}',-1)">${ic('chevL',18)}</button>
+    <button type="button" class="car-arrow r" onclick="carMove('${id}',1)">${ic('chevR',18)}</button>
+    <div class="car-dots" id="${id}-d">${slides.map((s,i)=>`<i class="${i===0?'on':''}" onclick="carGo('${id}',${i})"></i>`).join('')}</div>`:''}
+  </div>`;
+}
+function carState(id){ const el = document.getElementById(id); if (el && !el._urls) el._urls = [...el.querySelectorAll('.car-slide .im')].map(x=>{ const m=/url\('([^']+)'/.exec(x.getAttribute('style')||''); return m?m[1]:null; }); return el ? (el._s = el._s || { i: 0 }) : { i: 0 }; }
+/* ---- lightbox ---- */
+let LB = { urls: [], i: 0 };
+function openLightbox(urls, i){
+  LB.urls = urls.filter(Boolean); LB.i = Math.max(0, LB.urls.indexOf(urls[i]));
+  renderLb();
+}
+function renderLb(){
+  document.querySelectorAll('.lbox').forEach(x=>x.remove());
+  if (!LB.urls.length) return;
+  const d = document.createElement('div'); d.className = 'lbox';
+  d.innerHTML = `<img src="${esc(LB.urls[LB.i])}">
+    <button type="button" class="lb-x" onclick="closeLb()">✕</button>
+    ${LB.urls.length>1?`<button type="button" class="lb-a l" onclick="lbMove(-1)">${ic('chevL',20)}</button><button type="button" class="lb-a r" onclick="lbMove(1)">${ic('chevR',20)}</button>`:''}`;
+  d.onclick = e => { if (e.target === d) closeLb(); };
+  let sx=0; d.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
+  d.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx; if(dx<-40)lbMove(1); else if(dx>40)lbMove(-1);});
+  document.body.appendChild(d);
+}
+function lbMove(d){ LB.i = (LB.i + d + LB.urls.length) % LB.urls.length; renderLb(); }
+function closeLb(){ document.querySelectorAll('.lbox').forEach(x=>x.remove()); }
+function carInit(id, n){
+  const el = document.getElementById(id); if (!el) return;
+  el._n = n; carLayout(id);
+  let sx = 0, dx = 0, drag = false;
+  const view = el.querySelector('.car-view');
+  view.addEventListener('touchstart', e => { sx = e.touches[0].clientX; drag = true; }, { passive: true });
+  view.addEventListener('touchmove', e => { if (drag) dx = e.touches[0].clientX - sx; }, { passive: true });
+  view.addEventListener('touchend', () => { if (!drag) return; if (dx < -40) carMove(id, 1); else if (dx > 40) carMove(id, -1); dx = 0; drag = false; });
+  window.addEventListener('resize', () => carLayout(id));
+}
+function carLayout(id){
+  const el = document.getElementById(id); if (!el) return;
+  const track = document.getElementById(id + '-t'); if (!track) return;
+  const slides = track.children; const st = carState(id);
+  const view = el.querySelector('.car-view');
+  const sw = slides[0] ? slides[0].offsetWidth + 10 : 0;
+  track.style.transform = `translateX(${view.offsetWidth/2 - sw/2 - st.i*sw}px)`;
+  [...slides].forEach((s, i) => s.classList.toggle('on', i === st.i));
+  const dots = document.getElementById(id + '-d');
+  if (dots) [...dots.children].forEach((d, i) => d.classList.toggle('on', i === st.i));
+}
+function carClick(id, i){ const el=document.getElementById(id); const st=carState(id); if (st.i===i && el._urls && el._urls[i]) openLightbox(el._urls, i); else carGo(id, i); }
+function carGo(id, i){ const el = document.getElementById(id); if (!el) return; const st = carState(id); st.i = Math.max(0, Math.min((el._n||1)-1, i)); carLayout(id); }
+function carMove(id, d){ const el = document.getElementById(id); if (!el) return; carGo(id, carState(id).i + d); }
+
+/* ---- navigation with history ---- */
+let HIST = [{ name: 'home' }];
+let PAGE = HIST[0];
+function go(name, arg){ PAGE = { name, arg }; HIST.push(PAGE); try { history.pushState({}, ''); } catch(e){} window.scrollTo(0, 0); render(); }
+window.addEventListener('popstate', () => { HIST.pop(); PAGE = HIST[HIST.length - 1] || { name: 'home' }; window.scrollTo(0, 0); render(); });
+function goBack(){ if (HIST.length > 1) history.back(); else go('home'); }
+const backBtn = () => `<button type="button" class="backlink" onclick="goBack()">${ic('back',15)} ${t('back')}</button>`;
+
+/* ================= components ================= */
+function featTags(s){
+  let h = '';
+  if (s.english_ok) h += `<span class="tag g">${t('eng_ok')}</span>`;
+  if (s.chinese_ok) h += `<span class="tag g">${t('zh_ok')}</span>`;
+  if (s.foreigner_welcome) h += `<span class="tag g">${t('fw')}</span>`;
+  if (s.credit_card_ok) h += `<span class="tag">${ic('card',11)} ${t('card_ok')}</span>`;
+  return h;
+}
+function storeCard(s){
+  const budMax = (s.budget_max && Number(s.budget_max) > 0) ? ('〜¥'+Number(s.budget_max).toLocaleString()) : '〜';
+  return `<div class="card ovl" onclick="go('store',${s.id})">
+    <div class="ph" style="${imgStyle(s.cover_image, s.hue)}">${s.cover_image?'':esc(L(s,'name')).charAt(0)}</div>
+    <div class="ovl-grad"></div>
+    ${s.is_recommended?`<span class="badge ovl-top-badge">VIP</span>`:''}
+    <div class="ovl-txt">
+      <div style="display:flex;align-items:center;gap:8px">${s.logo?`<img src="${esc(s.logo)}" alt="" style="width:28px;height:28px;object-fit:contain;border-radius:6px;background:rgba(0,0,0,.5);border:1px solid var(--line);padding:2px;flex:none">`:''}<h3 style="min-width:0">${esc(L(s,'name'))}</h3></div>
+      <div class="stars">${stars(s.rating_avg)} <span style="color:#e8e2d0">${s.rating_avg||'-'} (${s.review_count})</span></div>
+      <div class="meta"><span>${ic('pin',12)} ${s.area?esc(L(s.area,'name')):''}</span><span>${ic('clock',12)} ${esc(s.open_hours||'')}</span></div>
+      <div class="meta"><span>${ic('banknote',12)} ¥${(s.budget_min||0).toLocaleString()}${budMax}</span></div>
+    </div>
+    <div class="bd">
+      <div>${featTags(s)}</div>
+      <div class="row"><button type="button" class="btn sm" onclick="event.stopPropagation();go('store',${s.id})">${t('view')}</button><button type="button" class="btn sm ghost" onclick="event.stopPropagation();contactStore(${s.id},'${esc(L(s,'name')).replace(/'/g,'')}')">${t('contact')}</button></div>
+    </div></div>`;
+}
+function castCard(c){
+  return `<div class="card ovl" onclick="go('cast',${c.id})">
+    <div class="ph" style="${imgStyle(c.photo, c.hue)}">${c.photo?'':esc(c.display_name||c.name).charAt(0)}</div>
+    <div class="ovl-grad"></div>
+    ${c.is_popular?`<span class="badge ovl-top-badge">POPULAR</span>`:''}
+    <div class="ovl-txt">
+      <h3>${esc(c.display_name||c.name)}</h3>
+      <div class="meta"><span>${ic('home',12)} ${esc(c['store_name_'+LANG]||c.store_name_en||'')}</span></div>
+    </div>
+    <div class="bd">
+      <div>${c.english_ok?`<span class="tag g">${t('eng_ok')}</span>`:''}${c.chinese_ok?`<span class="tag g">${t('zh_ok')}</span>`:''}${c.height?`<span class="tag">${c.height} cm</span>`:''}${c.style_type?`<span class="tag">${esc(c.style_type)}</span>`:''}</div>
+      <div class="meta" style="margin-top:6px">${esc(L(c,'recommend'))}</div>
+    </div></div>`;
+}
+function reviewCard(r){
+  return `<div class="review"><div class="h"><span class="stars">${stars(r.rating)}</span><span class="who">${esc(r.author_name)} · ${esc((r.created_at||'').slice(0,10))}</span></div>
+    ${r.title?`<div style="font-weight:700;margin-top:7px">${esc(r.title)}</div>`:''}
+    <div style="color:#cfc9bb;margin-top:5px;font-size:13px">${esc(r.body)}</div>
+    ${r.store_name_en?`<div class="meta" style="margin-top:7px">${ic('home',12)} ${esc(r['store_name_'+LANG]||r.store_name_en)}</div>`:''}
+    ${r.reply_body?`<div style="margin-top:10px;background:var(--bg3);border-left:2px solid var(--gold);border-radius:0 8px 8px 0;padding:10px 12px"><div style="font-size:11px;color:var(--gold2);margin-bottom:4px">${r.reply_role==='store'?t('reply_from_store'):r.reply_role==='cast'?t('reply_from_cast'):t('reply_from_site')} · ${esc(r.reply_by||'')}</div><div style="font-size:13px;color:#d9d4c7">${esc(r.reply_body)}</div></div>`:''}</div>`;
+}
+function eventCard(e){
+  const today = new Date().toISOString().slice(0,10);
+  return `<div class="card ovl" onclick="go('event',${e.id})">
+    <div class="ph" style="${imgStyle(e.image, e.hue)}">${e.image?'':ic('calendar',34)}</div>
+    <div class="ovl-grad"></div>
+    ${e.event_date===today?`<span class="badge ovl-top-badge">${t('tonight_only')}</span>`:''}
+    <div class="ovl-txt">
+      <h3>${esc(L(e,'title'))}</h3>
+      <div class="meta"><span>${ic('home',12)} ${esc(e['store_name_'+LANG]||e.store_name_en)}</span><span>${ic('calendar',12)} ${e.event_date} ${e.start_time||''}</span></div>
+    </div>
+    <div class="bd"><div class="meta">${esc(L(e,'desc')).slice(0,60)}</div></div></div>`;
+}
+function couponCard(c){
+  return `<div class="card ovl" onclick="couponDetail(${c.id})">
+    <div class="ph" style="${imgStyle(c.image, c.hue)}">${c.image?'':ic('ticket',34)}</div>
+    <div class="ovl-grad"></div>
+    <div class="ovl-txt">
+      <h3>${esc(L(c,'title'))}</h3>
+      <div class="meta"><span>${ic('home',12)} ${esc(c['store_name_'+LANG]||c.store_name_en)}</span><span>${ic('clock',12)} ${t('valid')}: ${c.valid_until||'-'}</span></div>
+    </div>
+    <div class="bd">
+      <div class="meta">${esc(L(c,'desc'))}</div>
+      <div class="row"><button type="button" class="btn sm" onclick="event.stopPropagation();getCoupon(${c.id})">${t('get_coupon')}</button><button type="button" class="btn sm ghost" onclick="event.stopPropagation();go('store',${c.store_id})">${t('view')}</button></div>
+    </div></div>`;
+}
+
+/* ================= pages ================= */
+async function pageHome(){
+  const [areas, stores, casts, events, coupons, reviews, blogs, summary] = await Promise.all([
+    API('/api/areas'), API('/api/stores?recommended=1'), API('/api/casts?popular=1'),
+    API('/api/events?when=week'), API('/api/coupons'), API('/api/reviews'), API('/api/blogs'), API('/api/reviews/summary')]);
+  return `<section class="hero"><h1>${t('hero1')}</h1><p>${t('hero2')}</p><div class="rule"></div></section>
+  <div class="wrap"><div class="searchbox">
+    <input type="text" id="sq" placeholder="${t('where')}" onkeydown="if(event.key==='Enter')doSearch('sq','sa','sg','sb')">
+    <div class="filters">
+      <select id="sa"><option value="">${t('area')} — ${t('all')}</option>${areas.map(a=>`<option value="${a.id}">${esc(L(a,'name'))}</option>`).join('')}</select>
+      <select id="sg"><option value="">${t('genre')} — ${t('all')}</option><option value="cabaret">${t('g_cabaret')}</option><option value="lounge">${t('g_lounge')}</option><option value="club">${t('g_club')}</option></select>
+      <select id="sb"><option value="">${t('budget')} — ${t('all')}</option><option value="0-50000">${t('b1')}</option><option value="50000-100000">${t('b2')}</option><option value="100000-">${t('b3')}</option></select>
+      <button type="button" class="btn" onclick="doSearch('sq','sa','sg','sb')">${ic('search',15)} ${t('search')}</button>
+    </div>
+    <div class="filters"><span class="chip" id="ce" onclick="this.classList.toggle('on')">${t('eng_ok')}</span><span class="chip" id="cz" onclick="this.classList.toggle('on')">${t('zh_ok')}</span><span class="chip" id="cf" onclick="this.classList.toggle('on')">${t('fw')}</span><span class="chip" id="cc" onclick="this.classList.toggle('on')">${ic('card',12)} ${t('card_ok')}</span></div>
+  </div>
+  <section class="sec"><h2><em>◆</em>${t('rec_clubs')}</h2><div class="store-rail">${stores.slice(0,8).map(storeCard).join('')||`<div class="empty">—</div>`}</div><div class="rail-more"><a class="backlink" onclick="go('stores')">${t('view_list')} →</a></div></section>
+  <section class="sec"><h2><em>◆</em>${t('pop_girls')}</h2><div class="cast-rail">${casts.slice(0,8).map(castCard).join('')||`<div class="empty">—</div>`}</div><div class="rail-more"><a class="backlink" onclick="go('casts')">${t('view_list_casts')} →</a></div></section>
+  <section class="sec"><h2><em>◆</em>${t('tonight')}</h2><span class="more" onclick="go('events')">${t('view')} →</span><div class="grid">${events.slice(0,4).map(eventCard).join('')||`<div class="empty">—</div>`}</div></section>
+  <section class="sec"><h2><em>◆</em>${t('sp_coupons')}</h2><span class="more" onclick="go('coupons')">${t('view')} →</span><div class="grid">${coupons.slice(0,4).map(couponCard).join('')||`<div class="empty">—</div>`}</div></section>
+  <section class="sec" id="latest-reviews"><h2><em>◆</em>${t('latest_rev')}</h2><div style="display:flex;align-items:baseline;gap:12px;margin-top:10px"><span class="big-rating">${summary.avg}</span><span class="stars" style="font-size:20px">${stars(summary.avg)}</span><span style="color:var(--sub)">(${summary.cnt})</span></div>
+    <div style="margin-top:12px">${reviews.slice(0,3).map(reviewCard).join('')||`<div class="empty">—</div>`}
+    <div style="margin-top:16px"><button type="button" class="btn ghost" onclick="reviewPicker()">${ic('pen',14)} ${t('write_review')}</button></div></section>
+  <section class="sec"><h2><em>◆</em>${t('guide')}</h2><div class="grid">${blogs.slice(0,3).map(b=>`<div class="card" onclick="go('blog','${b.slug}')"><div class="ph" style="height:118px;background:${grad(b.hue)}">${ic('book',32)}</div><div class="bd"><span class="tag g">${esc(b.category||'')}</span><h3 style="margin-top:7px">${esc(L(b,'title'))}</h3><div class="meta">${esc(b.seo_description||'')}</div></div></div>`).join('')}</div></section>
+  <section class="sec" style="text-align:center;padding:34px 0"><h2 style="font-size:27px">${t('find_perfect')}</h2><button type="button" class="btn" style="margin-top:16px;padding:15px 44px" onclick="go('stores')">${t('find_club')}</button></section>
+  </div>`;
+}
+function goLatestReviews(){ go('home'); setTimeout(()=>{ const el=document.getElementById('latest-reviews'); if(el) el.scrollIntoView({behavior:'smooth'}); }, 350); }
+function doSearch(sq, sa, sg, sb){
+  const p = new URLSearchParams();
+  const v = id => document.getElementById(id);
+  if (v(sq) && v(sq).value) p.set('q', v(sq).value);
+  if (v(sa) && v(sa).value) p.set('area', v(sa).value);
+  if (v(sg) && v(sg).value) p.set('genre', v(sg).value);
+  if (v(sb) && v(sb).value) p.set('budget', v(sb).value);
+  if (v('ce') && v('ce').classList.contains('on')) p.set('lang', 'en');
+  if (v('cz') && v('cz').classList.contains('on')) p.set('lang', 'zh');
+  if (v('cf') && v('cf').classList.contains('on')) p.set('foreigner', '1');
+  if (v('cc') && v('cc').classList.contains('on')) p.set('card', '1');
+  go('stores', p.toString());
+}
+async function pageStores(qs){
+  const [stores, areas] = await Promise.all([API('/api/stores?' + (qs || '')), API('/api/areas')]);
+  const cur = new URLSearchParams(qs || '');
+  return `<div class="wrap">${backBtn()}
+  <section class="sec"><h2><em>◆</em>${t('find_club')}</h2>
+  <div class="searchbox" style="margin:14px 0 0;max-width:none">
+    <input type="text" id="sq2" value="${esc(cur.get('q')||'')}" placeholder="${t('where')}" onkeydown="if(event.key==='Enter')doSearch('sq2','sa2','sg2','sb2')">
+    <div class="filters">
+      <select id="sa2"><option value="">${t('area')} — ${t('all')}</option>${areas.map(a=>`<option value="${a.id}" ${cur.get('area')==String(a.id)?'selected':''}>${esc(L(a,'name'))}</option>`).join('')}</select>
+      <select id="sg2"><option value="">${t('genre')} — ${t('all')}</option>${['cabaret','lounge','club'].map(g=>`<option value="${g}" ${cur.get('genre')===g?'selected':''}>${t('g_'+g)}</option>`).join('')}</select>
+      <select id="sb2"><option value="">${t('budget')} — ${t('all')}</option>${[['0-50000','b1'],['50000-100000','b2'],['100000-','b3']].map(b=>`<option value="${b[0]}" ${cur.get('budget')===b[0]?'selected':''}>${t(b[1])}</option>`).join('')}</select>
+      <button type="button" class="btn" onclick="doSearch('sq2','sa2','sg2','sb2')">${ic('search',15)} ${t('search')}</button>
+    </div>
+    <div class="filters"><span class="chip ${cur.get('lang')==='en'?'on':''}" id="ce" onclick="this.classList.toggle('on')">${t('eng_ok')}</span><span class="chip ${cur.get('lang')==='zh'?'on':''}" id="cz" onclick="this.classList.toggle('on')">${t('zh_ok')}</span><span class="chip ${cur.get('foreigner')==='1'?'on':''}" id="cf" onclick="this.classList.toggle('on')">${t('fw')}</span><span class="chip ${cur.get('card')==='1'?'on':''}" id="cc" onclick="this.classList.toggle('on')">${ic('card',12)} ${t('card_ok')}</span><span class="chip" onclick="goLatestReviews()">★ ${t('reviews_of')}</span></div>
+  </div>
+  <div class="grid" style="margin-top:16px">${stores.map(storeCard).join('')||`<div class="empty">—</div>`}</div></section></div>`;
+}
+/* ---- Google Maps: 埋め込みは /maps?output=embed、外部リンクは google.com/maps/search/?api=1&query= ---- */
+async function pageStores(qs){
+  const [stores, areas] = await Promise.all([API('/api/stores?' + (qs || '')), API('/api/areas')]);
+  const cur = new URLSearchParams(qs || '');
+  return `<div class="wrap">${backBtn()}
+  <section class="sec"><h2><em>◆</em>${t('find_club')}</h2>
+  <div class="searchbox" style="margin:14px 0 0;max-width:none">
+    <input type="text" id="sq2" value="${esc(cur.get('q')||'')}" placeholder="${t('where')}" onkeydown="if(event.key==='Enter')doSearch('sq2','sa2','sg2','sb2')">
+    <div class="filters">
+      <select id="sa2"><option value="">${t('area')} — ${t('all')}</option>${areas.map(a=>`<option value="${a.id}" ${cur.get('area')==String(a.id)?'selected':''}>${esc(L(a,'name'))}</option>`).join('')}</select>
+      <select id="sg2"><option value="">${t('genre')} — ${t('all')}</option>${['cabaret','lounge','club'].map(g=>`<option value="${g}" ${cur.get('genre')===g?'selected':''}>${t('g_'+g)}</option>`).join('')}</select>
+      <select id="sb2"><option value="">${t('budget')} — ${t('all')}</option>${[['0-50000','b1'],['50000-100000','b2'],['100000-','b3']].map(b=>`<option value="${b[0]}" ${cur.get('budget')===b[0]?'selected':''}>${t(b[1])}</option>`).join('')}</select>
+      <button type="button" class="btn" onclick="doSearch('sq2','sa2','sg2','sb2')">${ic('search',15)} ${t('search')}</button>
+    </div>
+    <div class="filters"><span class="chip ${cur.get('lang')==='en'?'on':''}" id="ce" onclick="this.classList.toggle('on')">${t('eng_ok')}</span><span class="chip ${cur.get('lang')==='zh'?'on':''}" id="cz" onclick="this.classList.toggle('on')">${t('zh_ok')}</span><span class="chip ${cur.get('foreigner')==='1'?'on':''}" id="cf" onclick="this.classList.toggle('on')">${t('fw')}</span><span class="chip ${cur.get('card')==='1'?'on':''}" id="cc" onclick="this.classList.toggle('on')">${ic('card',12)} ${t('card_ok')}</span><span class="chip" onclick="goLatestReviews()">★ ${t('reviews_of')}</span></div>
+  </div>
+  <div class="grid" style="margin-top:16px">${stores.map(storeCard).join('')||`<div class="empty">—</div>`}</div></section></div>`;
+}
+/* ---- Google Maps: 埋め込みは /maps?output=embed、外部リンクは google.com/maps/search/?api=1&query= ---- */
+function mapBlock(s){
+  if (!s.address && !s.google_map_url) return '';
+  const raw = String(s.google_map_url || '').trim();
+  const bad = /embed|output=embed|<iframe/i.test(raw);  // 埋め込み用URLは外部リンクに使わない
+  let embedQ = s.address ? encodeURIComponent(s.address) : null;
+  let openUrl = null;
+  if (raw && !bad) {
+    const mq = /[?&]q=([^&]+)/.exec(raw);
+    const mp = /maps\/place\/([^/?]+)/.exec(raw);
+    const query = mq ? mq[1] : (mp ? mp[1] : null);
+    openUrl = query ? ('https://www.google.com/maps/search/?api=1&query=' + query) : raw;
+    if (!embedQ && query) embedQ = query;
+  }
+  if (!openUrl && s.address) openUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(s.address);
+  if (!openUrl) return '';
+  return `${embedQ?`<iframe class="map-frame" loading="lazy" src="https://maps.google.com/maps?q=${embedQ}&output=embed"></iframe>`:''}
+    <div class="sns-row"><a class="btn sm ghost notranslate" href="${esc(openUrl)}" target="_blank" rel="noopener" translate="no">${ic('pin',14)} Google Maps</a></div>`;
+}
+async function pageStore(id){
+  const s = await API('/api/stores/' + id);
+  if (s.error) return `<div class="wrap">${backBtn()}<div class="empty">—</div></div>`;
+  const photos = photoArr(s.images, s.cover_image);
+  const isFavS = !!(ME && (ME.favorites||[]).some(f => f.target_type==='store' && f.target_id===s.id));
+  const hero = photos.length > 1
+    ? carousel(photos.map(u => ({ url: u, label: L(s,'name').charAt(0) })), s.hue)
+    : `<div class="detail-hero" style="${imgStyle(s.cover_image, s.hue)}"><div style="display:flex;align-items:center;gap:12px">${s.logo?`<img src="${esc(s.logo)}" alt="" style="width:52px;height:52px;object-fit:contain;border-radius:10px;background:rgba(20,20,22,.75);border:1px solid var(--line);padding:4px">`:''}<div><h1>${esc(L(s,'name'))}</h1>
+      <div class="stars" style="font-size:15px">${stars(s.rating_avg)} ${s.rating_avg} (${s.review_count} ${t('reviews_of')})</div></div></div></div>`;
+  return `${hero}
+  <div class="wrap" style="padding-bottom:70px">${backBtn()}
+  ${photos.length>1?`<div style="margin-top:16px;display:flex;align-items:center;gap:14px">${s.logo?`<img src="${esc(s.logo)}" alt="" style="width:56px;height:56px;object-fit:contain;border-radius:10px;background:var(--bg3);border:1px solid var(--line);padding:4px">`:''}<div><h1 style="font-family:var(--serif);font-size:28px;font-weight:600">${esc(L(s,'name'))}</h1>
+    <div class="stars" style="font-size:15px">${stars(s.rating_avg)} ${s.rating_avg} (${s.review_count} ${t('reviews_of')})</div></div></div>`:''}
+  <div class="meta" style="margin-top:14px"><span>${ic('pin',13)} ${s.area?esc(L(s.area,'name')):''}</span><span>${ic('clock',13)} ${esc(s.open_hours||'')}</span><span>${ic('banknote',13)} ¥${(s.budget_min||0).toLocaleString()}${(s.budget_max&&Number(s.budget_max)>0)?('〜¥'+Number(s.budget_max).toLocaleString()):'〜'}</span></div>
+  <div style="margin-top:9px">${featTags(s)}${s.reservation_ok?`<span class="tag">${t('reserve_ok')}</span>`:''}</div>
+  <div class="sns-row">
+    ${s.phone?`<a class="btn sm ghost" href="tel:${esc(s.phone)}">${ic('phone',13)} ${t('call')}</a>`:''}
+    ${s.instagram?`<a class="btn sm ghost notranslate" href="${esc(s.instagram)}" target="_blank" rel="noopener" translate="no">${ic('instagram',13)} Instagram</a>`:''}
+    ${s.website?`<a class="btn sm ghost" href="${esc(s.website)}" target="_blank" rel="noopener">${ic('globe',13)} ${t('official')}</a>`:''}
+  </div>
+  <div class="tabs">
+    <button type="button" class="on" onclick="tab(this,'about')">${t('about')}</button><button type="button" onclick="tab(this,'girls')">${t('girls')} (${s.casts.length})</button>
+    <button type="button" onclick="tab(this,'reviews')">${t('reviews')} (${s.reviews.length})</button><button type="button" onclick="tab(this,'events')">${t('events')}</button>
+    <button type="button" onclick="tab(this,'coupons')">${t('coupons')}</button><button type="button" onclick="tab(this,'access')">${t('access')}</button>
+  </div>
+  <div class="panel" id="p-about">
+    <p>${esc(L(s,'desc'))}</p>
+    <dl class="kv" style="margin-top:18px">
+      <dt>${t('hours')}</dt><dd>${esc(s.open_hours||'—')}</dd><dt>${t('closed')}</dt><dd>${esc(s.closed_days||'—')}</dd>
+      <dt>${t('price')}</dt><dd>¥${(s.budget_min||0).toLocaleString()}${(s.budget_max&&Number(s.budget_max)>0)?('〜¥'+Number(s.budget_max).toLocaleString()):'〜'}</dd>
+      <dt>${t('charge')}</dt><dd>${esc(s.charge||'—')}</dd><dt>${t('fee')}</dt><dd>${esc(s.service_fee||'—')}</dd>
+      <dt>${t('pay')}</dt><dd>${esc(s.payment_methods||'—')}</dd><dt>${t('cast')}</dt><dd>${(Number(s.cast_count)>0?Number(s.cast_count):s.casts.length)+t('people_unit')}</dd>
+    </dl></div>
+  <div class="panel" id="p-girls" style="display:none"><div class="grid">${s.casts.map(castCard).join('')||`<div class="empty">—</div>`}</div></div>
+  <div class="panel" id="p-reviews" style="display:none">
+    <div style="display:flex;align-items:baseline;gap:10px"><span class="big-rating">${s.rating_avg||'—'}</span><span class="stars" style="font-size:18px">${stars(s.rating_avg)}</span></div>
+    <button type="button" class="btn sm ghost" style="margin-top:12px" onclick="reviewModal(${s.id},null,'${esc(L(s,'name')).replace(/'/g,'')}')">${ic('pen',13)} ${t('write_review')}</button>
+    ${s.reviews.map(reviewCard).join('')||`<div class="empty">—</div>`}</div>
+  <div class="panel" id="p-events" style="display:none"><div class="grid">${s.events.map(eventCard).join('')||`<div class="empty">—</div>`}</div></div>
+  <div class="panel" id="p-coupons" style="display:none"><div class="grid">${s.coupons.map(couponCard).join('')||`<div class="empty">—</div>`}</div></div>
+  <div class="panel" id="p-access" style="display:none"><p style="margin-bottom:4px">${esc(s.address||'—')}</p>${mapBlock(s)}</div>
+  </div>
+  <div class="fixed-cta cta-store">
+    ${s.line_url?`<a class="btn ghost notranslate" href="${esc(s.line_url)}" target="_blank" rel="noopener" translate="no">LINE</a>`:''}
+    <button type="button" class="btn ghost ${isFavS?'fav-on':''}" onclick="fav('store',${s.id},this)">${ic('heart',15)}</button>
+    <button type="button" class="btn" onclick="contactStore(${s.id},'${esc(L(s,'name')).replace(/'/g,'')}')">${ic('message',14)} ${t('chat_club')}</button>
+    ${s.reservation_ok?`<button type="button" class="btn" onclick="contactStore(${s.id},'${esc(L(s,'name')).replace(/'/g,'')}',null,'reservation')">${t('reserve')}</button>`:''}
+  </div>`;
+}
+function tab(btn, name){
+  btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('on')); btn.classList.add('on');
+  document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
+  const el = document.getElementById('p-' + name); if (el) el.style.display = 'block';
+}
+async function pageCast(id){
+  const c = await API('/api/casts/' + id);
+  if (c.error) return `<div class="wrap">${backBtn()}<div class="empty">—</div></div>`;
+  const photos = photoArr(c.photos, c.photo);
+  const isFavC = !!(ME && (ME.favorites||[]).some(f => f.target_type==='cast' && f.target_id===c.id));
+  const hero = carousel(photos.length ? photos.map(u => ({ url: u, label: (c.display_name||c.name).charAt(0) })) : [{ url: null, label: (c.display_name||c.name).charAt(0) }], c.hue);
+  return `<div class="wrap" style="max-width:820px">${backBtn()}
+  <div style="margin-top:14px;text-align:center"><h1 style="font-family:var(--serif);font-size:30px;font-weight:600">${esc(c.display_name||c.name)}</h1>
+  <div class="meta" style="justify-content:center"><a style="color:var(--gold);display:inline-flex;align-items:center;gap:5px" href="javascript:go('store',${c.store_id})">${ic('home',13)} ${esc(c['store_name_'+LANG]||c.store_name_en)}</a>
+  ${c.review_count?`<span class="stars">${stars(c.rating_avg)} ${c.rating_avg} (${c.review_count})</span>`:''}</div></div>
+  ${hero}
+  <div style="margin-top:12px;text-align:center">${c.english_ok?`<span class="tag g">${t('eng_ok')}</span>`:''}${c.chinese_ok?`<span class="tag g">${t('zh_ok')}</span>`:''}${(c.languages||'').split(',').filter(Boolean).map(l=>`<span class="tag notranslate" translate="no">${l.toUpperCase()}</span>`).join('')}</div>
+  <div class="panel">
+    ${L(c,'recommend')?`<div style="background:var(--bg2);border-left:2px solid var(--gold);padding:13px 15px;border-radius:0 10px 10px 0;margin-bottom:16px">${esc(L(c,'recommend'))}</div>`:''}
+    <p>${esc(L(c,'profile'))}</p>
+    <dl class="kv" style="margin-top:16px">
+      <dt>${t('height')}</dt><dd>${c.height?c.height+' cm':'—'}</dd>
+      ${c.bust?`<dt>${t('f_bust')}</dt><dd>${esc(c.bust)}</dd>`:''}
+      ${c.birthplace?`<dt>${t('f_birthplace')}</dt><dd>${esc(c.birthplace)}</dd>`:''}
+      ${c.style_type?`<dt>${t('f_style')}</dt><dd>${esc(c.style_type)}</dd>`:''}
+      ${c.alcohol?`<dt>${t('f_alcohol')}</dt><dd>${esc(c.alcohol)}</dd>`:''}
+      ${c.skill?`<dt>${t('f_skill')}</dt><dd>${esc(c.skill)}</dd>`:''}
+      ${c.face?`<dt>${t('f_face')}</dt><dd>${esc(c.face)}</dd>`:''}
+      ${c.body_style?`<dt>${t('f_body')}</dt><dd>${esc(c.body_style)}</dd>`:''}
+      ${c.hair?`<dt>${t('f_hair')}</dt><dd>${esc(c.hair)}</dd>`:''}
+      <dt>${t('hobbies')}</dt><dd>${esc(c.hobbies||'—')}</dd>${(c.birth_month>=1&&c.birth_month<=12)?`<dt>${t('birth_month')}</dt><dd>${c.birth_month}${LANG==='ja'?'月':LANG==='zh'?'月':''}</dd>`:''}
+    </dl>
+    <div class="sns-row">
+      ${c.sns_instagram?`<a class="btn sm ghost notranslate" href="${esc(c.sns_instagram)}" target="_blank" rel="noopener" translate="no">${ic('instagram',13)} Instagram</a>`:''}
+      ${c.sns_tiktok?`<a class="btn sm ghost notranslate" href="${esc(c.sns_tiktok)}" target="_blank" rel="noopener" translate="no">${bic('tiktok',13)} TikTok</a>`:''}
+      ${c.sns_x?`<a class="btn sm ghost notranslate" href="${esc(c.sns_x)}" target="_blank" rel="noopener" translate="no">${bic('x',13)} X</a>`:''}
+      <button type="button" class="btn sm ghost" onclick="reviewModal(${c.store_id},${c.id},'${esc(c.display_name||c.name).replace(/'/g,'')}')">${ic('pen',13)} ${t('write_review_cast')}</button>
+    </div>
+  </div>
+  ${c.reviews && c.reviews.length ? `<section class="sec"><h2><em>◆</em>${t('rv_cast')} (${c.reviews.length})</h2>${c.reviews.map(reviewCard).join('')}</section>` : ''}
+  ${c.others && c.others.length ? `<section class="sec"><h2><em>◆</em>${t('other_cast')}</h2><div class="grid">${c.others.map(castCard).join('')}</div></section>` : ''}
+  </div>
+  <div class="fixed-cta"><button type="button" class="btn ghost ${isFavC?'fav-on':''}" onclick="fav('cast',${c.id},this)">${ic('heart',15)}</button>
+  <button type="button" class="btn" onclick="contactStore(${c.store_id},'${esc(c.display_name||c.name).replace(/'/g,'')}',${c.id})">${ic('message',14)} ${t('chat_cast')}</button>
+  <button type="button" class="btn ghost" onclick="go('store',${c.store_id})">${t('visit_club')}</button></div>`;
+}
+/* ---- キャスト検索 (詳細フィルター) ---- */
+const CAST_TR = {
+  bust:{en:{},zh:{}},
+  birthplace:{en:{'北海道・東北':'Hokkaido / Tohoku','関東':'Kanto','信越・北陸':'Shinetsu / Hokuriku','東海':'Tokai','関西':'Kansai','中国':'Chugoku','四国':'Shikoku','九州・沖縄':'Kyushu / Okinawa','海外':'Overseas'},zh:{'北海道・東北':'北海道·东北','関東':'关东','信越・北陸':'信越·北陆','東海':'东海','関西':'关西','中国':'中国地区','四国':'四国','九州・沖縄':'九州·冲绳','海外':'海外'}},
+  style_type:{en:{'綺麗':'Beautiful','セクシー':'Sexy','ギャル':'Gal','童顔':'Baby face','ハーフ顔':'Half'},zh:{'綺麗':'漂亮','セクシー':'性感','ギャル':'辣妹','童顔':'童颜','ハーフ顔':'混血颜'}},
+  alcohol:{en:{'強い':'Strong','飲む':'Drinks','飲めない':"Can't drink"},zh:{'強い':'酒量好','飲む':'会喝','飲めない':'不能喝'}},
+  skill:{en:{'話し上手':'Good talker','聞き上手':'Good listener','盛り上げ上手':'Lively','接待上手':'Great host','ゴルフ':'Golf'},zh:{'話し上手':'健谈','聞き上手':'善于倾听','盛り上げ上手':'活跃气氛','接待上手':'待客周到','ゴルフ':'高尔夫'}},
+  face:{en:{'綺麗系':'Beautiful','可愛い系':'Cute','クール系':'Cool','癒やし系':'Healing','ハーフ系':'Half'},zh:{'綺麗系':'漂亮系','可愛い系':'可爱系','クール系':'冷酷系','癒やし系':'治愈系','ハーフ系':'混血系'}},
+  body_style:{en:{'スレンダー':'Slender','普通':'Average','グラマー':'Glamorous','ややぽっちゃり':'Curvy','モデル体型':'Model'},zh:{'スレンダー':'苗条','普通':'普通','グラマー':'丰满','ややぽっちゃり':'微丰满','モデル体型':'模特身材'}},
+  hair:{en:{'ショート':'Short','ミディアム':'Medium','ロング':'Long'},zh:{'ショート':'短发','ミディアム':'中长发','ロング':'长发'}},
+  langs:{en:{'日本語':'Japanese','英語':'English','中国語':'Chinese'},zh:{'日本語':'日语','英語':'英语','中国語':'中文'}}
+};
+const tv = (key, v) => (CAST_TR[key] && CAST_TR[key][LANG] && CAST_TR[key][LANG][v]) || v;
+const CAST_OPTS = {
+  bust: ['B','C','D','E','F','G','H以上'],
+  birthplace: ['北海道・東北','関東','信越・北陸','東海','関西','中国','四国','九州・沖縄','海外'],
+  style_type: ['綺麗','セクシー','ギャル','童顔','ハーフ顔'],   /* 表示「系統」(内部キー style_type) */
+  alcohol: ['強い','飲む','飲めない'],
+  skill: ['話し上手','聞き上手','盛り上げ上手','接待上手','ゴルフ'],
+  face: ['綺麗系','可愛い系','クール系','癒やし系','ハーフ系'],
+  body_style: ['スレンダー','普通','グラマー','モデル体型'],    /* 表示「スタイル」 */
+  hair: ['ショート','ミディアム','ロング'],
+  langs: ['日本語','英語','中国語']
+};
+let CAST_F = {};
+function chipGroup(key, values){
+  const sel = CAST_F[key] || [];
+  return `<div class="flt-group"><div class="flt-title">${key==='langs'?t('f_lang'):t('f_'+key)}</div><div class="flt-chips">
+    ${values.map(v=>`<span class="chip ${sel.includes(v)?'on':''}" onclick="castChip('${key}','${esc(v)}',this)">${esc(tv(key,v))}</span>`).join('')}</div></div>`;
+}
+/* 複数選択対応: 押すと選択/解除、即時で検索へ反映 */
+function castChip(k, v, el){
+  const cur = CAST_F[k] || [];
+  CAST_F[k] = cur.includes(v) ? cur.filter(x=>x!==v) : cur.concat([v]);
+  if (!CAST_F[k].length) delete CAST_F[k];
+  if (el) el.classList.toggle('on', (CAST_F[k]||[]).includes(v));
+  renderCastList();
+}
+function castSel(k, v){ if(v) CAST_F[k]=[v]; else delete CAST_F[k]; renderCastList(); }
+async function renderCastList(){
+  const p = new URLSearchParams();
+  Object.entries(CAST_F).forEach(([k, v]) => {
+    if (k === '_hr') return;
+    if (k === 'langs') { const arr = v||[]; if (arr.includes('英語')) p.set('lang','en'); else if (arr.includes('中国語')) p.set('lang','zh'); return; }
+    if (Array.isArray(v) && v.length) p.set(k, v[0]); /* サーバーは先頭値で絞込(後方互換) */
+  });
+  const cs = await API('/api/casts?' + p.toString());
+  const el = document.getElementById('cast-results');
+  if (el) el.innerHTML = cs.map(castCard).join('') || `<div class="empty">—</div>`;
+}
+async function pageCasts(){
+  CAST_F = {};
+  const areas = await API('/api/areas');
+  return `<div class="wrap">${backBtn()}<section class="sec"><h2><em>◆</em>${t('find_girl')}</h2>
+  <div class="searchbox" style="margin:14px 0 0;max-width:none">
+    <div class="flt-group"><div class="flt-title">${t('f_area')}</div>
+      <select style="max-width:100%" onchange="castSel('area',this.value)"><option value="">${t('all')}</option>${areas.map(a=>`<option value="${a.id}">${esc(L(a,'name'))}</option>`).join('')}</select></div>
+    <div class="flt-group"><div class="flt-title">${t('f_height')}</div><div class="flt-chips">
+      ${[['0-149','h1'],['150-159','h2'],['160-169','h3'],['170-999','h4']].map(h=>`<span class="chip ${CAST_F._hr===h[0]?'on':''}" onclick="castHeight('${h[0]}',this)">${t(h[1])}</span>`).join('')}</div></div>
+    ${chipGroup('bust', CAST_OPTS.bust)}${chipGroup('style_type', CAST_OPTS.style_type)}${chipGroup('face', CAST_OPTS.face)}
+    <div id="more-filters" style="display:none">
+      ${chipGroup('birthplace', CAST_OPTS.birthplace)}${chipGroup('alcohol', CAST_OPTS.alcohol)}${chipGroup('skill', CAST_OPTS.skill)}${chipGroup('body_style', CAST_OPTS.body_style)}${chipGroup('hair', CAST_OPTS.hair)}${chipGroup('langs', CAST_OPTS.langs)}
+    </div>
+    <button type="button" class="more-toggle" id="more-btn" onclick="toggleMore()">${t('more_filters')}</button>
+    <div class="row" style="margin-top:14px"><button type="button" class="btn ghost" style="width:100%" onclick="clearCastFilters()">${t('clear')}</button></div>
+  </div>
+  <div class="grid" id="cast-results" style="margin-top:16px"><div class="empty">…</div></div></section></div>
+`;
+}
+function clearCastFilters(){ CAST_F = {}; render(); }
+function castHeight(range, el){
+  el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  const [lo, hi] = range.split('-');
+  if (CAST_F._hr === range) { CAST_F._hr = CAST_F.height_min = CAST_F.height_max = undefined; }
+  else { CAST_F._hr = range; CAST_F.height_min = lo; CAST_F.height_max = hi; el.classList.add('on'); }
+  renderCastList();
+}
+function toggleMore(){
+  const m = document.getElementById('more-filters'), b = document.getElementById('more-btn');
+  const open = m.style.display === 'none';
+  m.style.display = open ? 'block' : 'none';
+  b.textContent = open ? t('close_filters') : t('more_filters');
+}
+async function pageEvents(){
+  const [a, b] = await Promise.all([API('/api/events?when=today'), API('/api/events?when=week')]);
+  return `<div class="wrap">${backBtn()}<section class="sec"><h2><em>◆</em>${t('tonight')}</h2><div class="grid">${a.map(eventCard).join('')||`<div class="empty">—</div>`}</div></section>
+  <section class="sec"><h2><em>◆</em>${t('this_week')}</h2><div class="grid">${b.map(eventCard).join('')||`<div class="empty">—</div>`}</div></section></div>`;
+}
+async function pageEvent(id){
+  const e = await API('/api/events/' + id);
+  if (e.error) return `<div class="wrap">${backBtn()}<div class="empty">—</div></div>`;
+  return `<div class="detail-hero" style="${imgStyle(e.image, e.hue)}"><div><h1>${esc(L(e,'title'))}</h1></div></div>
+  <div class="wrap">${backBtn()}<section class="sec" style="margin-top:14px">
+  <dl class="kv">
+    <dt>${t('ev_venue')}</dt><dd><a style="color:var(--gold)" href="javascript:go('store',${e.store_id})">${esc(e['store_name_'+LANG]||e.store_name_en)} →</a></dd>
+    <dt>${t('ev_date')}</dt><dd>${esc(e.event_date||'')} ${esc(e.start_time||'')}${e.end_time?' — '+esc(e.end_time):''}</dd>
+    ${e.budget_min?`<dt>${t('ev_fee')}</dt><dd>¥${(e.budget_min||0).toLocaleString()}〜¥${(e.budget_max||0).toLocaleString()}</dd>`:''}
+  </dl>
+  <h2 style="margin-top:22px"><em>◆</em>${t('ev_about')}</h2>
+  <div class="panel">${esc(L(e,'desc'))}</div>
+  <div class="row" style="max-width:420px"><button type="button" class="btn" onclick="go('store',${e.store_id})">${t('visit_club')}</button>
+  <button type="button" class="btn ghost" onclick="contactStore(${e.store_id},'${esc((e['store_name_'+LANG]||e.store_name_en)).replace(/'/g,'')}')">${ic('message',14)} ${t('contact')}</button></div>
+  </section></div>`;
+}
+async function pageCoupons(){ const cs = await API('/api/coupons'); return `<div class="wrap">${backBtn()}<section class="sec"><h2><em>◆</em>${t('sp_coupons')}</h2><div class="grid">${cs.map(couponCard).join('')||`<div class="empty">—</div>`}</div></section></div>`; }
+async function pageReviews(){ const rs = await API('/api/reviews'); const s = await API('/api/reviews/summary'); return `<div class="wrap">${backBtn()}<section class="sec"><h2><em>◆</em>${t('reviews')}</h2><div style="display:flex;align-items:baseline;gap:12px;margin-top:10px"><span class="big-rating">${s.avg}</span><span class="stars" style="font-size:20px">${stars(s.avg)}</span><span style="color:var(--sub)">(${s.cnt})</span></div>
+  <div style="margin-top:12px"><button type="button" class="btn sm ghost" onclick="reviewPicker()">${ic('pen',13)} ${t('write_review')}</button></div>
+  <div style="margin-top:14px">${rs.map(reviewCard).join('')||`<div class="empty">—</div>`}</div></section></div>`; }
+async function pageBlogs(){ const bs = await API('/api/blogs'); return `<div class="wrap">${backBtn()}<section class="sec"><h2><em>◆</em>${t('blog')}</h2><div class="grid">${bs.map(b=>`<div class="card" onclick="go('blog','${b.slug}')"><div class="ph" style="height:118px;${imgStyle(b.image, b.hue)}">${b.image?'':ic('book',32)}</div><div class="bd"><span class="tag g">${esc(b.category||'')}</span><h3 style="margin-top:7px">${esc(L(b,'title'))}</h3><div class="meta">${esc(b.seo_description||'')}</div></div></div>`).join('')}</div></section></div>`; }
+async function pageBlog(slug){
+  const b = await API('/api/blogs/' + slug);
+  if (b.error) return `<div class="wrap">${backBtn()}<div class="empty">—</div></div>`;
+  return `<div class="wrap">${backBtn()}<section class="sec">
+  <span class="tag g">${esc(b.category||'')}</span><h2 style="font-size:26px;margin-top:10px">${esc(L(b,'title'))}</h2>
+  <div class="panel">${esc(L(b,'body')).split('\n').map(p => p.trim() ? `<p style="margin-bottom:13px">${p}</p>` : '').join('')}</div>
+  <div style="text-align:center;margin:28px 0"><button type="button" class="btn" onclick="go('stores')">${t('find_club')}</button> <button type="button" class="btn ghost" onclick="go('coupons')">${t('get_coupon')}</button></div></section></div>`;
+}
+async function pageMypage(){
+  if (!ME) { loginModal(); return `<div class="wrap"><div class="empty">—</div></div>`; }
+  const [u, allStores, allCasts] = await Promise.all([API('/api/me'), API('/api/stores'), API('/api/casts')]);
+  const favS = u.favorites.filter(f => f.target_type === 'store').map(f => allStores.find(s => s.id === f.target_id)).filter(Boolean);
+  const favC = u.favorites.filter(f => f.target_type === 'cast').map(f => allCasts.find(c => c.id === f.target_id)).filter(Boolean);
+  const today = new Date().toISOString().slice(0,10);
+  return `<div class="wrap"><section class="sec"><h2><em>◆</em>${t('mypage')}</h2>
+  <div class="meta" style="margin:10px 0">${ic('user',14)} ${esc(u.name||'')} · ${esc(u.email)} ${['admin','store','cast'].includes(u.role)?`· <a href="/admin.html" style="color:var(--gold)">${t('admin')}</a>`:''}</div>
+  <button type="button" class="btn sm ghost" onclick="localStorage.removeItem('tng_token');TOKEN='';ME=null;go('home')">${t('logout')}</button>
+  <h2 style="margin-top:28px"><em>◆</em>${t('my_coupons')}</h2><div class="grid">${u.coupons.map(c=>{const exp=c.valid_until&&c.valid_until<today;return `<div class="card" onclick="couponDetail(${c.id})" style="${exp?'opacity:.55':''}"><div class="bd"><h3>${esc(L(c,'title'))}</h3><div class="meta">${t('code')}: <b style="color:var(--gold)">${esc(c.code||'')}</b></div><div class="meta">${exp?`<span style="color:#e08080">${t('coupon_expired')}</span>`:`${t('valid')}: ${c.valid_until||'-'}`}</div></div></div>`}).join('')||`<div class="empty">—</div>`}</div>
+  <h2 style="margin-top:28px"><em>◆</em>${t('fav_stores')}</h2><div class="grid">${favS.map(storeCard).join('')||`<div class="empty">—</div>`}</div>
+  <h2 style="margin-top:28px"><em>◆</em>${t('fav_casts')}</h2><div class="grid">${favC.map(castCard).join('')||`<div class="empty">—</div>`}</div>
+  <h2 style="margin-top:28px"><em>◆</em>${t('messages')}</h2>
+  ${u.messages.map(m=>`<div class="msg-bubble"><div style="font-size:11px;color:var(--sub)">${m.direction==='user_to_store'?'→':'←'} ${esc((m.created_at||'').slice(0,16))}</div>
+    <div>${esc(m['body_'+LANG]||m.body)}</div><div class="tr">${t('original')}: ${esc(m.body)}</div></div>`).join('')||`<div class="empty">—</div>`}
+  </section></div>`;
+}
+
+/* ================= actions ================= */
+async function couponDetail(id){
+  const cs = await API('/api/coupons');
+  const c = cs.find(x => x.id === id); if (!c) return;
+  const today = new Date().toISOString().slice(0,10);
+  const exp = c.valid_until && c.valid_until < today;
+  modal(`<h3>${ic('ticket',16)} ${esc(L(c,'title'))}</h3>
+    ${exp?`<div style="color:#e08080;font-weight:700;margin-bottom:8px">${t('coupon_expired')}</div>`:''}
+    <div class="meta" style="margin-bottom:10px">${ic('home',12)} ${esc(c['store_name_'+LANG]||c.store_name_en)} · ${t('valid')}: ${c.valid_until||'-'}</div>
+    <div class="panel" style="padding:0 0 12px">${esc(L(c,'desc'))}</div>
+    ${L(c,'conditions')?`<div style="font-size:12px;color:var(--sub)">${esc(L(c,'conditions'))}</div>`:''}
+    <div style="background:var(--bg3);border:1px dashed var(--gold);border-radius:10px;padding:14px;text-align:center;margin:14px 0"><span style="font-size:11px;color:var(--sub)">${t('code')}</span><br><b style="font-size:22px;letter-spacing:.12em;color:var(--gold2)">${esc(c.code||'')}</b></div>
+    <div class="row"><button type="button" class="btn ghost" onclick="this.closest('.modal').remove();go('store',${c.store_id})">${t('visit_club')}</button>
+    ${!exp?`<button type="button" class="btn" onclick="this.closest('.modal').remove();contactStore(${c.store_id},'${esc((c['store_name_'+LANG]||c.store_name_en)).replace(/'/g,'')}')">${ic('message',14)} ${t('contact')}</button>`:''}</div>`);
+}
+/* 一覧のクーポンカード: 詳細はモーダルへ */
+function fav(type, id, btn){
+  if (needLogin()) return;
+  API('/api/favorites', { method:'POST', body: JSON.stringify({ target_type: type, target_id: id }) }).then(r => {
+    if (r.error === 'unauthorized') { toast(t('need_login')); loginModal(); return; }
+    toast(r.favorited ? t('fav_add') : t('fav_del'));
+    if (btn) btn.classList.toggle('fav-on', !!r.favorited);
+    if (ME && ME.favorites) {
+      if (r.favorited) ME.favorites.push({ target_type: type, target_id: id });
+      else ME.favorites = ME.favorites.filter(f => !(f.target_type === type && f.target_id === id));
+    }
+  });
+}
+function getCoupon(id){ if (needLogin()) return; API(`/api/coupons/${id}/get`, { method:'POST' }).then(() => toast(t('coupon_saved'))); }
+function contactStore(storeId, name, castId, kind){
+  if (needLogin()) return;
+  const isResv = kind === 'reservation';
+  const isCast = !!castId;
+  const title = isResv ? t('reservation') : (isCast ? t('chat_cast') : t('chat_club'));
+  modal(`<h3>${esc(name)}</h3>
+    <div style="font-size:12px;color:var(--gold2);margin-bottom:10px">${title}</div>
+    ${isResv?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+      <label style="flex:1;min-width:120px;font-size:11px;color:var(--sub)"><b style="color:var(--gold)">${t('select_date')}</b><input type="date" id="rsv-d" class="dt-ph" data-ph="${t('select_date')}" placeholder="${t('select_date')}" style="width:100%;margin-top:3px" min="${new Date().toISOString().slice(0,10)}" onclick="this.showPicker&&this.showPicker()" onchange="this.classList.toggle('has-val',!!this.value)" oninput="this.classList.toggle('has-val',!!this.value)"></label>
+      <label style="flex:1;min-width:110px;font-size:11px;color:var(--sub)">${t('select_time')}<select id="rsv-t" style="width:100%;margin-top:3px"><option value="">— ${t('select_time')} —</option>${(()=>{const a=[];for(let i=0;i<9;i++){const h=20+Math.floor(i/2),m=i%2?'30':'00';a.push(h+':'+m);}return a;})().map(x=>`<option value="${x}">${x}</option>`).join('')}</select></label>
+      <label style="flex:0 0 100px;font-size:11px;color:var(--sub)">${t('select_people')}<select id="rsv-p" style="width:100%;margin-top:3px"><option value="">— ${t('select_people')} —</option>${[1,2,3,4,5,6,7,8,9,10].map(n=>`<option value="${n}">${n}${t('people_unit')}</option>`).join('')}</select></label></div>`:''}
+    <div class="field" style="margin-top:10px"><label>${t('message')} (${LANG.toUpperCase()})</label><textarea id="msgbody" rows="4" placeholder="Hello! I'd like to visit tonight."></textarea></div>
+    <button type="button" class="btn" style="width:100%" onclick="sendMsg(${storeId},${castId||null},this,'${kind||''}')">${ic('send',14)} ${t('send')}</button>
+    <p style="font-size:11px;color:var(--sub);margin-top:11px">${t('translated')}</p>`);
+  const ta = document.getElementById('msgbody'); if (ta) ta.focus();
+}
+function sendMsg(storeId, castId, btn, kind){
+  const body = document.getElementById('msgbody').value.trim(); if (!body) return;
+  const payload = { store_id: storeId, cast_id: castId, body, kind: kind === 'reservation' ? 'reservation' : (castId ? 'cast_chat' : 'store_chat') };
+  if (kind === 'reservation') {
+    const rd = (document.getElementById('rsv-d')||{}).value || '';
+    const rt = (document.getElementById('rsv-t')||{}).value || '';
+    const rp = parseInt((document.getElementById('rsv-p')||{}).value || '', 10);
+    if (!rd || !rt || !rp || rp < 1 || rp > 10) { toast(t('select_date') + ' / ' + t('select_time') + ' / ' + t('select_people')); return; }
+    payload.resv_date = rd; payload.resv_time = rt; payload.resv_people = rp;
+  }
+  btn.disabled = true;
+  API('/api/messages', { method:'POST', body: JSON.stringify(payload) })
+    .then(r => {
+      if (r.error) {
+        btn.disabled = false;
+        if (r.error === 'unauthorized') { btn.closest('.modal').remove(); toast(t('need_login_chat')); loginModal(); return; }
+        return toast(r.error);
+      }
+      btn.closest('.modal').remove();
+      toast(kind === 'reservation' ? t('resv_sent') : t('msg_sent'));
+    });
+}
+/* 口コミ: 店舗選択ピッカー → 投稿モーダル (店舗/キャスト両対応) */
+async function reviewPicker(){
+  const stores = await API('/api/stores');
+  modal(`<h3>${ic('pen',16)} ${t('write_review')}</h3>
+    <div class="field"><label>${t('select_store')}</label>
+    <select id="rp-s">${stores.map(s=>`<option value="${s.id}">${esc(L(s,'name'))}</option>`).join('')}</select></div>
+    <button type="button" class="btn" style="width:100%" onclick="reviewModal(+document.getElementById('rp-s').value,null,document.getElementById('rp-s').selectedOptions[0].textContent)">${t('write_review')} →</button>`);
+}
+function reviewModal(storeId, castId, targetName){
+  document.querySelectorAll('.modal').forEach(m => m.remove());
+  modal(`<h3>${ic('pen',16)} ${castId ? t('rv_cast') : t('rv_store')}</h3>
+    <div style="font-size:12px;color:var(--gold2);margin-bottom:10px">${esc(targetName||'')}</div>
+    <div class="field"><label>★</label><select id="rv-r">${[5,4,3,2,1].map(n=>`<option>${n}</option>`).join('')}</select></div>
+    <div class="field"><label>Name</label><input id="rv-n" value="${esc(ME?ME.name:'')}"></div>
+    <div class="field"><label>Title</label><input id="rv-t"></div>
+    <div class="field"><label>Review</label><textarea id="rv-b" rows="5" placeholder="${t('rv_ph')}" oninput="rvCount()" onblur="if(this.value.trim().length>0&&this.value.trim().length<200)document.getElementById('rv-err').style.display='block'"></textarea>
+    <div id="rv-c" style="font-size:11px;color:var(--sub);text-align:right;margin-top:4px">0 / 200</div></div>
+    <div id="rv-err" style="font-size:12px;color:#e08080;display:none;margin-bottom:8px">${t('rv_min')}</div>
+    <button type="button" class="btn" id="rv-btn" style="width:100%;opacity:.45" disabled onclick="submitReview(${storeId},${castId||null},this)">${t('submit')}</button>`);
+}
+function rvCount(){
+  const n = (document.getElementById('rv-b').value||'').trim().length;
+  const c = document.getElementById('rv-c'), b = document.getElementById('rv-btn'), e = document.getElementById('rv-err');
+  c.textContent = n + ' / 200' + (n >= 200 ? ' ✓' : '');
+  c.style.color = n >= 200 ? 'var(--gold2)' : 'var(--sub)';
+  const ok = n >= 200; b.disabled = !ok; b.style.opacity = ok ? '1' : '.45';
+  if (e) e.style.display = 'none';
+}
+function submitReview(storeId, castId, btn){
+  if (btn.disabled) return;
+  const body = document.getElementById('rv-b').value.trim();
+  if (body.length < 200) { document.getElementById('rv-err').style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = '...';
+  API('/api/reviews',{method:'POST',body:JSON.stringify({ store_id: storeId, cast_id: castId,
+    rating:+document.getElementById('rv-r').value, author_name:document.getElementById('rv-n').value,
+    title:document.getElementById('rv-t').value, body:document.getElementById('rv-b').value, language:LANG })})
+  .then(r=>{ if (r.error) { btn.disabled = false; btn.textContent = t('submit'); document.getElementById('rv-err').style.display = 'block'; return; } btn.closest('.modal').remove(); toast(t('review_saved')); });
+}
+function pwToggle(id, btn){ const el = document.getElementById(id); const show = el.type === 'password'; el.type = show ? 'text' : 'password'; btn.innerHTML = ic(show ? 'eyeOff' : 'eye', 17); }
+function forgotModal(){
+  document.querySelectorAll('.modal').forEach(m=>m.remove());
+  modal(`<h3>${t('forgot')}</h3>
+  <div class="field"><label>Email</label><input id="fg-e" type="email"></div>
+  <button type="button" class="btn" style="width:100%" onclick="doForgot(this)">${t('send')}</button>
+  <div id="fg-msg" style="font-size:12px;color:var(--gold2);margin-top:10px;word-break:break-all"></div>`);
+}
+async function doForgot(btn){
+  const r = await API('/api/auth/forgot', { method:'POST', body: JSON.stringify({ email: document.getElementById('fg-e').value }) });
+  document.getElementById('fg-msg').textContent = t('reset_sent') + (r.link ? ' ' + location.origin + r.link : '');
+}
+function resetModal(token){
+  modal(`<h3>${t('new_pw')}</h3>
+  <div class="field"><div class="pw"><input id="rs-p" type="password"><button type="button" class="eye" onclick="pwToggle('rs-p',this)">${ic('eye',17)}</button></div></div>
+  <button type="button" class="btn" style="width:100%" onclick="doReset('${token}',this)">${t('set_pw')}</button>`);
+}
+async function doReset(token, btn){
+  const r = await API('/api/auth/reset', { method:'POST', body: JSON.stringify({ token, password: document.getElementById('rs-p').value }) });
+  if (r.error) return toast(r.error);
+  btn.closest('.modal').remove(); toast(t('reset_done')); loginModal();
+}
+function loginModal(){
+  modal(`<h3>${t('login')} / ${t('register')}</h3>
+  <div class="field"><label>Name (${t('register')})</label><input id="au-n"></div>
+  <div class="field"><label>Email</label><input id="au-e" type="email"></div>
+  <div class="field"><label>Password</label><div class="pw"><input id="au-p" type="password"><button type="button" class="eye" onclick="pwToggle('au-p',this)">${ic('eye',17)}</button></div></div>
+  <div class="row"><button type="button" class="btn" onclick="authDo('login')">${t('login')}</button><button type="button" class="btn ghost" onclick="authDo('register')">${t('register')}</button></div>
+  <div style="text-align:center;margin-top:12px"><a style="font-size:12px;color:var(--sub);cursor:pointer" onclick="forgotModal()">${t('forgot')}</a></div>`);
+}
+async function authDo(mode){
+  const body = { email: document.getElementById('au-e').value, password: document.getElementById('au-p').value, name: document.getElementById('au-n').value, language: LANG };
+  const r = await API('/api/auth/' + mode, { method:'POST', body: JSON.stringify(body) });
+  if (r.error) return toast(r.error);
+  TOKEN = r.token; localStorage.setItem('tng_token', TOKEN); ME = r.user;
+  document.querySelector('.modal') && document.querySelector('.modal').remove();
+  toast(ME.name || ME.email);
+  API('/api/me').then(u => { if (!u.error) { ME = u; render(); } else render(); });
+}
+
+/* ================= router ================= */
+async function render(){
+  markLang();
+  const app = document.getElementById('app');
+  const p = PAGE;
+  const pages = { home: pageHome, stores: pageStores, store: pageStore, casts: pageCasts, cast: pageCast,
+    events: pageEvents, event: pageEvent, coupons: pageCoupons, reviews: pageReviews, blogs: pageBlogs, blog: pageBlog, mypage: pageMypage };
+  app.innerHTML = await (pages[p.name] || pageHome)(p.arg);
+  const nav = [['home','home',t('home')],['stores','search',t('find_club')],['casts','users',t('find_girl')],['events','calendar',t('events')],['coupons','ticket',t('coupons')],['mypage','user',t('mypage')]];
+  document.getElementById('fnav').innerHTML = nav.map(n => `<a class="${p.name===n[0]?'on':''}" href="javascript:go('${n[0]}')">${ic(n[1],19)}<span>${n[2]}</span></a>`).join('');
+  document.querySelectorAll('.car').forEach(el => { if (!el._init) { el._init = 1; carInit(el.id, el.querySelectorAll('.car-slide').length); } });
+  if (p.name === 'casts') renderCastList();
+}
+function setSiteName(){
+  const n = LANG === 'ja' ? (SETTINGS.site_name_ja || SETTINGS.site_name) : LANG === 'zh' ? (SETTINGS.site_name_zh || SETTINGS.site_name) : SETTINGS.site_name;
+  if (n) { document.getElementById('sitename').textContent = n; document.getElementById('f_sitename').textContent = n; }
+}
+(async () => {
+  const qs = new URLSearchParams(location.search);
+  const rs = qs.get('reset');
+  const qStore = qs.get('store'), qCast = qs.get('cast');
+  if (qStore) PAGE = { name:'store', arg: parseInt(qStore,10) };
+  else if (qCast) PAGE = { name:'cast', arg: parseInt(qCast,10) };
+  if (rs) { setTimeout(() => resetModal(rs), 600); }
+  SETTINGS = await API('/api/settings');
+  document.documentElement.lang = LANG;
+  setSiteName();
+  render();
+})();
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>
