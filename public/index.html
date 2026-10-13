@@ -994,7 +994,7 @@ async function authDo(mode){
 
 /* ================= router ================= */
 async function render(){
-  setTimeout(()=>{ document.body.classList.toggle('has-cta', !!document.querySelector('[data-cta]')); }, 0);
+  document.body.classList.toggle('has-cta', PAGE.name === 'store' || PAGE.name === 'cast');
   markLang();
   const app = document.getElementById('app');
   const p = PAGE;
