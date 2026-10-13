@@ -142,7 +142,10 @@ footer .logo{font-size:15px}
 .card.ovl .ovl-txt .stars{color:#f0c96a}
 .card.ovl .ovl-top-badge{position:absolute;top:10px;left:10px;z-index:2}
 @media(max-width:640px){.card.ovl .ph{height:225px}}
-.fixed-cta.cta-store{bottom:57px;z-index:62}
+.fixed-cta.cta-store{bottom:calc(57px + env(safe-area-inset-bottom));z-index:62}
+body.has-cta{padding-bottom:130px}
+body.has-cta .footer-nav{bottom:calc(63px + env(safe-area-inset-bottom));z-index:61}
+body.has-cta .fixed-cta.cta-store{bottom:calc(126px + env(safe-area-inset-bottom));z-index:62}
 
 input[type="date"].dt-ph{position:relative;color:transparent}
 input[type="date"].dt-ph::-webkit-calendar-picker-indicator{opacity:1}
@@ -647,7 +650,7 @@ async function pageStore(id){
       <dt>${t('charge')}</dt><dd>${esc(s.charge||'—')}</dd><dt>${t('fee')}</dt><dd>${esc(s.service_fee||'—')}</dd>
       <dt>${t('pay')}</dt><dd>${esc(s.payment_methods||'—')}</dd><dt>${t('cast')}</dt><dd>${(Number(s.cast_count)>0?Number(s.cast_count):s.casts.length)+t('people_unit')}</dd>
     </dl></div>
-  <div class="panel" id="p-girls" style="display:none"><div class="grid">${s.casts.map(castCard).join('')||`<div class="empty">—</div>`}</div></div>
+  <div class="panel" id="p-girls" style="display:none"><div class="list-grid">${s.casts.map(castCardRail).join('')||`<div class="empty">—</div>`}</div></div>
   <div class="panel" id="p-reviews" style="display:none">
     <div style="display:flex;align-items:baseline;gap:10px"><span class="big-rating">${s.rating_avg||'—'}</span><span class="stars" style="font-size:18px">${stars(s.rating_avg)}</span></div>
     <button type="button" class="btn sm ghost" style="margin-top:12px" onclick="reviewModal(${s.id},null,'${esc(L(s,'name')).replace(/'/g,'')}')">${ic('pen',13)} ${t('write_review')}</button>
@@ -656,7 +659,7 @@ async function pageStore(id){
   <div class="panel" id="p-coupons" style="display:none"><div class="grid">${s.coupons.map(couponCard).join('')||`<div class="empty">—</div>`}</div></div>
   <div class="panel" id="p-access" style="display:none"><p style="margin-bottom:4px">${esc(s.address||'—')}</p>${mapBlock(s)}</div>
   </div>
-  <div class="fixed-cta cta-store">
+  <div class="fixed-cta cta-store" data-cta="1">
     ${s.line_url?`<a class="btn ghost notranslate" href="${esc(s.line_url)}" target="_blank" rel="noopener" translate="no">LINE</a>`:''}
     <button type="button" class="btn ghost ${isFavS?'fav-on':''}" onclick="fav('store',${s.id},this)">${ic('heart',15)}</button>
     <button type="button" class="btn" onclick="contactStore(${s.id},'${esc(L(s,'name')).replace(/'/g,'')}')">${ic('message',14)} ${t('chat_club')}</button>
@@ -705,7 +708,7 @@ async function pageCast(id){
   ${c.reviews && c.reviews.length ? `<section class="sec"><h2><em>◆</em>${t('rv_cast')} (${c.reviews.length})</h2>${c.reviews.map(reviewCard).join('')}</section>` : ''}
   ${c.others && c.others.length ? `<section class="sec"><h2><em>◆</em>${t('other_cast')}</h2><div class="list-grid">${c.others.map(castCardRail).join('')}</div></section>` : ''}
   </div>
-  <div class="fixed-cta"><button type="button" class="btn ghost ${isFavC?'fav-on':''}" onclick="fav('cast',${c.id},this)">${ic('heart',15)}</button>
+  <div class="fixed-cta" data-cta="1"><button type="button" class="btn ghost ${isFavC?'fav-on':''}" onclick="fav('cast',${c.id},this)">${ic('heart',15)}</button>
   <button type="button" class="btn" onclick="contactStore(${c.store_id},'${esc(c.display_name||c.name).replace(/'/g,'')}',${c.id})">${ic('message',14)} ${t('chat_cast')}</button>
   <button type="button" class="btn ghost" onclick="go('store',${c.store_id})">${t('visit_club')}</button></div>`;
 }
@@ -991,6 +994,7 @@ async function authDo(mode){
 
 /* ================= router ================= */
 async function render(){
+  setTimeout(()=>{ document.body.classList.toggle('has-cta', !!document.querySelector('[data-cta]')); }, 0);
   markLang();
   const app = document.getElementById('app');
   const p = PAGE;
