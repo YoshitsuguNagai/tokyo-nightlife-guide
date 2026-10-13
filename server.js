@@ -47,8 +47,16 @@ async function translateText(text, from, to) {
       if (out && out !== text) return out;
     }
   } catch (e) {}
-  // 3) 最終フォールバック（従来の簡易辞書。失敗時も日本語のまま返さず [EN]/[中文] 印を付ける）
-  return naiveTranslate(text, to);
+  // 3) MyMemory（キー不要の公開API・サーバーからの到達性が高い）
+  try {
+    const mmUrl = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text.slice(0, 500))
+      + '&langpair=' + encodeURIComponent(from + '|' + (to === 'zh' ? 'zh-CN' : to));
+    const r = await fetch(mmUrl, { signal: AbortSignal.timeout(10000) }).then(r => r.json());
+    const out = r && r.responseStatus === 200 && r.responseData && r.responseData.translatedText;
+    if (out && String(out).trim() && String(out).trim().toLowerCase() !== text.toLowerCase()) return String(out).trim();
+  } catch (e) {}
+  // 4) 最終フォールバック: 例外を投げず、日本語のまま返さないよう印を付けて返す
+  return (to === 'en' ? '[EN] ' : to === 'zh' ? '[中文] ' : '') + text;
 }
 
 /* ---------- auth ---------- */
@@ -226,6 +234,7 @@ app.post('/api/translate', async (req, res) => {
     const translated = await translateText(clean(text), clean(from || 'ja'), clean(to || 'en'));
     res.json({ translated });
   } catch (e) {
+    console.error('[translate]', e && e.message);
     res.json({ translated: '', error: 'translate_failed' });
   }
 });
